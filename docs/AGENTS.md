@@ -11,6 +11,7 @@ When working in this project, the AI should:
 - **Use project conventions**
   - Follow `.cursor/rules/*` for stack versions, coding style, architecture, UI patterns, and security (tokens, OAuth, OpenAI).
   - Prefer Tailwind v4 utilities and design tokens from `app/globals.css` when styling UI.
+  - Refer to the brand and icon docs in `docs/brand-theme.md` and `docs/ICONS.md` when adding or adjusting UI.
 
 - **Be cautious with automation**
   - Preserve existing OAuth and token flows; avoid changing redirect URIs or security-sensitive logic without explicit instruction.

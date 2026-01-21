@@ -23,6 +23,12 @@ Code should be simple, readable, and maintainable, optimized for small personal 
   - Large monolithic handlers mixing parsing, business logic, and rendering.
   - Duplicated logic across API routes and services.
 
+## Function & component syntax
+
+- Use **arrow-function declarations** for functions and React components:
+  - Prefer `const myFn = () => { ... }` over `function myFn() { ... }`.
+- You may still use inline anonymous functions where appropriate (e.g. small callbacks), but new named functions should follow the arrow style.
+
 ## TypeScript
 
 - Use explicit types for:

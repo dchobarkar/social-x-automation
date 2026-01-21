@@ -1,0 +1,17 @@
+---
+description: Project documentation and design guides to consult
+alwaysApply: false
+---
+
+# Documentation & Guides
+
+- **Architecture & agents**
+  - Use `docs/AGENTS.md` for a high-level overview of how agents should behave in this repo (architecture expectations, safety, and conventions).
+
+- **Brand & visuals**
+  - Use `docs/brand-theme.md` as the source of truth for colors, typography, spacing, and component shapes (buttons, cards, inputs).
+  - Use `docs/ICONS.md` for Lucide icon usage patterns and recommended icons for common actions.
+
+- **When implementing changes**
+  - For UI changes, consult `docs/brand-theme.md` and `docs/ICONS.md` before introducing new colors, sizes, or icons.
+  - For architecture or higher-level behavior changes, skim `docs/AGENTS.md` and the relevant `.cursor/rules/*` files to stay consistent with the intended design.
