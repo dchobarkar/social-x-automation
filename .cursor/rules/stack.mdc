@@ -28,5 +28,4 @@ alwaysApply: true
 
 ## TailwindCSS Notes
 
-- Use utility classes and CSS variables defined in `app/globals.css` for colors, spacing, typography, and radii.
-- Avoid adding Tailwind v3-only configuration or plugins unless the project explicitly introduces them.
+- For detailed Tailwind and theme conventions, rely on the dedicated `tailwind-and-theme.mdc` rule instead of adding new Tailwind guidance here.
