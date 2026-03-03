@@ -17,7 +17,7 @@ Flow with PKCE.
 - Generates contextual replies using OpenAI
 - Posts replies via X API v2
 - Handles token refresh automatically
-- Provides a minimal dashboard to control the full flow
+- Provides a minimal dashboard to control the full flow (shows “Connected to X” when logged in)
 
 This project is intended for personal use only.
 
@@ -54,10 +54,13 @@ Create a `.env.local` file in the root:
 
     X_CLIENT_ID=YOUR_X_CLIENT_ID
     X_CLIENT_SECRET=YOUR_X_CLIENT_SECRET
-    X_REDIRECT_URI=http://localhost:3000/api/auth/x/callback
+    X_REDIRECT_URI=http://127.0.0.1:3000/api/auth/x/callback
     OPENAI_API_KEY=YOUR_OPENAI_KEY
-    APP_BASE_URL=http://localhost:3000
+    APP_BASE_URL=http://127.0.0.1:3000
     STATE_SECRET=random_long_string_here
+
+**Important:** Use `127.0.0.1` instead of `localhost` for `X_REDIRECT_URI` and `APP_BASE_URL`.  
+X’s OAuth does not accept `localhost` as a callback URL and will return 400 if you use it.
 
 Never commit `.env.local` to GitHub.
 

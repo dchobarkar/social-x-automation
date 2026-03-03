@@ -20,10 +20,29 @@ const Page = () => {
   const [message, setMessage] = useState<Message | null>(null);
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [postingForId, setPostingForId] = useState<string | null>(null);
+  const [connected, setConnected] = useState<boolean | null>(null);
+  const [accessExpiresAt, setAccessExpiresAt] = useState<number | null>(null);
 
   const showMessage = useCallback((type: "success" | "error", text: string) => {
     setMessage({ type, text });
   }, []);
+
+  const fetchAuthStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/x/status");
+      const data = await res.json();
+      setConnected(data.connected === true);
+      setAccessExpiresAt(
+        typeof data.accessExpiresAt === "number" ? data.accessExpiresAt : null,
+      );
+    } catch {
+      setConnected(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAuthStatus();
+  }, [fetchAuthStatus]);
 
   useEffect(() => {
     const params = new URLSearchParams(
@@ -37,8 +56,9 @@ const Page = () => {
     } else if (success) {
       showMessage("success", "X account connected successfully.");
       window.history.replaceState({}, "", "/dashboard");
+      fetchAuthStatus();
     }
-  }, [showMessage]);
+  }, [showMessage, fetchAuthStatus]);
 
   const handleConnectX = () => {
     window.location.href = "/api/auth/x/oauth";
@@ -151,17 +171,38 @@ const Page = () => {
         <section className="rounded-xl border border-(--foreground)/10 bg-background p-6 shadow-sm">
           <h2 className="text-lg font-medium mb-2">1. Connect X Account</h2>
 
-          <p className="text-sm text-(--foreground)/70 mb-4">
-            Sign in with X (OAuth 2.0) to post replies on your behalf.
-          </p>
-
-          <button
-            type="button"
-            onClick={handleConnectX}
-            className="px-4 py-2 rounded-lg bg-[#0f1419] text-white hover:bg-[#1a1f24] transition-colors font-medium"
-          >
-            Connect X Account
-          </button>
+          {connected === null ? (
+            <p className="text-sm text-(--foreground)/70">Checking…</p>
+          ) : connected ? (
+            <div className="space-y-2">
+              <p className="text-sm text-green-600 dark:text-green-400 font-medium">
+                Connected to X
+              </p>
+              <p className="text-xs text-(--foreground)/70">
+                Access tokens are refreshed automatically. You can search and
+                post replies.
+              </p>
+              {accessExpiresAt != null && (
+                <p className="text-xs text-(--foreground)/60">
+                  Next refresh before:{" "}
+                  {new Date(accessExpiresAt).toLocaleString()}
+                </p>
+              )}
+            </div>
+          ) : (
+            <>
+              <p className="text-sm text-(--foreground)/70 mb-4">
+                Sign in with X (OAuth 2.0) to post replies on your behalf.
+              </p>
+              <button
+                type="button"
+                onClick={handleConnectX}
+                className="px-4 py-2 rounded-lg bg-[#0f1419] text-white hover:bg-[#1a1f24] transition-colors font-medium"
+              >
+                Connect X Account
+              </button>
+            </>
+          )}
         </section>
 
         <section className="rounded-xl border border-(--foreground)/10 bg-background p-6 shadow-sm space-y-4">
