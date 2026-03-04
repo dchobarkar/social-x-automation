@@ -4,9 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 
 type Message = { type: "success" | "error"; text: string };
-
 type VariantChoice = "humorous" | "insightful";
-
 type TweetWithReplies = {
   id: string;
   text: string;
@@ -60,9 +58,8 @@ const Page = () => {
         body: JSON.stringify({ query: query.trim(), maxResults }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error ?? "Search failed");
-      }
+      if (!res.ok) throw new Error(data.error ?? "Search failed");
+
       const mapped: TweetWithReplies[] = (data.items ?? []).map(
         (item: {
           tweet: { id: string; text: string };
@@ -77,14 +74,13 @@ const Page = () => {
         }),
       );
       setItems(mapped);
-      if (!mapped.length) {
+      if (!mapped.length)
         showMessage("success", "No tweets found for that query.");
-      } else {
+      else
         showMessage(
           "success",
           `Found ${mapped.length} tweet(s) and generated replies.`,
         );
-      }
     } catch (e) {
       showMessage(
         "error",
@@ -123,9 +119,8 @@ const Page = () => {
         body: JSON.stringify({ tweetId: id, text: chosenText }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error ?? "Post failed");
-      }
+      if (!res.ok) throw new Error(data.error ?? "Post failed");
+
       showMessage("success", "Reply posted successfully.");
     } catch (e) {
       showMessage(
@@ -144,6 +139,7 @@ const Page = () => {
           <h1 className="text-2xl font-semibold tracking-tight">
             X AI Reply Automation
           </h1>
+
           <Link
             href="/"
             className="text-sm text-(--foreground)/70 hover:underline"
@@ -154,9 +150,11 @@ const Page = () => {
 
         <section className="rounded-xl border border-(--foreground)/10 bg-background p-6 shadow-sm">
           <h2 className="text-lg font-medium mb-2">1. Connect X Account</h2>
+
           <p className="text-sm text-(--foreground)/70 mb-4">
             Sign in with X (OAuth 2.0) to post replies on your behalf.
           </p>
+
           <button
             type="button"
             onClick={handleConnectX}
@@ -168,6 +166,7 @@ const Page = () => {
 
         <section className="rounded-xl border border-(--foreground)/10 bg-background p-6 shadow-sm space-y-4">
           <h2 className="text-lg font-medium">2. Search posts by keyword</h2>
+
           <div>
             <label htmlFor="query" className="block text-sm font-medium mb-1">
               Keywords or search query
@@ -181,6 +180,7 @@ const Page = () => {
               className="w-full px-3 py-2 rounded-lg border border-(--foreground)/20 bg-background focus:outline-none focus:ring-2 focus:ring-(--foreground)/30"
             />
           </div>
+
           <div>
             <label
               htmlFor="maxResults"

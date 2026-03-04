@@ -9,11 +9,11 @@ type PkceStateFile = Record<string, PkceEntry>;
 
 const TTL_MS = 10 * 60 * 1000; // 10 minutes
 
-async function ensureDataDir(): Promise<void> {
+const ensureDataDir = async (): Promise<void> => {
   await mkdir(DATA_DIR, { recursive: true });
-}
+};
 
-async function readState(): Promise<PkceStateFile> {
+const readState = async (): Promise<PkceStateFile> => {
   try {
     const raw = await readFile(FILE_PATH, "utf8");
     const data = JSON.parse(raw) as PkceStateFile;
@@ -21,32 +21,35 @@ async function readState(): Promise<PkceStateFile> {
   } catch {
     return {};
   }
-}
+};
 
-async function writeState(data: PkceStateFile): Promise<void> {
+const writeState = async (data: PkceStateFile): Promise<void> => {
   await ensureDataDir();
   await writeFile(FILE_PATH, JSON.stringify(data, null, 0), "utf8");
-}
+};
 
 /**
  * Store state and code_verifier for validation in callback.
  */
-export async function savePkceState(
+export const savePkceState = async (
   state: string,
   code_verifier: string,
-): Promise<void> {
+): Promise<void> => {
   const data = await readState();
   data[state] = { code_verifier, createdAt: Date.now() };
   await writeState(data);
-}
+};
 
 /**
  * Get code_verifier for state and remove the entry (one-time use).
  */
-export async function consumePkceState(state: string): Promise<string | null> {
+export const consumePkceState = async (
+  state: string,
+): Promise<string | null> => {
   const data = await readState();
   const entry = data[state];
   if (!entry) return null;
+
   if (Date.now() - entry.createdAt > TTL_MS) {
     delete data[state];
     await writeState(data);
@@ -55,4 +58,4 @@ export async function consumePkceState(state: string): Promise<string | null> {
   delete data[state];
   await writeState(data);
   return entry.code_verifier;
-}
+};
