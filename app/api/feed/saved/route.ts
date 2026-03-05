@@ -1,0 +1,39 @@
+import { NextRequest, NextResponse } from "next/server";
+
+import { getSavedFeed, saveFeed, type StoredTweet } from "@/lib/feedStore";
+
+export async function GET() {
+  try {
+    const items = await getSavedFeed();
+    return NextResponse.json({ items });
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to load saved feed";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const items = body.items;
+    if (!Array.isArray(items)) {
+      return NextResponse.json(
+        { error: "items must be an array" },
+        { status: 400 },
+      );
+    }
+    const valid = items.filter(
+      (t: unknown): t is StoredTweet =>
+        t != null &&
+        typeof t === "object" &&
+        typeof (t as StoredTweet).id === "string" &&
+        typeof (t as StoredTweet).text === "string",
+    );
+    await saveFeed(valid);
+    return NextResponse.json({ ok: true, count: valid.length });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to save feed";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}

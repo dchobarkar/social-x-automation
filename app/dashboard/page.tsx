@@ -21,6 +21,7 @@ type TweetWithReplies = {
   /** Feed-only display (no OpenAI yet) */
   author_username?: string;
   author_name?: string;
+  author_profile_image_url?: string;
   created_at?: string;
   public_metrics?: TweetMetrics;
   author_followers_count?: number;
@@ -64,6 +65,26 @@ const Page = () => {
   useEffect(() => {
     fetchAuthStatus();
   }, [fetchAuthStatus]);
+
+  // When authenticated, load saved tweets from data/feed.json; when not, show nothing
+  useEffect(() => {
+    if (connected === false) {
+      setItems([]);
+      return;
+    }
+    if (connected !== true) return;
+    let cancelled = false;
+    fetch("/api/feed/saved")
+      .then((res) => res.json())
+      .then((data: { items?: TweetWithReplies[] }) => {
+        if (cancelled || !Array.isArray(data.items)) return;
+        if (data.items.length > 0) setItems(data.items);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [connected]);
 
   useEffect(() => {
     const params = new URLSearchParams(
@@ -162,11 +183,15 @@ const Page = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Load feed failed");
 
+      // Log raw API response for debugging
+      console.log("Feed API response:", data);
+
       const raw = (data.items ?? []) as Array<{
         id: string;
         text: string;
         author_username?: string;
         author_name?: string;
+        author_profile_image_url?: string;
         created_at?: string;
         public_metrics?: TweetMetrics;
         author_metrics?: { followers_count?: number };
@@ -177,11 +202,21 @@ const Page = () => {
         selected: "humorous" as VariantChoice,
         author_username: item.author_username,
         author_name: item.author_name,
+        author_profile_image_url: item.author_profile_image_url,
         created_at: item.created_at,
         public_metrics: item.public_metrics,
         author_followers_count: item.author_metrics?.followers_count,
       }));
       setItems(mapped);
+      try {
+        await fetch("/api/feed/saved", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ items: mapped }),
+        });
+      } catch {
+        // save failed
+      }
       if (!mapped.length)
         showMessage("success", "No tweets in your feed for these filters.");
       else
@@ -206,6 +241,18 @@ const Page = () => {
       ),
     );
   };
+
+  const handleDeleteTweet = useCallback((id: string) => {
+    setItems((prev) => {
+      const next = prev.filter((item) => item.id !== id);
+      fetch("/api/feed/saved", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: next }),
+      }).catch(() => {});
+      return next;
+    });
+  }, []);
 
   const handlePostFor = async (id: string) => {
     const item = items.find((i) => i.id === id);
@@ -482,142 +529,238 @@ const Page = () => {
           <section className="rounded-xl border border-(--foreground)/10 bg-background p-6 shadow-sm space-y-4">
             <h2 className="text-lg font-medium">3. Tweets</h2>
             <p className="text-sm text-(--foreground)/70">
-              Feed-only items show tweet data; reply generation can be added
-              later. Search results include AI reply variants you can post.
+              Saved in browser storage. Delete removes from list and storage.
+              Reply coming later.
             </p>
-            <div className="space-y-6">
+            <div className="divide-y divide-(--foreground)/10">
               {items.map((item) => {
                 const hasReplies =
                   (item.humorous ?? "").trim() !== "" ||
                   (item.insightful ?? "").trim() !== "";
+                const displayName =
+                  item.author_name ?? item.author_username ?? "Unknown";
+                const initial = displayName.charAt(0).toUpperCase();
+                const timeStr =
+                  item.created_at != null
+                    ? (() => {
+                        const d = new Date(item.created_at);
+                        const now = new Date();
+                        const diffMs = now.getTime() - d.getTime();
+                        const diffM = Math.floor(diffMs / 60000);
+                        const diffH = Math.floor(diffMs / 3600000);
+                        const diffD = Math.floor(diffMs / 86400000);
+                        if (diffM < 1) return "now";
+                        if (diffM < 60) return `${diffM}m`;
+                        if (diffH < 24) return `${diffH}h`;
+                        if (diffD < 7) return `${diffD}d`;
+                        return d.toLocaleDateString();
+                      })()
+                    : null;
                 return (
                   <article
                     key={item.id}
-                    className="rounded-lg border border-(--foreground)/10 bg-background p-4 space-y-3"
+                    className="py-4 px-1 -mx-1 rounded-lg hover:bg-(--foreground)/5 transition-colors"
                   >
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-(--foreground)/70">
-                      <span>ID: {item.id}</span>
-                      {item.author_username != null && (
-                        <span>
-                          @{item.author_username}
-                          {item.author_name != null && ` (${item.author_name})`}
-                        </span>
-                      )}
-                      {item.author_followers_count != null && (
-                        <span>
-                          {item.author_followers_count.toLocaleString()}{" "}
-                          followers
-                        </span>
-                      )}
-                      {item.created_at != null && (
-                        <span>
-                          {new Date(item.created_at).toLocaleString()}
-                        </span>
-                      )}
-                    </div>
-                    {item.public_metrics != null && (
-                      <div className="flex gap-4 text-xs text-(--foreground)/60">
-                        {item.public_metrics.reply_count != null && (
-                          <span>{item.public_metrics.reply_count} replies</span>
-                        )}
-                        {item.public_metrics.like_count != null && (
-                          <span>{item.public_metrics.like_count} likes</span>
-                        )}
-                        {item.public_metrics.retweet_count != null && (
-                          <span>
-                            {item.public_metrics.retweet_count} retweets
-                          </span>
+                    <div className="flex gap-3">
+                      {/* Avatar */}
+                      <div className="shrink-0">
+                        {item.author_profile_image_url ? (
+                          <img
+                            src={item.author_profile_image_url}
+                            alt=""
+                            className="w-12 h-12 rounded-full object-cover bg-(--foreground)/10"
+                          />
+                        ) : (
+                          <div
+                            className="w-12 h-12 rounded-full bg-(--foreground)/15 flex items-center justify-center text-lg font-semibold text-(--foreground)/80"
+                            aria-hidden
+                          >
+                            {initial}
+                          </div>
                         )}
                       </div>
-                    )}
-                    <p className="text-sm whitespace-pre-wrap">{item.text}</p>
-
-                    {hasReplies ? (
-                      <>
-                        <div className="flex flex-col gap-3 mt-2">
-                          <div className="flex items-center gap-2">
-                            <input
-                              id={`humorous-${item.id}`}
-                              type="radio"
-                              name={`choice-${item.id}`}
-                              checked={item.selected === "humorous"}
-                              onChange={() =>
-                                handleChangeSelection(item.id, "humorous")
-                              }
-                            />
-                            <label
-                              htmlFor={`humorous-${item.id}`}
-                              className="text-sm font-medium"
-                            >
-                              Humorous
-                            </label>
-                          </div>
-                          <textarea
-                            rows={3}
-                            className="w-full px-3 py-2 rounded-lg border border-(--foreground)/20 bg-background focus:outline-none focus:ring-2 focus:ring-(--foreground)/30 resize-y text-sm"
-                            value={item.humorous ?? ""}
-                            onChange={(e) =>
-                              setItems((prev) =>
-                                prev.map((it) =>
-                                  it.id === item.id
-                                    ? { ...it, humorous: e.target.value }
-                                    : it,
-                                ),
-                              )
-                            }
-                          />
-
-                          <div className="flex items-center gap-2">
-                            <input
-                              id={`insightful-${item.id}`}
-                              type="radio"
-                              name={`choice-${item.id}`}
-                              checked={item.selected === "insightful"}
-                              onChange={() =>
-                                handleChangeSelection(item.id, "insightful")
-                              }
-                            />
-                            <label
-                              htmlFor={`insightful-${item.id}`}
-                              className="text-sm font-medium"
-                            >
-                              Insightful
-                            </label>
-                          </div>
-                          <textarea
-                            rows={3}
-                            className="w-full px-3 py-2 rounded-lg border border-(--foreground)/20 bg-background focus:outline-none focus:ring-2 focus:ring-(--foreground)/30 resize-y text-sm"
-                            value={item.insightful ?? ""}
-                            onChange={(e) =>
-                              setItems((prev) =>
-                                prev.map((it) =>
-                                  it.id === item.id
-                                    ? { ...it, insightful: e.target.value }
-                                    : it,
-                                ),
-                              )
-                            }
-                          />
+                      <div className="min-w-0 flex-1">
+                        {/* Header: name, @handle, time */}
+                        <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0 text-[15px]">
+                          <span className="font-semibold text-foreground truncate">
+                            {displayName}
+                          </span>
+                          {item.author_username != null && (
+                            <span className="text-(--foreground)/60 truncate">
+                              @{item.author_username}
+                            </span>
+                          )}
+                          {timeStr != null && (
+                            <>
+                              <span className="text-(--foreground)/50">·</span>
+                              <span className="text-(--foreground)/50">
+                                {timeStr}
+                              </span>
+                            </>
+                          )}
                         </div>
-
-                        <div className="pt-2">
+                        {/* Tweet text */}
+                        <p className="text-[15px] text-foreground whitespace-pre-wrap wrap-break-word mt-0.5 leading-snug">
+                          {item.text}
+                        </p>
+                        {/* Engagement bar (X-style counts) */}
+                        {item.public_metrics != null &&
+                          (item.public_metrics.reply_count != null ||
+                            item.public_metrics.retweet_count != null ||
+                            item.public_metrics.like_count != null) && (
+                            <div className="flex gap-4 mt-2 text-(--foreground)/60 text-[13px]">
+                              {item.public_metrics.reply_count != null && (
+                                <span>
+                                  {item.public_metrics.reply_count > 0
+                                    ? `${item.public_metrics.reply_count} replies`
+                                    : "Reply"}
+                                </span>
+                              )}
+                              {item.public_metrics.retweet_count != null && (
+                                <span>
+                                  {item.public_metrics.retweet_count > 0
+                                    ? `${item.public_metrics.retweet_count} retweets`
+                                    : "Retweet"}
+                                </span>
+                              )}
+                              {item.public_metrics.like_count != null && (
+                                <span>
+                                  {item.public_metrics.like_count > 0
+                                    ? `${item.public_metrics.like_count} likes`
+                                    : "Like"}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        {/* Actions: Reply, Delete (and optional reply UI for search results) */}
+                        <div className="flex flex-wrap items-center gap-2 mt-3">
                           <button
                             type="button"
-                            onClick={() => handlePostFor(item.id)}
-                            disabled={postingForId === item.id}
-                            className="px-4 py-2 rounded-lg bg-[#0f1419] text-white hover:bg-[#1a1f24] disabled:opacity-60 transition-colors font-medium text-sm"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium text-(--foreground)/80 hover:bg-(--foreground)/10 hover:text-foreground transition-colors"
+                            onClick={() => {
+                              /* Reply: we'll work on later */
+                            }}
                           >
-                            {postingForId === item.id
-                              ? "Posting…"
-                              : "Post selected reply"}
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              aria-hidden
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+                              />
+                            </svg>
+                            Reply
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteTweet(item.id)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              aria-hidden
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                            Delete
                           </button>
                         </div>
-                      </>
-                    ) : (
-                      <p className="text-xs text-(--foreground)/60 italic">
-                        Reply generation coming later.
-                      </p>
-                    )}
+
+                        {/* Search result: reply variants and post (unchanged) */}
+                        {hasReplies && (
+                          <div className="mt-4 pt-4 border-t border-(--foreground)/10 space-y-3">
+                            <div className="flex flex-col gap-3">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  id={`humorous-${item.id}`}
+                                  type="radio"
+                                  name={`choice-${item.id}`}
+                                  checked={item.selected === "humorous"}
+                                  onChange={() =>
+                                    handleChangeSelection(item.id, "humorous")
+                                  }
+                                />
+                                <label
+                                  htmlFor={`humorous-${item.id}`}
+                                  className="text-sm font-medium"
+                                >
+                                  Humorous
+                                </label>
+                              </div>
+                              <textarea
+                                rows={2}
+                                className="w-full px-3 py-2 rounded-lg border border-(--foreground)/20 bg-background focus:outline-none focus:ring-2 focus:ring-(--foreground)/30 resize-y text-sm"
+                                value={item.humorous ?? ""}
+                                onChange={(e) =>
+                                  setItems((prev) =>
+                                    prev.map((it) =>
+                                      it.id === item.id
+                                        ? { ...it, humorous: e.target.value }
+                                        : it,
+                                    ),
+                                  )
+                                }
+                              />
+                              <div className="flex items-center gap-2">
+                                <input
+                                  id={`insightful-${item.id}`}
+                                  type="radio"
+                                  name={`choice-${item.id}`}
+                                  checked={item.selected === "insightful"}
+                                  onChange={() =>
+                                    handleChangeSelection(item.id, "insightful")
+                                  }
+                                />
+                                <label
+                                  htmlFor={`insightful-${item.id}`}
+                                  className="text-sm font-medium"
+                                >
+                                  Insightful
+                                </label>
+                              </div>
+                              <textarea
+                                rows={2}
+                                className="w-full px-3 py-2 rounded-lg border border-(--foreground)/20 bg-background focus:outline-none focus:ring-2 focus:ring-(--foreground)/30 resize-y text-sm"
+                                value={item.insightful ?? ""}
+                                onChange={(e) =>
+                                  setItems((prev) =>
+                                    prev.map((it) =>
+                                      it.id === item.id
+                                        ? { ...it, insightful: e.target.value }
+                                        : it,
+                                    ),
+                                  )
+                                }
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handlePostFor(item.id)}
+                              disabled={postingForId === item.id}
+                              className="px-4 py-2 rounded-lg bg-[#0f1419] text-white hover:bg-[#1a1f24] disabled:opacity-60 transition-colors font-medium text-sm"
+                            >
+                              {postingForId === item.id
+                                ? "Posting…"
+                                : "Post selected reply"}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </article>
                 );
               })}

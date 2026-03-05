@@ -31,6 +31,7 @@ export type XTweetWithMetrics = XTweet & {
   author_metrics?: XUserPublicMetrics;
   author_username?: string;
   author_name?: string;
+  author_profile_image_url?: string;
 };
 
 export type HomeTimelineOptions = {
@@ -214,7 +215,7 @@ export const getHomeTimeline = async (
   const params = new URLSearchParams({
     "tweet.fields": "public_metrics,created_at,author_id,text",
     expansions: "author_id",
-    "user.fields": "public_metrics,username,name",
+    "user.fields": "public_metrics,username,name,profile_image_url",
     max_results: String(maxResults),
   });
   if (options.startTime) params.set("start_time", options.startTime);
@@ -254,6 +255,7 @@ export const getHomeTimeline = async (
         id: string;
         username?: string;
         name?: string;
+        profile_image_url?: string;
         public_metrics?: XUserPublicMetrics;
       }>;
     };
@@ -271,6 +273,7 @@ export const getHomeTimeline = async (
       author_metrics: author?.public_metrics,
       author_username: author?.username,
       author_name: author?.name,
+      author_profile_image_url: author?.profile_image_url,
     };
   });
   return result;
