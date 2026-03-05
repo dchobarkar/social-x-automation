@@ -344,12 +344,20 @@ const Page = () => {
       const res = await fetch("/api/twitter/reply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tweetId: id, text: chosenText }),
+        body: JSON.stringify({ tweetId: id, text: chosenText.trim() }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Post failed");
 
       showMessage("success", "Reply posted successfully.");
+      setReplyingToId(null);
+      const next = items.filter((i) => i.id !== id);
+      setItems(next);
+      await fetch("/api/feed/saved", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: next }),
+      }).catch(() => {});
     } catch (e) {
       showMessage(
         "error",
@@ -887,9 +895,24 @@ const Page = () => {
                                     placeholder="Add perspective or value…"
                                   />
                                 </div>
-                                <p className="text-xs text-(--foreground)/50">
-                                  Post button coming later.
-                                </p>
+                                <button
+                                  type="button"
+                                  onClick={() => handlePostFor(item.id)}
+                                  disabled={
+                                    postingForId === item.id ||
+                                    !(
+                                      (item.selected === "humorous" &&
+                                        (item.humorous ?? "").trim()) ||
+                                      (item.selected === "insightful" &&
+                                        (item.insightful ?? "").trim())
+                                    )
+                                  }
+                                  className="mt-2 px-4 py-2 rounded-lg bg-[#0f1419] text-white hover:bg-[#1a1f24] disabled:opacity-60 transition-colors font-medium text-sm"
+                                >
+                                  {postingForId === item.id
+                                    ? "Posting…"
+                                    : "Post reply"}
+                                </button>
                               </>
                             )}
                           </div>

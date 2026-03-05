@@ -4,7 +4,7 @@ import { postReply } from "@/lib/twitter";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const tweetId = body?.tweetId;
     const text = body?.text;
 
@@ -27,7 +27,9 @@ export async function POST(request: NextRequest) {
       tweetId: result.data?.id,
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Post reply failed";
+    const message =
+      err instanceof Error ? err.message : "Post reply failed";
+    console.error("[reply]", err);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

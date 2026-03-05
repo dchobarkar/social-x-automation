@@ -162,8 +162,19 @@ export const postReply = async (
   }
 
   if (!result.ok) {
-    const err = await result.res.text();
-    throw new Error(`X API error: ${result.status} ${err}`);
+    const errText = await result.res.text();
+    let message = errText;
+    try {
+      const parsed = JSON.parse(errText) as { detail?: string; title?: string };
+      if (typeof parsed.detail === "string" && parsed.detail) {
+        message = parsed.detail;
+      } else if (typeof parsed.title === "string" && parsed.title) {
+        message = parsed.title;
+      }
+    } catch {
+      message = result.status === 403 ? errText : `X API error: ${result.status} ${errText}`;
+    }
+    throw new Error(message);
   }
   return result.res.json() as Promise<{ data: { id: string } }>;
 };
