@@ -34,6 +34,10 @@ const Page = () => {
   const [message, setMessage] = useState<Message | null>(null);
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [loadingFeed, setLoadingFeed] = useState(false);
+  const [loadingReplyForId, setLoadingReplyForId] = useState<string | null>(
+    null,
+  );
+  const [replyingToId, setReplyingToId] = useState<string | null>(null);
   const [postingForId, setPostingForId] = useState<string | null>(null);
   const [connected, setConnected] = useState<boolean | null>(null);
   const [feedLastHours, setFeedLastHours] = useState<number | "">("");
@@ -242,17 +246,86 @@ const Page = () => {
     );
   };
 
-  const handleDeleteTweet = useCallback((id: string) => {
-    setItems((prev) => {
-      const next = prev.filter((item) => item.id !== id);
-      fetch("/api/feed/saved", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: next }),
-      }).catch(() => {});
-      return next;
-    });
-  }, []);
+  const handleDeleteTweet = useCallback(
+    (id: string) => {
+      setItems((prev) => {
+        const next = prev.filter((item) => item.id !== id);
+        fetch("/api/feed/saved", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ items: next }),
+        }).catch(() => {});
+        return next;
+      });
+      if (replyingToId === id) setReplyingToId(null);
+    },
+    [replyingToId],
+  );
+
+  const handleReplyClick = useCallback(
+    async (item: TweetWithReplies) => {
+      const isOpen = replyingToId === item.id;
+      if (isOpen) {
+        setReplyingToId(null);
+        return;
+      }
+      setReplyingToId(item.id);
+      const hasVariants =
+        (item.humorous ?? "").trim() !== "" ||
+        (item.insightful ?? "").trim() !== "";
+      if (hasVariants) return;
+      setLoadingReplyForId(item.id);
+      setMessage(null);
+      try {
+        const res = await fetch("/api/twitter/generate-variants", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tweetText: item.text }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const msg =
+            typeof data?.error === "string" ? data.error : "Generate failed";
+          throw new Error(msg);
+        }
+        setItems((prev) =>
+          prev.map((it) =>
+            it.id === item.id
+              ? {
+                  ...it,
+                  humorous: data.humorous ?? "",
+                  insightful: data.insightful ?? "",
+                  selected: "humorous" as VariantChoice,
+                }
+              : it,
+          ),
+        );
+        const updated = items.map((it) =>
+          it.id === item.id
+            ? {
+                ...it,
+                humorous: data.humorous ?? "",
+                insightful: data.insightful ?? "",
+                selected: "humorous" as VariantChoice,
+              }
+            : it,
+        );
+        await fetch("/api/feed/saved", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ items: updated }),
+        });
+      } catch (e) {
+        showMessage(
+          "error",
+          e instanceof Error ? e.message : "Failed to generate reply options",
+        );
+      } finally {
+        setLoadingReplyForId(null);
+      }
+    },
+    [replyingToId, items, showMessage],
+  );
 
   const handlePostFor = async (id: string) => {
     const item = items.find((i) => i.id === id);
@@ -529,8 +602,8 @@ const Page = () => {
           <section className="rounded-xl border border-(--foreground)/10 bg-background p-6 shadow-sm space-y-4">
             <h2 className="text-lg font-medium">3. Tweets</h2>
             <p className="text-sm text-(--foreground)/70">
-              Saved in browser storage. Delete removes from list and storage.
-              Reply coming later.
+              Saved in data/feed.json. Click Reply to generate Humorous &amp;
+              Insightful options with OpenAI. Delete removes from list.
             </p>
             <div className="divide-y divide-(--foreground)/10">
               {items.map((item) => {
@@ -599,6 +672,35 @@ const Page = () => {
                             </>
                           )}
                         </div>
+                        {/* Meta: tweet ID, author followers, full date */}
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5 text-[13px] text-(--foreground)/55">
+                          <span title="Tweet ID">ID: {item.id}</span>
+                          {item.author_followers_count != null && (
+                            <>
+                              <span className="text-(--foreground)/45">·</span>
+                              <span>
+                                {item.author_followers_count >= 1000
+                                  ? `${(item.author_followers_count / 1000).toFixed(1)}K`
+                                  : item.author_followers_count.toLocaleString()}{" "}
+                                followers
+                              </span>
+                            </>
+                          )}
+                          {item.created_at != null && (
+                            <>
+                              <span className="text-(--foreground)/45">·</span>
+                              <span title={item.created_at}>
+                                {new Date(item.created_at).toLocaleString(
+                                  undefined,
+                                  {
+                                    dateStyle: "short",
+                                    timeStyle: "short",
+                                  },
+                                )}
+                              </span>
+                            </>
+                          )}
+                        </div>
                         {/* Tweet text */}
                         <p className="text-[15px] text-foreground whitespace-pre-wrap wrap-break-word mt-0.5 leading-snug">
                           {item.text}
@@ -607,8 +709,9 @@ const Page = () => {
                         {item.public_metrics != null &&
                           (item.public_metrics.reply_count != null ||
                             item.public_metrics.retweet_count != null ||
-                            item.public_metrics.like_count != null) && (
-                            <div className="flex gap-4 mt-2 text-(--foreground)/60 text-[13px]">
+                            item.public_metrics.like_count != null ||
+                            item.public_metrics.quote_count != null) && (
+                            <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-2 text-(--foreground)/60 text-[13px]">
                               {item.public_metrics.reply_count != null && (
                                 <span>
                                   {item.public_metrics.reply_count > 0
@@ -630,16 +733,21 @@ const Page = () => {
                                     : "Like"}
                                 </span>
                               )}
+                              {item.public_metrics.quote_count != null &&
+                                item.public_metrics.quote_count > 0 && (
+                                  <span>
+                                    {item.public_metrics.quote_count} quotes
+                                  </span>
+                                )}
                             </div>
                           )}
-                        {/* Actions: Reply, Delete (and optional reply UI for search results) */}
+                        {/* Actions: Reply, Delete */}
                         <div className="flex flex-wrap items-center gap-2 mt-3">
                           <button
                             type="button"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium text-(--foreground)/80 hover:bg-(--foreground)/10 hover:text-foreground transition-colors"
-                            onClick={() => {
-                              /* Reply: we'll work on later */
-                            }}
+                            disabled={loadingReplyForId === item.id}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium text-(--foreground)/80 hover:bg-(--foreground)/10 hover:text-foreground transition-colors disabled:opacity-60"
+                            onClick={() => handleReplyClick(item)}
                           >
                             <svg
                               className="w-4 h-4"
@@ -680,83 +788,110 @@ const Page = () => {
                           </button>
                         </div>
 
-                        {/* Search result: reply variants and post (unchanged) */}
-                        {hasReplies && (
+                        {/* Reply panel: when Reply is clicked, show two options (Humorous / Insightful) */}
+                        {replyingToId === item.id && (
                           <div className="mt-4 pt-4 border-t border-(--foreground)/10 space-y-3">
-                            <div className="flex flex-col gap-3">
-                              <div className="flex items-center gap-2">
-                                <input
-                                  id={`humorous-${item.id}`}
-                                  type="radio"
-                                  name={`choice-${item.id}`}
-                                  checked={item.selected === "humorous"}
-                                  onChange={() =>
-                                    handleChangeSelection(item.id, "humorous")
-                                  }
-                                />
-                                <label
-                                  htmlFor={`humorous-${item.id}`}
-                                  className="text-sm font-medium"
-                                >
-                                  Humorous
-                                </label>
-                              </div>
-                              <textarea
-                                rows={2}
-                                className="w-full px-3 py-2 rounded-lg border border-(--foreground)/20 bg-background focus:outline-none focus:ring-2 focus:ring-(--foreground)/30 resize-y text-sm"
-                                value={item.humorous ?? ""}
-                                onChange={(e) =>
-                                  setItems((prev) =>
-                                    prev.map((it) =>
-                                      it.id === item.id
-                                        ? { ...it, humorous: e.target.value }
-                                        : it,
-                                    ),
-                                  )
-                                }
-                              />
-                              <div className="flex items-center gap-2">
-                                <input
-                                  id={`insightful-${item.id}`}
-                                  type="radio"
-                                  name={`choice-${item.id}`}
-                                  checked={item.selected === "insightful"}
-                                  onChange={() =>
-                                    handleChangeSelection(item.id, "insightful")
-                                  }
-                                />
-                                <label
-                                  htmlFor={`insightful-${item.id}`}
-                                  className="text-sm font-medium"
-                                >
-                                  Insightful
-                                </label>
-                              </div>
-                              <textarea
-                                rows={2}
-                                className="w-full px-3 py-2 rounded-lg border border-(--foreground)/20 bg-background focus:outline-none focus:ring-2 focus:ring-(--foreground)/30 resize-y text-sm"
-                                value={item.insightful ?? ""}
-                                onChange={(e) =>
-                                  setItems((prev) =>
-                                    prev.map((it) =>
-                                      it.id === item.id
-                                        ? { ...it, insightful: e.target.value }
-                                        : it,
-                                    ),
-                                  )
-                                }
-                              />
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-sm font-medium text-(--foreground)/80">
+                                Reply options
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setReplyingToId(null)}
+                                className="text-[13px] text-(--foreground)/60 hover:text-foreground"
+                              >
+                                Close
+                              </button>
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => handlePostFor(item.id)}
-                              disabled={postingForId === item.id}
-                              className="px-4 py-2 rounded-lg bg-[#0f1419] text-white hover:bg-[#1a1f24] disabled:opacity-60 transition-colors font-medium text-sm"
-                            >
-                              {postingForId === item.id
-                                ? "Posting…"
-                                : "Post selected reply"}
-                            </button>
+                            {loadingReplyForId === item.id ? (
+                              <p className="text-sm text-(--foreground)/60">
+                                Generating reply options…
+                              </p>
+                            ) : (
+                              <>
+                                <div className="flex flex-col gap-3">
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      id={`humorous-${item.id}`}
+                                      type="radio"
+                                      name={`choice-${item.id}`}
+                                      checked={item.selected === "humorous"}
+                                      onChange={() =>
+                                        handleChangeSelection(
+                                          item.id,
+                                          "humorous",
+                                        )
+                                      }
+                                    />
+                                    <label
+                                      htmlFor={`humorous-${item.id}`}
+                                      className="text-sm font-medium"
+                                    >
+                                      Humorous
+                                    </label>
+                                  </div>
+                                  <textarea
+                                    rows={2}
+                                    className="w-full px-3 py-2 rounded-lg border border-(--foreground)/20 bg-background focus:outline-none focus:ring-2 focus:ring-(--foreground)/30 resize-y text-sm"
+                                    value={item.humorous ?? ""}
+                                    onChange={(e) =>
+                                      setItems((prev) =>
+                                        prev.map((it) =>
+                                          it.id === item.id
+                                            ? {
+                                                ...it,
+                                                humorous: e.target.value,
+                                              }
+                                            : it,
+                                        ),
+                                      )
+                                    }
+                                    placeholder="Light, witty reply…"
+                                  />
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      id={`insightful-${item.id}`}
+                                      type="radio"
+                                      name={`choice-${item.id}`}
+                                      checked={item.selected === "insightful"}
+                                      onChange={() =>
+                                        handleChangeSelection(
+                                          item.id,
+                                          "insightful",
+                                        )
+                                      }
+                                    />
+                                    <label
+                                      htmlFor={`insightful-${item.id}`}
+                                      className="text-sm font-medium"
+                                    >
+                                      Insightful
+                                    </label>
+                                  </div>
+                                  <textarea
+                                    rows={2}
+                                    className="w-full px-3 py-2 rounded-lg border border-(--foreground)/20 bg-background focus:outline-none focus:ring-2 focus:ring-(--foreground)/30 resize-y text-sm"
+                                    value={item.insightful ?? ""}
+                                    onChange={(e) =>
+                                      setItems((prev) =>
+                                        prev.map((it) =>
+                                          it.id === item.id
+                                            ? {
+                                                ...it,
+                                                insightful: e.target.value,
+                                              }
+                                            : it,
+                                        ),
+                                      )
+                                    }
+                                    placeholder="Add perspective or value…"
+                                  />
+                                </div>
+                                <p className="text-xs text-(--foreground)/50">
+                                  Post button coming later.
+                                </p>
+                              </>
+                            )}
                           </div>
                         )}
                       </div>
