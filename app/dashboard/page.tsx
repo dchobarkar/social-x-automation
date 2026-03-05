@@ -895,24 +895,75 @@ const Page = () => {
                                     placeholder="Add perspective or value…"
                                   />
                                 </div>
-                                <button
-                                  type="button"
-                                  onClick={() => handlePostFor(item.id)}
-                                  disabled={
-                                    postingForId === item.id ||
-                                    !(
-                                      (item.selected === "humorous" &&
+                                <div className="mt-2 flex flex-wrap items-center gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => handlePostFor(item.id)}
+                                    disabled={
+                                      postingForId === item.id ||
+                                      !(
+                                        (item.selected === "humorous" &&
+                                          (item.humorous ?? "").trim()) ||
+                                        (item.selected === "insightful" &&
+                                          (item.insightful ?? "").trim())
+                                      )
+                                    }
+                                    className="px-4 py-2 rounded-lg bg-[#0f1419] text-white hover:bg-[#1a1f24] disabled:opacity-60 transition-colors font-medium text-sm"
+                                  >
+                                    {postingForId === item.id
+                                      ? "Posting…"
+                                      : "Post reply"}
+                                  </button>
+                                  <a
+                                    href={(() => {
+                                      const text =
+                                        item.selected === "humorous"
+                                          ? (item.humorous ?? "").trim()
+                                          : (item.insightful ?? "").trim();
+                                      if (!text) return "#";
+                                      return `https://twitter.com/intent/tweet?in_reply_to=${encodeURIComponent(item.id)}&text=${encodeURIComponent(text)}`;
+                                    })()}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => {
+                                      const text =
+                                        item.selected === "humorous"
+                                          ? (item.humorous ?? "").trim()
+                                          : (item.insightful ?? "").trim();
+                                      if (!text) e.preventDefault();
+                                    }}
+                                    className={
+                                      "px-4 py-2 rounded-lg border border-(--foreground)/20 text-(--foreground)/80 hover:bg-(--foreground)/10 hover:text-foreground transition-colors font-medium text-sm inline-flex items-center gap-1.5 " +
+                                      ((item.selected === "humorous" &&
                                         (item.humorous ?? "").trim()) ||
                                       (item.selected === "insightful" &&
                                         (item.insightful ?? "").trim())
-                                    )
-                                  }
-                                  className="mt-2 px-4 py-2 rounded-lg bg-[#0f1419] text-white hover:bg-[#1a1f24] disabled:opacity-60 transition-colors font-medium text-sm"
-                                >
-                                  {postingForId === item.id
-                                    ? "Posting…"
-                                    : "Post reply"}
-                                </button>
+                                        ? ""
+                                        : "opacity-50 pointer-events-none")
+                                    }
+                                  >
+                                    Open in X to post
+                                    <svg
+                                      className="w-3.5 h-3.5"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                      aria-hidden
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                      />
+                                    </svg>
+                                  </a>
+                                </div>
+                                <p className="mt-1.5 text-xs text-(--foreground)/50">
+                                  Use “Open in X to post” when the API reply is
+                                  not allowed (e.g. you’re not in the
+                                  conversation).
+                                </p>
                               </>
                             )}
                           </div>
