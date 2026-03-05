@@ -11,6 +11,36 @@ export type XTweet = {
   created_at?: string;
 };
 
+export type XUserPublicMetrics = {
+  followers_count?: number;
+  following_count?: number;
+  tweet_count?: number;
+  listed_count?: number;
+};
+
+export type XTweetPublicMetrics = {
+  retweet_count?: number;
+  reply_count?: number;
+  like_count?: number;
+  quote_count?: number;
+  impression_count?: number;
+};
+
+export type XTweetWithMetrics = XTweet & {
+  public_metrics?: XTweetPublicMetrics;
+  author_metrics?: XUserPublicMetrics;
+  author_username?: string;
+  author_name?: string;
+};
+
+export type HomeTimelineOptions = {
+  maxResults?: number;
+  startTime?: string; // ISO 8601 e.g. 2025-03-05T18:00:00Z
+  endTime?: string;
+  excludeReplies?: boolean;
+  excludeRetweets?: boolean;
+};
+
 const getValidAccessToken = async (): Promise<string> => {
   const tokens = await getTokens();
   if (!tokens) throw new Error("Not authenticated. Connect X account first.");
@@ -135,4 +165,113 @@ export const postReply = async (
     throw new Error(`X API error: ${result.status} ${err}`);
   }
   return result.res.json() as Promise<{ data: { id: string } }>;
+};
+
+/** Get the authenticated user's id and profile (for timeline). */
+export const getMe = async (): Promise<{
+  id: string;
+  username: string;
+  name: string;
+}> => {
+  const accessToken = await getValidAccessToken();
+  let res = await fetch(`${X_API_BASE}/users/me?user.fields=public_metrics`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (res.status === 401) {
+    await refreshTokens();
+    const updated = await getTokens();
+    if (updated) {
+      res = await fetch(`${X_API_BASE}/users/me?user.fields=public_metrics`, {
+        headers: { Authorization: `Bearer ${updated.access_token}` },
+      });
+    }
+  }
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`X API users/me error: ${res.status} ${err}`);
+  }
+
+  const json = (await res.json()) as {
+    data?: { id: string; username: string; name: string };
+  };
+  if (!json.data?.id) throw new Error("X API users/me returned no user");
+  return json.data;
+};
+
+/**
+ * Get the authenticated user's home timeline (same as X home feed).
+ * Uses GET /2/users/:id/timelines/reverse_chronological.
+ * Optional server-side filters: time range, exclude replies/retweets.
+ * Returns tweets with public_metrics and author public_metrics so you can filter
+ * client-side by reply_count, author followers, etc.
+ */
+export const getHomeTimeline = async (
+  userId: string,
+  options: HomeTimelineOptions = {},
+): Promise<XTweetWithMetrics[]> => {
+  const accessToken = await getValidAccessToken();
+  const maxResults = Math.min(Math.max(options.maxResults ?? 20, 1), 100);
+  const params = new URLSearchParams({
+    "tweet.fields": "public_metrics,created_at,author_id,text",
+    expansions: "author_id",
+    "user.fields": "public_metrics,username,name",
+    max_results: String(maxResults),
+  });
+  if (options.startTime) params.set("start_time", options.startTime);
+  if (options.endTime) params.set("end_time", options.endTime);
+  const exclude: string[] = [];
+  if (options.excludeReplies) exclude.push("replies");
+  if (options.excludeRetweets) exclude.push("retweets");
+  if (exclude.length) params.set("exclude", exclude.join(","));
+
+  const url = `${X_API_BASE}/users/${encodeURIComponent(userId)}/timelines/reverse_chronological?${params.toString()}`;
+  let res = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (res.status === 401) {
+    await refreshTokens();
+    const updated = await getTokens();
+    if (updated) {
+      res = await fetch(url, {
+        headers: { Authorization: `Bearer ${updated.access_token}` },
+      });
+    }
+  }
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`X API timeline error: ${res.status} ${err}`);
+  }
+  const json = (await res.json()) as {
+    data?: Array<{
+      id: string;
+      text: string;
+      author_id?: string;
+      created_at?: string;
+      public_metrics?: XTweetPublicMetrics;
+    }>;
+    includes?: {
+      users?: Array<{
+        id: string;
+        username?: string;
+        name?: string;
+        public_metrics?: XUserPublicMetrics;
+      }>;
+    };
+  };
+  const tweets = json.data ?? [];
+  const usersById = new Map((json.includes?.users ?? []).map((u) => [u.id, u]));
+  const result: XTweetWithMetrics[] = tweets.map((t) => {
+    const author = t.author_id ? usersById.get(t.author_id) : undefined;
+    return {
+      id: t.id,
+      text: t.text,
+      author_id: t.author_id,
+      created_at: t.created_at,
+      public_metrics: t.public_metrics,
+      author_metrics: author?.public_metrics,
+      author_username: author?.username,
+      author_name: author?.name,
+    };
+  });
+  return result;
 };

@@ -82,9 +82,9 @@ Visit:
 
 1. Click Connect X Account
 2. Approve OAuth permissions
-3. Enter Tweet ID and Tweet Text
-4. Generate AI reply
-5. Post reply
+3. Get tweets either by **search** (keyword query) or **load my home feed** (same as your X home/feed, with optional filters)
+4. Generate AI reply variants (humorous / insightful)
+5. Review, edit if needed, and post reply
 
 Everything runs locally.
 
@@ -104,11 +104,12 @@ Everything runs locally.
 This project currently focuses on:
 
 - Local execution
-- Manual trigger commenting
-- AI-assisted reply generation
+- Manual trigger commenting (search by keyword or load home feed)
+- Optional filters: time range, exclude replies/retweets, max reply count, min author followers
+- AI-assisted reply generation (humorous / insightful)
+- Review and post replies
 
-Future enhancements may include: - Auto scanning posts - Scheduling
-replies - Multi-account support - Advanced prompt customization
+Future enhancements may include: auto scanning posts, scheduling replies, multi-account support, advanced prompt customization.
 
 ---
 
