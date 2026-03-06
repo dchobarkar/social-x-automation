@@ -372,34 +372,29 @@ const Page = () => {
     <div className="min-h-screen bg-background text-foreground p-6 md:p-10">
       <div className="max-w-2xl mx-auto space-y-8">
         <header className="flex items-center justify-between gap-4 flex-wrap">
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-h2 font-semibold tracking-tight">
             X AI Reply Automation
           </h1>
 
-          <Link
-            href="/"
-            className="text-sm text-(--foreground)/70 hover:underline"
-          >
+          <Link href="/" className="text-sm text-muted hover:underline">
             ← Home
           </Link>
         </header>
 
-        <section className="rounded-xl border border-(--foreground)/10 bg-background p-6 shadow-sm">
-          <h2 className="text-lg font-medium mb-2">1. Connect X Account</h2>
+        <section className="rounded-card border border-border bg-background p-6 shadow-sm">
+          <h2 className="text-h3 font-medium mb-2">1. Connect X Account</h2>
 
           {connected === null ? (
-            <p className="text-sm text-(--foreground)/70">Checking…</p>
+            <p className="text-sm text-muted">Checking…</p>
           ) : connected ? (
             <div className="space-y-2">
-              <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-                Connected to X
-              </p>
-              <p className="text-xs text-(--foreground)/70">
+              <p className="text-sm text-success font-medium">Connected to X</p>
+              <p className="text-xs text-muted">
                 Access tokens are refreshed automatically. You can search and
                 post replies.
               </p>
               {accessExpiresAt != null && (
-                <p className="text-xs text-(--foreground)/60">
+                <p className="text-xs text-muted">
                   Next refresh before:{" "}
                   {new Date(accessExpiresAt).toLocaleString()}
                 </p>
@@ -407,13 +402,13 @@ const Page = () => {
             </div>
           ) : (
             <>
-              <p className="text-sm text-(--foreground)/70 mb-4">
+              <p className="text-sm text-muted mb-4">
                 Sign in with X (OAuth 2.0) to post replies on your behalf.
               </p>
               <button
                 type="button"
                 onClick={handleConnectX}
-                className="px-4 py-2 rounded-lg bg-[#0f1419] text-white hover:bg-[#1a1f24] transition-colors font-medium"
+                className="px-4 py-2 rounded-button bg-primary text-white hover:opacity-90 transition-colors font-medium"
               >
                 Connect X Account
               </button>
@@ -421,7 +416,7 @@ const Page = () => {
           )}
         </section>
 
-        <section className="rounded-xl border border-(--foreground)/10 bg-background p-6 shadow-sm space-y-4">
+        <section className="rounded-card border border-border bg-background p-6 shadow-sm space-y-4">
           <h2 className="text-lg font-medium">2. Get tweets to reply to</h2>
 
           <div className="space-y-4">
@@ -431,7 +426,7 @@ const Page = () => {
                 <div className="min-w-50">
                   <label
                     htmlFor="query"
-                    className="block text-xs text-(--foreground)/70 mb-0.5"
+                    className="block text-xs text-muted mb-0.5"
                   >
                     Query
                   </label>
@@ -441,13 +436,13 @@ const Page = () => {
                     placeholder="e.g. nextjs OR react lang:en"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-(--foreground)/20 bg-background focus:outline-none focus:ring-2 focus:ring-(--foreground)/30 text-sm"
+                    className="w-full px-3 py-2 rounded-card border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
                   />
                 </div>
                 <div className="w-20">
                   <label
                     htmlFor="maxResults"
-                    className="block text-xs text-(--foreground)/70 mb-0.5"
+                    className="block text-xs text-muted mb-0.5"
                   >
                     Max (1–20)
                   </label>
@@ -467,23 +462,23 @@ const Page = () => {
                             ),
                       )
                     }
-                    className="w-full px-2 py-2 rounded-lg border border-(--foreground)/20 bg-background focus:outline-none focus:ring-2 focus:ring-(--foreground)/30 text-sm"
+                    className="w-full px-2 py-2 rounded-card border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={handleSearch}
                   disabled={loadingSearch}
-                  className="px-4 py-2 rounded-lg bg-[#0f1419] text-white hover:bg-[#1a1f24] disabled:opacity-60 transition-colors font-medium text-sm"
+                  className="px-4 py-2 rounded-button bg-primary text-white hover:opacity-90 disabled:opacity-60 transition-colors font-medium text-sm"
                 >
                   {loadingSearch ? "Searching…" : "Search & generate"}
                 </button>
               </div>
             </div>
 
-            <div className="border-t border-(--foreground)/10 pt-4">
+            <div className="border-t border-border pt-4">
               <h3 className="text-sm font-medium mb-2">Or load my home feed</h3>
-              <p className="text-xs text-(--foreground)/70 mb-3">
+              <p className="text-xs text-muted mb-3">
                 Same tweets you see on your X home/feed (no OpenAI). Optional
                 filters below. Reply generation can be added later.
               </p>
@@ -491,7 +486,7 @@ const Page = () => {
                 <div>
                   <label
                     htmlFor="feedLastHours"
-                    className="block text-xs text-(--foreground)/70 mb-0.5"
+                    className="block text-xs text-muted mb-0.5"
                   >
                     Posted in last
                   </label>
@@ -503,7 +498,7 @@ const Page = () => {
                         e.target.value === "" ? "" : Number(e.target.value),
                       )
                     }
-                    className="px-3 py-2 rounded-lg border border-(--foreground)/20 bg-background focus:outline-none focus:ring-2 focus:ring-(--foreground)/30 text-sm"
+                    className="px-3 py-2 rounded-card border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
                   >
                     <option value="">All time</option>
                     <option value="1">1 hour</option>
@@ -515,7 +510,7 @@ const Page = () => {
                 <div className="w-20">
                   <label
                     htmlFor="feedMaxResults"
-                    className="block text-xs text-(--foreground)/70 mb-0.5"
+                    className="block text-xs text-muted mb-0.5"
                   >
                     Max (1–100)
                   </label>
@@ -536,7 +531,7 @@ const Page = () => {
                         ),
                       )
                     }
-                    className="w-full px-2 py-2 rounded-lg border border-(--foreground)/20 bg-background focus:outline-none focus:ring-2 focus:ring-(--foreground)/30 text-sm"
+                    className="w-full px-2 py-2 rounded-card border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -564,7 +559,7 @@ const Page = () => {
                 <div className="w-24">
                   <label
                     htmlFor="feedMaxReplyCount"
-                    className="block text-xs text-(--foreground)/70 mb-0.5"
+                    className="block text-xs text-muted mb-0.5"
                   >
                     Max replies
                   </label>
@@ -574,13 +569,13 @@ const Page = () => {
                     placeholder="e.g. 20"
                     value={feedMaxReplyCount}
                     onChange={(e) => setFeedMaxReplyCount(e.target.value)}
-                    className="w-full px-2 py-2 rounded-lg border border-(--foreground)/20 bg-background focus:outline-none focus:ring-2 focus:ring-(--foreground)/30 text-sm"
+                    className="w-full px-2 py-2 rounded-card border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
                   />
                 </div>
                 <div className="w-28">
                   <label
                     htmlFor="feedMinAuthorFollowers"
-                    className="block text-xs text-(--foreground)/70 mb-0.5"
+                    className="block text-xs text-muted mb-0.5"
                   >
                     Min author followers
                   </label>
@@ -590,14 +585,14 @@ const Page = () => {
                     placeholder="e.g. 100"
                     value={feedMinAuthorFollowers}
                     onChange={(e) => setFeedMinAuthorFollowers(e.target.value)}
-                    className="w-full px-2 py-2 rounded-lg border border-(--foreground)/20 bg-background focus:outline-none focus:ring-2 focus:ring-(--foreground)/30 text-sm"
+                    className="w-full px-2 py-2 rounded-card border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={handleLoadFeedOnly}
                   disabled={loadingFeed}
-                  className="px-4 py-2 rounded-lg bg-[#0f1419] text-white hover:bg-[#1a1f24] disabled:opacity-60 transition-colors font-medium text-sm"
+                  className="px-4 py-2 rounded-button bg-primary text-white hover:opacity-90 disabled:opacity-60 transition-colors font-medium text-sm"
                 >
                   {loadingFeed ? "Loading feed…" : "Load feed"}
                 </button>
@@ -607,13 +602,13 @@ const Page = () => {
         </section>
 
         {items.length > 0 && (
-          <section className="rounded-xl border border-(--foreground)/10 bg-background p-6 shadow-sm space-y-4">
+          <section className="rounded-card border border-border bg-background p-6 shadow-sm space-y-4">
             <h2 className="text-lg font-medium">3. Tweets</h2>
-            <p className="text-sm text-(--foreground)/70">
+            <p className="text-sm text-muted">
               Saved in data/feed.json. Click Reply to generate Humorous &amp;
               Insightful options with OpenAI. Delete removes from list.
             </p>
-            <div className="divide-y divide-(--foreground)/10">
+            <div className="divide-y divide-border">
               {items.map((item) => {
                 const hasReplies =
                   (item.humorous ?? "").trim() !== "" ||
@@ -640,7 +635,7 @@ const Page = () => {
                 return (
                   <article
                     key={item.id}
-                    className="py-4 px-1 -mx-1 rounded-lg hover:bg-(--foreground)/5 transition-colors"
+                    className="py-4 px-1 -mx-1 rounded-card hover:bg-border transition-colors"
                   >
                     <div className="flex gap-3">
                       {/* Avatar */}
@@ -649,11 +644,11 @@ const Page = () => {
                           <img
                             src={item.author_profile_image_url}
                             alt=""
-                            className="w-12 h-12 rounded-full object-cover bg-(--foreground)/10"
+                            className="w-12 h-12 rounded-full object-cover bg-border"
                           />
                         ) : (
                           <div
-                            className="w-12 h-12 rounded-full bg-(--foreground)/15 flex items-center justify-center text-lg font-semibold text-(--foreground)/80"
+                            className="w-12 h-12 rounded-full bg-border flex items-center justify-center text-lg font-semibold text-foreground"
                             aria-hidden
                           >
                             {initial}
@@ -667,25 +662,23 @@ const Page = () => {
                             {displayName}
                           </span>
                           {item.author_username != null && (
-                            <span className="text-(--foreground)/60 truncate">
+                            <span className="text-muted truncate">
                               @{item.author_username}
                             </span>
                           )}
                           {timeStr != null && (
                             <>
-                              <span className="text-(--foreground)/50">·</span>
-                              <span className="text-(--foreground)/50">
-                                {timeStr}
-                              </span>
+                              <span className="text-muted">·</span>
+                              <span className="text-muted">{timeStr}</span>
                             </>
                           )}
                         </div>
                         {/* Meta: tweet ID, author followers, full date */}
-                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5 text-[13px] text-(--foreground)/55">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5 text-[13px] text-muted">
                           <span title="Tweet ID">ID: {item.id}</span>
                           {item.author_followers_count != null && (
                             <>
-                              <span className="text-(--foreground)/45">·</span>
+                              <span className="text-muted">·</span>
                               <span>
                                 {item.author_followers_count >= 1000
                                   ? `${(item.author_followers_count / 1000).toFixed(1)}K`
@@ -696,7 +689,7 @@ const Page = () => {
                           )}
                           {item.created_at != null && (
                             <>
-                              <span className="text-(--foreground)/45">·</span>
+                              <span className="text-muted">·</span>
                               <span title={item.created_at}>
                                 {new Date(item.created_at).toLocaleString(
                                   undefined,
@@ -719,7 +712,7 @@ const Page = () => {
                             item.public_metrics.retweet_count != null ||
                             item.public_metrics.like_count != null ||
                             item.public_metrics.quote_count != null) && (
-                            <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-2 text-(--foreground)/60 text-[13px]">
+                            <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-2 text-muted text-[13px]">
                               {item.public_metrics.reply_count != null && (
                                 <span>
                                   {item.public_metrics.reply_count > 0
@@ -754,7 +747,7 @@ const Page = () => {
                           <button
                             type="button"
                             disabled={loadingReplyForId === item.id}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium text-(--foreground)/80 hover:bg-(--foreground)/10 hover:text-foreground transition-colors disabled:opacity-60"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium text-foreground hover:bg-border hover:text-foreground transition-colors disabled:opacity-60"
                             onClick={() => handleReplyClick(item)}
                           >
                             <svg
@@ -776,7 +769,7 @@ const Page = () => {
                           <button
                             type="button"
                             onClick={() => handleDeleteTweet(item.id)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium text-error hover:bg-error/10 transition-colors"
                           >
                             <svg
                               className="w-4 h-4"
@@ -798,21 +791,21 @@ const Page = () => {
 
                         {/* Reply panel: when Reply is clicked, show two options (Humorous / Insightful) */}
                         {replyingToId === item.id && (
-                          <div className="mt-4 pt-4 border-t border-(--foreground)/10 space-y-3">
+                          <div className="mt-4 pt-4 border-t border-border space-y-3">
                             <div className="flex items-center justify-between gap-2">
-                              <span className="text-sm font-medium text-(--foreground)/80">
+                              <span className="text-sm font-medium text-foreground">
                                 Reply options
                               </span>
                               <button
                                 type="button"
                                 onClick={() => setReplyingToId(null)}
-                                className="text-[13px] text-(--foreground)/60 hover:text-foreground"
+                                className="text-[13px] text-muted hover:text-foreground"
                               >
                                 Close
                               </button>
                             </div>
                             {loadingReplyForId === item.id ? (
-                              <p className="text-sm text-(--foreground)/60">
+                              <p className="text-sm text-muted">
                                 Generating reply options…
                               </p>
                             ) : (
@@ -840,7 +833,7 @@ const Page = () => {
                                   </div>
                                   <textarea
                                     rows={2}
-                                    className="w-full px-3 py-2 rounded-lg border border-(--foreground)/20 bg-background focus:outline-none focus:ring-2 focus:ring-(--foreground)/30 resize-y text-sm"
+                                    className="w-full px-3 py-2 rounded-card border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y text-sm"
                                     value={item.humorous ?? ""}
                                     onChange={(e) =>
                                       setItems((prev) =>
@@ -878,7 +871,7 @@ const Page = () => {
                                   </div>
                                   <textarea
                                     rows={2}
-                                    className="w-full px-3 py-2 rounded-lg border border-(--foreground)/20 bg-background focus:outline-none focus:ring-2 focus:ring-(--foreground)/30 resize-y text-sm"
+                                    className="w-full px-3 py-2 rounded-card border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y text-sm"
                                     value={item.insightful ?? ""}
                                     onChange={(e) =>
                                       setItems((prev) =>
@@ -908,7 +901,7 @@ const Page = () => {
                                           (item.insightful ?? "").trim())
                                       )
                                     }
-                                    className="px-4 py-2 rounded-lg bg-[#0f1419] text-white hover:bg-[#1a1f24] disabled:opacity-60 transition-colors font-medium text-sm"
+                                    className="px-4 py-2 rounded-button bg-primary text-white hover:opacity-90 disabled:opacity-60 transition-colors font-medium text-sm"
                                   >
                                     {postingForId === item.id
                                       ? "Posting…"
@@ -933,7 +926,7 @@ const Page = () => {
                                       if (!text) e.preventDefault();
                                     }}
                                     className={
-                                      "px-4 py-2 rounded-lg border border-(--foreground)/20 text-(--foreground)/80 hover:bg-(--foreground)/10 hover:text-foreground transition-colors font-medium text-sm inline-flex items-center gap-1.5 " +
+                                      "px-4 py-2 rounded-card border border-border text-foreground hover:bg-border hover:text-foreground transition-colors font-medium text-sm inline-flex items-center gap-1.5 " +
                                       ((item.selected === "humorous" &&
                                         (item.humorous ?? "").trim()) ||
                                       (item.selected === "insightful" &&
@@ -959,7 +952,7 @@ const Page = () => {
                                     </svg>
                                   </a>
                                 </div>
-                                <p className="mt-1.5 text-xs text-(--foreground)/50">
+                                <p className="mt-1.5 text-xs text-muted">
                                   Use “Open in X to post” when the API reply is
                                   not allowed (e.g. you’re not in the
                                   conversation).
@@ -980,10 +973,10 @@ const Page = () => {
         {message && (
           <div
             role="alert"
-            className={`rounded-lg p-4 ${
+            className={`rounded-card p-4 ${
               message.type === "success"
-                ? "bg-green-500/10 text-green-700 dark:text-green-400"
-                : "bg-red-500/10 text-red-700 dark:text-red-400"
+                ? "bg-success/10 text-success"
+                : "bg-error/10 text-error"
             }`}
           >
             {message.text}
