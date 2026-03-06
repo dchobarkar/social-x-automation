@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { generateReplyVariants } from "@/lib/openai";
 
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest) => {
   try {
     const body = await request.json().catch(() => ({}));
     const tweetText = body?.tweetText;
@@ -32,4 +32,4 @@ export async function POST(request: NextRequest) {
     console.error("[generate-variants]", err);
     return NextResponse.json({ error: message }, { status: 500 });
   }
-}
+};

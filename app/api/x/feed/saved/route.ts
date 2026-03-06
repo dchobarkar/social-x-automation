@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getSavedFeed, saveFeed, type StoredTweet } from "@/lib/feedStore";
+import { getSavedFeed, saveFeed } from "@/lib/feedStore";
+import type { StoredTweet } from "@/types/tweet";
 
-export async function GET() {
+export const GET = async () => {
   try {
     const items = await getSavedFeed();
     return NextResponse.json({ items });
@@ -11,9 +12,9 @@ export async function GET() {
       err instanceof Error ? err.message : "Failed to load saved feed";
     return NextResponse.json({ error: message }, { status: 500 });
   }
-}
+};
 
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest) => {
   try {
     const body = await request.json().catch(() => ({}));
     const items = body.items;
@@ -36,4 +37,4 @@ export async function POST(request: NextRequest) {
     const message = err instanceof Error ? err.message : "Failed to save feed";
     return NextResponse.json({ error: message }, { status: 500 });
   }
-}
+};

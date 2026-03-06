@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateReplyVariants } from "@/lib/openai";
 import { searchTweetsByKeyword } from "@/lib/twitter";
 
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest) => {
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const query = body?.query;
     const maxResults = body?.maxResults;
 
@@ -39,4 +39,4 @@ export async function POST(request: NextRequest) {
       err instanceof Error ? err.message : "Search and generate failed";
     return NextResponse.json({ error: message }, { status: 500 });
   }
-}
+};

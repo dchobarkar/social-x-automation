@@ -4,31 +4,20 @@ import { getMe, getHomeTimeline, type XTweetWithMetrics } from "@/lib/twitter";
 
 export type FeedFilters = {
   maxResults?: number;
-  /** ISO 8601, e.g. "2025-03-05T18:00:00Z" - only tweets after this time */
   startTime?: string;
-  /** ISO 8601 - only tweets before this time */
   endTime?: string;
   excludeReplies?: boolean;
   excludeRetweets?: boolean;
-  /** Keep only tweets with reply_count <= this (optional) */
   maxReplyCount?: number;
-  /** Keep only tweets whose author has at least this many followers (optional) */
   minAuthorFollowers?: number;
 };
 
-/**
- * GET /api/twitter/feed?maxResults=20&lastHours=1&excludeReplies=1&maxReplyCount=20&minAuthorFollowers=100
- * Or POST with JSON body for the same fields.
- * Returns the authenticated user's home timeline (same as X home feed) with optional filters.
- */
-async function getFeed(filters: FeedFilters): Promise<XTweetWithMetrics[]> {
+const getFeed = async (filters: FeedFilters): Promise<XTweetWithMetrics[]> => {
   const me = await getMe();
-  const startTime = filters.startTime;
-  const endTime = filters.endTime;
   const tweets = await getHomeTimeline(me.id, {
     maxResults: filters.maxResults ?? 20,
-    startTime,
-    endTime,
+    startTime: filters.startTime,
+    endTime: filters.endTime,
     excludeReplies: filters.excludeReplies,
     excludeRetweets: filters.excludeRetweets,
   });
@@ -46,9 +35,9 @@ async function getFeed(filters: FeedFilters): Promise<XTweetWithMetrics[]> {
     );
   }
   return result;
-}
+};
 
-export async function GET(request: NextRequest) {
+export const GET = async (request: NextRequest) => {
   try {
     const searchParams = request.nextUrl.searchParams;
     const lastHours = searchParams.get("lastHours");
@@ -98,9 +87,9 @@ export async function GET(request: NextRequest) {
       err instanceof Error ? err.message : "Failed to load home feed";
     return NextResponse.json({ error: message }, { status: 500 });
   }
-}
+};
 
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest) => {
   try {
     const body = await request.json().catch(() => ({}));
     const filters: FeedFilters = {
@@ -135,4 +124,4 @@ export async function POST(request: NextRequest) {
       err instanceof Error ? err.message : "Failed to load home feed";
     return NextResponse.json({ error: message }, { status: 500 });
   }
-}
+};

@@ -17,27 +17,30 @@ export async function GET(request: NextRequest) {
   const clientId = process.env.X_CLIENT_ID;
   const clientSecret = process.env.X_CLIENT_SECRET;
 
+  const dashboardX = `${baseUrl}/dashboard/x`;
+
   if (error) {
-    const dashboardUrl = `${baseUrl}/dashboard?error=${encodeURIComponent(error)}`;
-    return NextResponse.redirect(dashboardUrl);
+    return NextResponse.redirect(
+      `${dashboardX}?error=${encodeURIComponent(error)}`,
+    );
   }
 
   if (!code || !state) {
     return NextResponse.redirect(
-      `${baseUrl}/dashboard?error=${encodeURIComponent("Missing code or state")}`,
+      `${dashboardX}?error=${encodeURIComponent("Missing code or state")}`,
     );
   }
 
   if (!clientId || !clientSecret) {
     return NextResponse.redirect(
-      `${baseUrl}/dashboard?error=${encodeURIComponent("Server misconfiguration")}`,
+      `${dashboardX}?error=${encodeURIComponent("Server misconfiguration")}`,
     );
   }
 
   const code_verifier = await consumePkceState(state);
   if (!code_verifier) {
     return NextResponse.redirect(
-      `${baseUrl}/dashboard?error=${encodeURIComponent("Invalid or expired state")}`,
+      `${dashboardX}?error=${encodeURIComponent("Invalid or expired state")}`,
     );
   }
 
@@ -61,7 +64,7 @@ export async function GET(request: NextRequest) {
   if (!res.ok) {
     const err = await res.text();
     return NextResponse.redirect(
-      `${baseUrl}/dashboard?error=${encodeURIComponent(`Token exchange failed: ${err}`)}`,
+      `${dashboardX}?error=${encodeURIComponent(`Token exchange failed: ${err}`)}`,
     );
   }
 
@@ -77,5 +80,5 @@ export async function GET(request: NextRequest) {
     data.expires_in,
   );
 
-  return NextResponse.redirect(`${baseUrl}/dashboard?success=1`);
+  return NextResponse.redirect(`${dashboardX}?success=1`);
 }
