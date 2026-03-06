@@ -20,3 +20,20 @@ export type StoredTweet = {
   public_metrics?: TweetMetrics;
   author_followers_count?: number;
 };
+
+export type FeedApiItem = {
+  id: string;
+  text: string;
+  author_username?: string;
+  author_name?: string;
+  author_profile_image_url?: string;
+  created_at?: string;
+  public_metrics?: TweetMetrics;
+  author_metrics?: { followers_count?: number };
+};
+
+export type SearchWithRepliesItem = {
+  tweet: { id: string; text: string };
+  humorous: string;
+  insightful: string;
+};
