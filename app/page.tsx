@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { Sparkles } from "lucide-react";
 
 const Page = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-6 bg-background text-foreground">
-      <h1 className="text-h2 font-semibold tracking-tight">
+      <h1 className="text-h2 font-semibold tracking-tight flex items-center gap-2">
+        <Sparkles className="w-8 h-8 text-primary shrink-0" aria-hidden />
         Social X Automation Bot
       </h1>
 
