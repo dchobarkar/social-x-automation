@@ -1,5 +1,8 @@
 ---
 description: Project documentation and design guides to consult
+globs: |
+  docs/**/*.md
+  docs/**/*.mdx
 alwaysApply: false
 ---
 

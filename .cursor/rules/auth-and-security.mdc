@@ -1,5 +1,11 @@
 ---
 description: OAuth, token management, and security practices for X/OpenAI integrations
+globs: |
+  app/api/**/*.ts
+  app/auth/**/*.tsx
+  lib/**/*.ts
+  integrations/**/*.ts
+  services/**/*.ts
 alwaysApply: false
 ---
 
