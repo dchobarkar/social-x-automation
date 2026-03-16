@@ -1,41 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getMe, getHomeTimeline, type XTweetWithMetrics } from "@/lib/twitter";
-
-export type FeedFilters = {
-  maxResults?: number;
-  startTime?: string;
-  endTime?: string;
-  excludeReplies?: boolean;
-  excludeRetweets?: boolean;
-  maxReplyCount?: number;
-  minAuthorFollowers?: number;
-};
-
-const getFeed = async (filters: FeedFilters): Promise<XTweetWithMetrics[]> => {
-  const me = await getMe();
-  const tweets = await getHomeTimeline(me.id, {
-    maxResults: filters.maxResults ?? 20,
-    startTime: filters.startTime,
-    endTime: filters.endTime,
-    excludeReplies: filters.excludeReplies,
-    excludeRetweets: filters.excludeRetweets,
-  });
-
-  let result = tweets;
-  if (typeof filters.maxReplyCount === "number") {
-    result = result.filter(
-      (t) => (t.public_metrics?.reply_count ?? 0) <= filters.maxReplyCount!,
-    );
-  }
-  if (typeof filters.minAuthorFollowers === "number") {
-    result = result.filter(
-      (t) =>
-        (t.author_metrics?.followers_count ?? 0) >= filters.minAuthorFollowers!,
-    );
-  }
-  return result;
-};
+import { getHomeFeed, type FeedFilters } from "@/services/x/feedService";
 
 export const GET = async (request: NextRequest) => {
   try {
@@ -80,7 +45,7 @@ export const GET = async (request: NextRequest) => {
     if (Number.isNaN(filters.minAuthorFollowers as number))
       filters.minAuthorFollowers = undefined;
 
-    const items = await getFeed(filters);
+    const items = await getHomeFeed(filters);
     return NextResponse.json({ items });
   } catch (err) {
     const message =
@@ -117,7 +82,7 @@ export const POST = async (request: NextRequest) => {
         filters.startTime = d.toISOString();
       }
     }
-    const items = await getFeed(filters);
+    const items = await getHomeFeed(filters);
     return NextResponse.json({ items });
   } catch (err) {
     const message =

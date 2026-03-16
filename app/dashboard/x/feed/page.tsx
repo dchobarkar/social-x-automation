@@ -17,13 +17,10 @@ import {
 import { ROUTES } from "@/constants/routes";
 import { useTweetList } from "@/hooks/useTweetList";
 import { mapFeedApiItemsToStored } from "@/utils/tweet";
+import { postJson, safeJson } from "@/utils/http";
 
 const persistFeed = async (items: StoredTweet[]): Promise<void> => {
-  await fetch(ROUTES.API_X_FEED_SAVED, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ items }),
-  }).catch(() => {});
+  await postJson(ROUTES.API_X_FEED_SAVED, { items }).catch(() => {});
 };
 
 const FeedPage = () => {
@@ -56,7 +53,7 @@ const FeedPage = () => {
   useEffect(() => {
     let cancelled = false;
     fetch(ROUTES.API_X_FEED_SAVED)
-      .then((res) => res.json())
+      .then((res) => safeJson<{ items?: StoredTweet[] }>(res, {}))
       .then((data: { items?: StoredTweet[] }) => {
         if (cancelled || !Array.isArray(data.items)) return;
         if (data.items.length > 0) setItems(data.items);
@@ -87,12 +84,10 @@ const FeedPage = () => {
         const n = Number.parseInt(feedMinAuthorFollowers, 10);
         if (Number.isFinite(n) && n >= 0) body.minAuthorFollowers = n;
       }
-      const res = await fetch(ROUTES.API_X_FEED, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
+      const { res, data } = await postJson<{ items?: FeedApiItem[]; error?: string }>(
+        ROUTES.API_X_FEED,
+        body,
+      );
       if (!res.ok) throw new Error(data.error ?? "Load feed failed");
       const raw = (data.items ?? []) as FeedApiItem[];
       const mapped = mapFeedApiItemsToStored(raw);

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { generateReplyVariants } from "@/lib/openai";
+import { generateReplyVariants } from "@/integrations/openai/replyVariants";
 
 export const POST = async (request: NextRequest) => {
   try {

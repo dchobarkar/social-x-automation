@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import { getOpenAI, OPENAI_DEFAULT_MODEL } from "./client";
 
 export type ReplyVariants = {
   humorous: string;
@@ -8,17 +8,10 @@ export type ReplyVariants = {
 const SYSTEM_PROMPT =
   "You are a thoughtful developer engaging on X. Write concise, intelligent, non-spammy replies.";
 
-const getOpenAI = (): OpenAI => {
-  const key = process.env.OPENAI_API_KEY;
-  if (!key) throw new Error("OPENAI_API_KEY is missing; set it in .env.local");
-  return new OpenAI({ apiKey: key });
-};
-
-// Generate a single AI reply suggestion for a given tweet text.
 export const generateReply = async (tweetText: string): Promise<string> => {
   const openai = getOpenAI();
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: OPENAI_DEFAULT_MODEL,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: tweetText },
@@ -31,13 +24,12 @@ export const generateReply = async (tweetText: string): Promise<string> => {
   return content;
 };
 
-// Generate two variants (humorous + insightful) for a tweet.
 export const generateReplyVariants = async (
   tweetText: string,
 ): Promise<ReplyVariants> => {
   const openai = getOpenAI();
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: OPENAI_DEFAULT_MODEL,
     response_format: { type: "json_object" },
     messages: [
       {
@@ -74,3 +66,4 @@ export const generateReplyVariants = async (
     throw new Error("OpenAI variants missing humorous or insightful reply");
   return { humorous, insightful };
 };
+

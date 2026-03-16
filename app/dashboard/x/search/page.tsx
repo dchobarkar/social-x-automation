@@ -16,6 +16,7 @@ import {
 import { ROUTES } from "@/constants/routes";
 import { useTweetList } from "@/hooks/useTweetList";
 import { mapSearchWithRepliesToStored } from "@/utils/tweet";
+import { postJson, safeJson } from "@/utils/http";
 
 const SearchPage = () => {
   const {
@@ -41,7 +42,7 @@ const SearchPage = () => {
   useEffect(() => {
     let cancelled = false;
     fetch(ROUTES.API_X_SEARCH_SAVED)
-      .then((res) => res.json())
+      .then((res) => safeJson<{ items?: StoredTweet[] }>(res, {}))
       .then((data: { items?: StoredTweet[] }) => {
         if (cancelled || !Array.isArray(data.items)) return;
         if (data.items.length > 0) setItems(data.items);
@@ -59,24 +60,18 @@ const SearchPage = () => {
     }
     setLoadingSearch(true);
     try {
-      const res = await fetch(ROUTES.API_X_SEARCH_WITH_REPLIES, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: query.trim(),
-          maxResults: Math.min(Math.max(maxResults, 1), SEARCH_MAX_RESULTS_MAX),
-        }),
+      const { res, data } = await postJson<{
+        items?: SearchWithRepliesItem[];
+        error?: string;
+      }>(ROUTES.API_X_SEARCH_WITH_REPLIES, {
+        query: query.trim(),
+        maxResults: Math.min(Math.max(maxResults, 1), SEARCH_MAX_RESULTS_MAX),
       });
-      const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Search failed");
       const raw = (data.items ?? []) as SearchWithRepliesItem[];
       const mapped = mapSearchWithRepliesToStored(raw);
       setItems(mapped);
-      await fetch(ROUTES.API_X_SEARCH_SAVED, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: mapped }),
-      }).catch(() => {});
+      await postJson(ROUTES.API_X_SEARCH_SAVED, { items: mapped }).catch(() => {});
       if (mapped.length === 0) {
         showMessage("success", "No tweets found for that query.");
       } else {

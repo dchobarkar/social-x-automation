@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import type { StoredTweet, VariantChoice } from "@/types/tweet";
 import type { FlashMessage } from "@/types/ui";
 import { ROUTES } from "@/constants/routes";
+import { postJson } from "@/utils/http";
 
 type SaveEndpoint =
   | typeof ROUTES.API_X_FEED_SAVED
@@ -14,11 +15,7 @@ const persistItems = async (
   endpoint: string,
   items: StoredTweet[],
 ): Promise<void> => {
-  await fetch(endpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ items }),
-  }).catch(() => {});
+  await postJson(endpoint, { items }).catch(() => {});
 };
 
 export const useTweetList = (saveEndpoint: SaveEndpoint) => {
@@ -84,12 +81,11 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
       setLoadingReplyForId(item.id);
       setMessage(null);
       try {
-        const res = await fetch(ROUTES.API_X_GENERATE_VARIANTS, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tweetText: item.text }),
-        });
-        const data = await res.json().catch(() => ({}));
+        const { res, data } = await postJson<{
+          humorous?: string;
+          insightful?: string;
+          error?: string;
+        }>(ROUTES.API_X_GENERATE_VARIANTS, { tweetText: item.text });
         if (!res.ok) {
           const msg =
             typeof data?.error === "string" ? data.error : "Generate failed";
@@ -132,12 +128,10 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
       setPostingForId(id);
       setMessage(null);
       try {
-        const res = await fetch(ROUTES.API_X_REPLY, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tweetId: id, text: chosenText.trim() }),
-        });
-        const data = await res.json();
+        const { res, data } = await postJson<{ error?: string }>(
+          ROUTES.API_X_REPLY,
+          { tweetId: id, text: chosenText.trim() },
+        );
         if (!res.ok) throw new Error(data.error ?? "Post failed");
         showMessage("success", "Reply posted successfully.");
         setReplyingToId(null);

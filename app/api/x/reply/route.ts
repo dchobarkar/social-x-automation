@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { postReply } from "@/lib/twitter";
+import { replyToTweet } from "@/services/x/replyService";
 
 export const POST = async (request: NextRequest) => {
   try {
@@ -21,11 +21,8 @@ export const POST = async (request: NextRequest) => {
       );
     }
 
-    const result = await postReply(text.trim(), tweetId.trim());
-    return NextResponse.json({
-      success: true,
-      tweetId: result.data?.id,
-    });
+    const result = await replyToTweet(text.trim(), tweetId.trim());
+    return NextResponse.json({ success: true, tweetId: result.tweetId });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Post reply failed";
     console.error("[reply]", err);
