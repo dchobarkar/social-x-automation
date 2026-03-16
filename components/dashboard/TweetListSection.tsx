@@ -41,8 +41,8 @@ const TweetListSection = ({
 
   return (
     <Card title={title} className={className}>
-      <p className="text-sm text-muted mb-4">{description}</p>
-      <div className="divide-y divide-border">
+      <p className="text-sm text-muted mb-5">{description}</p>
+      <div className="space-y-4">
         {items.map((item) => (
           <TweetCard
             key={item.id}

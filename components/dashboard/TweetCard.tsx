@@ -1,13 +1,24 @@
 "use client";
 
-import { Reply, Trash2, ExternalLink } from "lucide-react";
+import { useState } from "react";
+import {
+  Reply,
+  Trash2,
+  ExternalLink,
+  MessageCircle,
+  Heart,
+  Repeat2,
+} from "lucide-react";
 
 import type { StoredTweet, VariantChoice } from "@/types/tweet";
 import Button from "@/components/ui/Button";
 import Textarea from "@/components/form/Textarea";
 import { formatRelativeTime } from "@/utils/date";
 import { formatFollowers } from "@/utils/format";
-import { buildTwitterReplyIntent } from "@/constants/dashboard";
+import {
+  buildTwitterReplyIntent,
+  buildTweetViewUrl,
+} from "@/constants/dashboard";
 import {
   REPLY_VARIANT_HUMOROUS,
   REPLY_VARIANT_INSIGHTFUL,
@@ -15,6 +26,8 @@ import {
   REPLY_PLACEHOLDER_INSIGHTFUL,
 } from "@/constants/dashboard";
 import { cn } from "@/utils/cn";
+
+const POST_COLLAPSE_LENGTH = 200;
 
 export type TweetCardProps = {
   item: StoredTweet;
@@ -43,6 +56,7 @@ const TweetCard = ({
   onInsightfulChange,
   onPostReply,
 }: TweetCardProps) => {
+  const [expanded, setExpanded] = useState(false);
   const displayName = item.author_name ?? item.author_username ?? "Unknown";
   const initial = displayName.charAt(0).toUpperCase();
   const timeStr = formatRelativeTime(item.created_at);
@@ -53,9 +67,12 @@ const TweetCard = ({
   const canPost =
     (item.selected === "humorous" && (item.humorous ?? "").trim()) ||
     (item.selected === "insightful" && (item.insightful ?? "").trim());
+  const isLongPost = (item.text?.length ?? 0) > POST_COLLAPSE_LENGTH;
+  const showCollapsed = isLongPost && !expanded;
+  const viewUrl = buildTweetViewUrl(item.id, item.author_username);
 
   return (
-    <article className="py-4 px-1 -mx-1 rounded-card hover:bg-border/50 transition-colors">
+    <article className="rounded-card border border-border/80 bg-background p-4 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex gap-3">
         <div className="shrink-0">
           {item.author_profile_image_url ? (
@@ -63,11 +80,11 @@ const TweetCard = ({
             <img
               src={item.author_profile_image_url}
               alt=""
-              className="w-12 h-12 rounded-full object-cover bg-border"
+              className="h-11 w-11 rounded-full object-cover ring-1 ring-border/50"
             />
           ) : (
             <div
-              className="w-12 h-12 rounded-full bg-border flex items-center justify-center text-lg font-semibold text-foreground"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-base font-semibold text-primary"
               aria-hidden
             >
               {initial}
@@ -75,72 +92,91 @@ const TweetCard = ({
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0 text-[15px]">
-            <span className="font-semibold text-foreground truncate">
-              {displayName}
-            </span>
+          <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
+            <span className="font-semibold text-foreground">{displayName}</span>
             {item.author_username != null && (
-              <span className="text-muted truncate">
+              <span className="text-sm text-muted">
                 @{item.author_username}
               </span>
             )}
             {timeStr != null && (
-              <>
-                <span className="text-muted">·</span>
-                <span className="text-muted">{timeStr}</span>
-              </>
+              <span className="text-sm text-muted">· {timeStr}</span>
             )}
           </div>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5 text-[13px] text-muted">
-            <span title="Tweet ID">ID: {item.id}</span>
-            {item.author_followers_count != null && (
-              <>
-                <span>·</span>
+          {(item.author_followers_count != null || item.id) && (
+            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted">
+              {item.author_followers_count != null && (
                 <span>
                   {formatFollowers(item.author_followers_count)} followers
                 </span>
-              </>
+              )}
+              <span className="font-mono" title="Tweet ID">
+                {item.id}
+              </span>
+            </div>
+          )}
+          <div className="mt-2">
+            <p
+              className={cn(
+                "text-[15px] text-foreground leading-snug whitespace-pre-wrap break-words",
+                showCollapsed && "line-clamp-4",
+              )}
+            >
+              {item.text}
+            </p>
+            {isLongPost && (
+              <button
+                type="button"
+                onClick={() => setExpanded((e) => !e)}
+                className="mt-0.5 text-sm text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-1 rounded"
+              >
+                {expanded ? "Show less" : "Show more"}
+              </button>
             )}
           </div>
-          <p className="text-[15px] text-foreground whitespace-pre-wrap wrap-break-word mt-0.5 leading-snug">
-            {item.text}
-          </p>
           {item.public_metrics != null &&
             (item.public_metrics.reply_count != null ||
               item.public_metrics.retweet_count != null ||
               item.public_metrics.like_count != null) && (
-              <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-2 text-muted text-[13px]">
+              <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted">
                 {item.public_metrics.reply_count != null && (
-                  <span>
-                    {item.public_metrics.reply_count > 0
-                      ? `${item.public_metrics.reply_count} replies`
-                      : "Reply"}
+                  <span className="inline-flex items-center gap-1">
+                    <MessageCircle className="h-3.5 w-3.5" />
+                    {item.public_metrics.reply_count}
                   </span>
                 )}
                 {item.public_metrics.retweet_count != null && (
-                  <span>
-                    {item.public_metrics.retweet_count > 0
-                      ? `${item.public_metrics.retweet_count} retweets`
-                      : "Retweet"}
+                  <span className="inline-flex items-center gap-1">
+                    <Repeat2 className="h-3.5 w-3.5" />
+                    {item.public_metrics.retweet_count}
                   </span>
                 )}
                 {item.public_metrics.like_count != null && (
-                  <span>
-                    {item.public_metrics.like_count > 0
-                      ? `${item.public_metrics.like_count} likes`
-                      : "Like"}
+                  <span className="inline-flex items-center gap-1">
+                    <Heart className="h-3.5 w-3.5" />
+                    {item.public_metrics.like_count}
                   </span>
                 )}
               </div>
             )}
-          <div className="flex flex-wrap items-center gap-2 mt-3">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              type="button"
+              href={viewUrl}
+              external
+              iconBefore={<ExternalLink className="h-4 w-4 shrink-0" />}
+            >
+              View on X
+            </Button>
             <Button
               variant="ghost"
               size="sm"
               type="button"
               disabled={isLoadingReply}
               onClick={onReplyClick}
-              iconBefore={<Reply className="w-4 h-4 shrink-0" />}
+              iconBefore={<Reply className="h-4 w-4 shrink-0" />}
             >
               Reply
             </Button>
@@ -150,7 +186,7 @@ const TweetCard = ({
               type="button"
               onClick={onDelete}
               className="text-error hover:bg-error/10"
-              iconBefore={<Trash2 className="w-4 h-4 shrink-0" />}
+              iconBefore={<Trash2 className="h-4 w-4 shrink-0" />}
             >
               Delete
             </Button>

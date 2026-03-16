@@ -12,3 +12,14 @@ export const buildTwitterReplyIntent = (
 
   return `${TWITTER_INTENT_BASE}?in_reply_to=${encodeURIComponent(tweetId)}&text=${encodeURIComponent(text)}`;
 };
+
+/** Open the tweet on X (status page). */
+export const buildTweetViewUrl = (
+  tweetId: string,
+  username?: string | null,
+): string => {
+  if (username?.trim()) {
+    return `https://x.com/${username.replace(/^@/, "").trim()}/status/${tweetId}`;
+  }
+  return `https://x.com/i/status/${tweetId}`;
+};
