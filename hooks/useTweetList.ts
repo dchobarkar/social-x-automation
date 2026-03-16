@@ -6,17 +6,11 @@ import type { StoredTweet, VariantChoice } from "@/types/tweet";
 import type { FlashMessage } from "@/types/ui";
 import { ROUTES } from "@/constants/routes";
 import { postJson } from "@/utils/http";
+import { persistSavedItems } from "@/utils/savedItems";
 
 type SaveEndpoint =
   | typeof ROUTES.API_X_FEED_SAVED
   | typeof ROUTES.API_X_SEARCH_SAVED;
-
-const persistItems = async (
-  endpoint: string,
-  items: StoredTweet[],
-): Promise<void> => {
-  await postJson(endpoint, { items }).catch(() => {});
-};
 
 export const useTweetList = (saveEndpoint: SaveEndpoint) => {
   const [items, setItems] = useState<StoredTweet[]>([]);
@@ -58,7 +52,7 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
     (id: string) => {
       setItems((prev) => {
         const next = prev.filter((item) => item.id !== id);
-        persistItems(saveEndpoint, next);
+        persistSavedItems(saveEndpoint, next);
         return next;
       });
       setReplyingToId((curr) => (curr === id ? null : curr));
@@ -100,7 +94,7 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
           const next = prev.map((it) =>
             it.id === item.id ? { ...it, ...updatedItem } : it,
           );
-          persistItems(saveEndpoint, next);
+          persistSavedItems(saveEndpoint, next);
           return next;
         });
       } catch (e) {
@@ -137,7 +131,7 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
         setReplyingToId(null);
         const next = items.filter((i) => i.id !== id);
         setItems(next);
-        await persistItems(saveEndpoint, next);
+        await persistSavedItems(saveEndpoint, next);
       } catch (e) {
         showMessage(
           "error",

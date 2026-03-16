@@ -4,9 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
+import AuthPageLayout from "@/components/layout/AuthPageLayout";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 import { ROUTES } from "@/constants/routes";
-import { Home } from "lucide-react";
 
 const Page = () => {
   const router = useRouter();
@@ -36,47 +36,27 @@ const Page = () => {
   };
 
   if (connected === null) {
-    return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-6">
-        <p className="text-muted">Checking authentication…</p>
-      </div>
-    );
+    return <LoadingScreen message="Checking authentication…" />;
   }
 
   if (connected === true) return null;
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <div className="p-6 md:p-8 flex justify-end">
-        <Button
-          variant="ghost"
-          size="sm"
-          href={ROUTES.HOME}
-          iconBefore={<Home className="h-4 w-4" />}
-        >
-          Home
+    <AuthPageLayout
+      title="Connect X (Twitter)"
+      description="Sign in with X (OAuth 2.0) to use the dashboard: load your home feed, search tweets, and post AI-generated replies."
+      homeHref={ROUTES.HOME}
+    >
+      <div className="space-y-4">
+        <p className="text-sm text-muted">
+          You will be redirected to X to authorize this app. After connecting,
+          you can access the X dashboard.
+        </p>
+        <Button onClick={handleConnect} type="button">
+          Connect X Account
         </Button>
       </div>
-
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-lg">
-          <Card
-            title="Connect X (Twitter)"
-            description="Sign in with X (OAuth 2.0) to use the dashboard: load your home feed, search tweets, and post AI-generated replies."
-          >
-            <div className="space-y-4">
-              <p className="text-sm text-muted">
-                You will be redirected to X to authorize this app. After
-                connecting, you can access the X dashboard.
-              </p>
-              <Button onClick={handleConnect} type="button">
-                Connect X Account
-              </Button>
-            </div>
-          </Card>
-        </div>
-      </div>
-    </div>
+    </AuthPageLayout>
   );
 };
 

@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 
 import XSidebar from "@/components/layout/XSidebar";
 import Footer from "@/components/layout/Footer";
+import FlashMessageBar from "@/components/dashboard/FlashMessageBar";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 import { ROUTES } from "@/constants/routes";
+import type { FlashMessage } from "@/types/ui";
 import { cn } from "@/utils/cn";
 
 const Layout = ({
@@ -15,10 +18,7 @@ const Layout = ({
 }>) => {
   const router = useRouter();
   const [allowed, setAllowed] = useState<boolean | null>(null);
-  const [flashMessage, setFlashMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
+  const [flashMessage, setFlashMessage] = useState<FlashMessage | null>(null);
 
   const checkAuth = useCallback(async () => {
     try {
@@ -58,12 +58,7 @@ const Layout = ({
     }
   }, []);
 
-  if (allowed === null)
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted">Loading…</p>
-      </div>
-    );
+  if (allowed === null) return <LoadingScreen />;
 
   if (allowed === false) return null;
 
@@ -77,19 +72,10 @@ const Layout = ({
           "min-h-screen",
         )}
       >
-        {flashMessage && (
-          <div
-            role="alert"
-            className={cn(
-              "mx-4 mt-4 md:mx-6 md:mt-6 rounded-card p-4 text-sm",
-              flashMessage.type === "success"
-                ? "bg-success/10 text-success"
-                : "bg-error/10 text-error",
-            )}
-          >
-            {flashMessage.text}
-          </div>
-        )}
+        <FlashMessageBar
+          message={flashMessage}
+          className="mx-4 mt-4 md:mx-6 md:mt-6 text-sm"
+        />
 
         <div className="flex-1 p-4 md:p-6 lg:p-8">{children}</div>
 

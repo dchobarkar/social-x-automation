@@ -2,14 +2,16 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import type { StoredTweet, FeedApiItem } from "@/types/tweet";
+import type { FeedApiItem } from "@/types/tweet";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import SectionLayout from "@/components/ui/SectionLayout";
+import PageHeader from "@/components/ui/PageHeader";
 import Input from "@/components/form/Input";
 import Checkbox from "@/components/form/Checkbox";
-import TweetCard from "@/components/dashboard/TweetCard";
+import Select from "@/components/form/Select";
 import FlashMessageBar from "@/components/dashboard/FlashMessageBar";
+import TweetListSection from "@/components/dashboard/TweetListSection";
 import {
   FEED_DEFAULT_MAX_RESULTS,
   FEED_LAST_HOURS_OPTIONS,
@@ -17,11 +19,8 @@ import {
 import { ROUTES } from "@/constants/routes";
 import { useTweetList } from "@/hooks/useTweetList";
 import { mapFeedApiItemsToStored } from "@/utils/tweet";
-import { postJson, safeJson } from "@/utils/http";
-
-const persistFeed = async (items: StoredTweet[]): Promise<void> => {
-  await postJson(ROUTES.API_X_FEED_SAVED, { items }).catch(() => {});
-};
+import { postJson } from "@/utils/http";
+import { getSavedItems, persistSavedItems } from "@/utils/savedItems";
 
 const FeedPage = () => {
   const {
@@ -52,13 +51,10 @@ const FeedPage = () => {
 
   useEffect(() => {
     let cancelled = false;
-    fetch(ROUTES.API_X_FEED_SAVED)
-      .then((res) => safeJson<{ items?: StoredTweet[] }>(res, {}))
-      .then((data: { items?: StoredTweet[] }) => {
-        if (cancelled || !Array.isArray(data.items)) return;
-        if (data.items.length > 0) setItems(data.items);
-      })
-      .catch(() => {});
+    getSavedItems(ROUTES.API_X_FEED_SAVED).then((items) => {
+      if (cancelled || items.length === 0) return;
+      setItems(items);
+    });
     return () => {
       cancelled = true;
     };
@@ -92,7 +88,7 @@ const FeedPage = () => {
       const raw = (data.items ?? []) as FeedApiItem[];
       const mapped = mapFeedApiItemsToStored(raw);
       setItems(mapped);
-      await persistFeed(mapped);
+      await persistSavedItems(ROUTES.API_X_FEED_SAVED, mapped);
       if (mapped.length === 0) {
         showMessage("success", "No tweets in your feed for these filters.");
       } else {
@@ -122,36 +118,31 @@ const FeedPage = () => {
 
   return (
     <SectionLayout padding="none" variant="transparent" as="div">
-      <h1 className="text-h2 font-semibold tracking-tight mb-2">Home Feed</h1>
-      <p className="text-muted mb-6">
-        Load your X home timeline. Tweets are stored in data/x/feed.json. Click
-        Reply to generate options with OpenAI.
-      </p>
+      <PageHeader
+        title="Home Feed"
+        description="Load your X home timeline. Tweets are stored in data/x/feed.json. Click Reply to generate options with OpenAI."
+      />
 
       <Card title="Load feed" className="mb-8">
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div>
-              <label className="block text-xs text-muted mb-1">
-                Posted in last
-              </label>
-              <select
-                value={feedLastHours === "" ? "" : String(feedLastHours)}
-                onChange={(e) =>
-                  setFeedLastHours(
-                    e.target.value === "" ? "" : Number(e.target.value),
-                  )
-                }
-                className="w-full rounded-input border border-border bg-background px-3 py-2 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-              >
-                <option value="">All time</option>
-                {FEED_LAST_HOURS_OPTIONS.map((h) => (
-                  <option key={h} value={h}>
-                    {h} hour{h !== 1 ? "s" : ""}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label="Posted in last"
+              value={feedLastHours === "" ? "" : String(feedLastHours)}
+              onChange={(e) =>
+                setFeedLastHours(
+                  e.target.value === "" ? "" : Number(e.target.value),
+                )
+              }
+              name="feedLastHours"
+              options={[
+                { value: "", label: "All time" },
+                ...FEED_LAST_HOURS_OPTIONS.map((h) => ({
+                  value: String(h),
+                  label: `${h} hour${h !== 1 ? "s" : ""}`,
+                })),
+              ]}
+            />
             <Input
               label="Max (1–100)"
               type="number"
@@ -207,38 +198,22 @@ const FeedPage = () => {
         </div>
       </Card>
 
-      {items.length > 0 && (
-        <Card title="Tweets" className="mb-8">
-          <p className="text-sm text-muted mb-4">
-            Click Reply to generate Humorous &amp; Insightful options. Delete
-            removes from list.
-          </p>
-          <div className="divide-y divide-border">
-            {items.map((item) => (
-              <TweetCard
-                key={item.id}
-                item={item}
-                isReplying={replyingToId === item.id}
-                isLoadingReply={loadingReplyForId === item.id}
-                isPosting={postingForId === item.id}
-                onReplyClick={() => handleReplyClick(item)}
-                onCloseReply={() => setReplyingToId(null)}
-                onDelete={() => handleDeleteTweet(item.id)}
-                onSelectionChange={(choice) =>
-                  handleChangeSelection(item.id, choice)
-                }
-                onHumorousChange={(value) =>
-                  updateItem(item.id, { humorous: value })
-                }
-                onInsightfulChange={(value) =>
-                  updateItem(item.id, { insightful: value })
-                }
-                onPostReply={() => handlePostFor(item.id)}
-              />
-            ))}
-          </div>
-        </Card>
-      )}
+      <TweetListSection
+        items={items}
+        title="Tweets"
+        description="Click Reply to generate Humorous &amp; Insightful options. Delete removes from list."
+        loadingReplyForId={loadingReplyForId}
+        replyingToId={replyingToId}
+        postingForId={postingForId}
+        onReplyClick={handleReplyClick}
+        onCloseReply={() => setReplyingToId(null)}
+        onDelete={handleDeleteTweet}
+        onSelectionChange={handleChangeSelection}
+        onHumorousChange={(id, value) => updateItem(id, { humorous: value })}
+        onInsightfulChange={(id, value) => updateItem(id, { insightful: value })}
+        onPostReply={handlePostFor}
+        className="mb-8"
+      />
 
       <FlashMessageBar message={message} />
     </SectionLayout>

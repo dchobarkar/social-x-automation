@@ -1,6 +1,7 @@
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import SectionLayout from "@/components/ui/SectionLayout";
+import PageHeader from "@/components/ui/PageHeader";
 import { ROUTES } from "@/constants/routes";
 
 const Page = () => {
@@ -11,15 +12,11 @@ const Page = () => {
       as="div"
       className="flex-1 flex flex-col items-center justify-center min-h-0"
     >
-      <div className="text-center mb-6">
-        <h1 className="text-h2 font-semibold tracking-tight mb-2">
-          X Dashboard
-        </h1>
-        <p className="text-muted">
-          Manage your X (Twitter) feed, search tweets, and post AI-generated
-          replies.
-        </p>
-      </div>
+      <PageHeader
+        title="X Dashboard"
+        description="Manage your X (Twitter) feed, search tweets, and post AI-generated replies."
+        className="text-center mb-6"
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 w-full max-w-2xl">
         <Card

@@ -6,6 +6,7 @@ import type { StoredTweet, VariantChoice } from "@/types/tweet";
 import Button from "@/components/ui/Button";
 import Textarea from "@/components/form/Textarea";
 import { formatRelativeTime } from "@/utils/date";
+import { formatFollowers } from "@/utils/format";
 import { buildTwitterReplyIntent } from "@/constants/dashboard";
 import {
   REPLY_VARIANT_HUMOROUS,
@@ -14,9 +15,6 @@ import {
   REPLY_PLACEHOLDER_INSIGHTFUL,
 } from "@/constants/dashboard";
 import { cn } from "@/utils/cn";
-
-const formatFollowers = (count: number): string =>
-  count >= 1000 ? `${(count / 1000).toFixed(1)}K` : count.toLocaleString();
 
 export type TweetCardProps = {
   item: StoredTweet;
