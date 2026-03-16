@@ -13,17 +13,17 @@ title: Git Branching & Commit Message Conventions
 - **Main branches**
   - `main`: stable, deployable branch.
 
+### Branch type reference
+
+| Branch prefix | Example                       | When to use                                                    |
+| ------------- | ----------------------------- | -------------------------------------------------------------- |
+| `feature/`    | `feature/x-reply-variants`    | New features or significant enhancements to existing features. |
+| `fix/`        | `fix/openai-timeout-handling` | Bug fixes and behavior corrections.                            |
+| `chore/`      | `chore/tailwind-cleanup`      | Tooling, config, refactors, or non-functional changes.         |
+| `docs/`       | `docs/update-readme`          | Documentation-only work.                                       |
+
 - **Feature / work branches**
-  - Pattern: `type/short-topic`
-  - Common `type` prefixes:
-    - `feature/` – new features or major enhancements.
-    - `fix/` – bug fixes.
-    - `chore/` – tooling, config, refactors that don’t change behavior.
-    - `docs/` – documentation-only changes.
-  - Examples:
-    - `feature/x-reply-variants`
-    - `fix/openai-timeout-handling`
-    - `chore/tailwind-cleanup`
+  - Pattern: `type/short-topic` (see table above for common `type` values).
 
 ### Branching guidelines
 
@@ -44,12 +44,18 @@ title: Git Branching & Commit Message Conventions
     - `docs: document cursor rules structure`
 
 - **Allowed `type` values**
-  - `feat` – new user-visible behavior or capabilities.
-  - `fix` – bug fix or behavior correction.
-  - `chore` – refactors, build, tooling, or non-functional changes.
-  - `docs` – documentation-only.
-  - `refactor` – structural changes without changing behavior.
-  - `test` – adding or modifying tests.
+  - See the table below for a detailed reference.
+
+### Commit type reference
+
+| Type       | Example commit                                 | Description                                                             |
+| ---------- | ---------------------------------------------- | ----------------------------------------------------------------------- |
+| `feat`     | `feat: add openai variant generation endpoint` | New user-visible behavior or capabilities.                              |
+| `fix`      | `fix: prevent duplicate tweet replies`         | Bug fixes or behavior corrections.                                      |
+| `chore`    | `chore: update lint config`                    | Tooling, build, dependency bumps, or non-functional refactors.          |
+| `docs`     | `docs: document cursor rules structure`        | Documentation-only changes (README, docs, comments that clarify usage). |
+| `refactor` | `refactor: simplify token refresh flow`        | Structural code changes without changing external behavior.             |
+| `test`     | `test: add coverage for x feed endpoint`       | Adding or updating automated tests.                                     |
 
 ### Subject line rules
 
