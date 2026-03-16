@@ -1,0 +1,29 @@
+---
+description: UI/UX and brand-consistent design patterns for the dashboard
+globs: |
+  app/**/*.tsx
+  components/**/*.tsx
+alwaysApply: false
+---
+
+# UI, UX, and Brand Consistency
+
+- **Layout & structure**
+  - Use `SectionLayout` for primary sections and pages to maintain consistent padding, max-width, and background behavior.
+  - For dashboard views under `app/dashboard/**`, reuse `XSidebar`, `Footer`, and existing layout patterns in `app/dashboard/x/layout.tsx`.
+
+- **Components**
+  - Prefer shared primitives from `components/ui/**` (`Button`, `Card`, `Modal`, `SectionLayout`) before introducing new bespoke components.
+  - When adding new form elements, follow the patterns in `components/form/**` (props, labeling, focus styles).
+
+- **Visual language**
+  - Use design tokens and semantic classes from `app/globals.css` (e.g. `bg-background`, `text-muted`, `rounded-card`, `rounded-button`).
+  - Keep icon usage consistent with `lucide-react`; size and color icons to match existing components (`w-4 h-4`, `text-primary`, etc.).
+
+- **Interaction & feedback**
+  - Provide clear feedback for async actions (loading states, success/error flash messages as in `FlashMessageBar` and `useTweetList`).
+  - Disable buttons appropriately when an action is in progress or when required data is missing, rather than silently ignoring clicks.
+
+- **Accessibility**
+  - Use semantic elements and accessible attributes: labels for inputs, `aria-hidden` only when appropriate, and visible focus outlines.
+  - Ensure keyboard navigation works across interactive components (buttons, links, modals, and controls within Tweet cards).

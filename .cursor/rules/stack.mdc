@@ -1,0 +1,32 @@
+---
+description: Technology stack and framework-version rules for this project
+alwaysApply: true
+---
+
+# Project Technology Stack
+
+- **Runtime & language**
+  - Node.js (use the version implied by the repo; do not assume older Node features are unavailable).
+  - TypeScript (see `tsconfig.json` for module/target settings).
+
+- **Frameworks & libraries**
+  - Next.js `16.1.6` using **App Router** (`app/**`).
+  - React `19.2.3` and ReactDOM `19.2.3`.
+  - Tailwind CSS `^4` via `@tailwindcss/postcss` and `app/globals.css` (no legacy `tailwind.config.js`-driven v3 patterns unless added later).
+  - `lucide-react` for icons.
+  - `openai` for AI integration.
+  - `twitter-api-v2` plus direct X API HTTP calls.
+
+## Version & API Rules
+
+- Always consult `package.json` before adding code that depends on framework/library features.
+- Generate code compatible with **Next.js 16 App Router** and **React 19** APIs; avoid deprecated or legacy patterns.
+- Prefer official documentation for:
+  - Next.js (routing, layouts, server vs client components, API routes under App Router).
+  - Tailwind v4 (CSS-first, utility classes, modern tokens).
+  - OpenAI Node SDK v4 patterns (`openai.chat.completions.create`).
+
+## TailwindCSS Notes
+
+- Use utility classes and CSS variables defined in `app/globals.css` for colors, spacing, typography, and radii.
+- Avoid adding Tailwind v3-only configuration or plugins unless the project explicitly introduces them.

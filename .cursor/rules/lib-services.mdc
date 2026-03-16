@@ -1,0 +1,29 @@
+---
+description: Service layer conventions for lib/** (Twitter, OpenAI, storage)
+globs: lib/**/*.ts
+alwaysApply: false
+---
+
+# `integrations/**`, `services/**`, and `lib/**`
+
+- **Responsibility (target structure)**
+  - `integrations/**` modules should encapsulate external integrations (X API, OpenAI, future providers) and low-level SDK usage.
+  - `services/**` modules should contain shared business logic and orchestration (`getHomeTimeline`, token refresh flows, higher-level automation flows).
+  - `lib/**` should be reserved for small, framework-agnostic helpers and cross-cutting utilities used by multiple layers.
+  - Expose small, typed functions from `integrations/**` and `services/**` instead of exporting raw SDK clients.
+
+- **Error normalization**
+  - Catch provider-specific errors and throw `Error` objects with clear, user-safe messages (see `postReply` and `getHomeTimeline`).
+  - When an SDK forces `any`, confine it in the module and normalize to project types before returning.
+
+- **Token & state management**
+  - Centralize token reads/writes in dedicated modules (`tokenStore`, `pkceStateStore`, `feedStore`, `searchStore`) rather than scattered file IO.
+  - Keep expiration handling and refresh logic (`getValidAccessToken`, `refreshTokens`) in these modules, not in components or routes.
+
+- **Environment usage**
+  - Validate required env vars on use (e.g. `OPENAI_API_KEY`, `X_CLIENT_ID`, `X_CLIENT_SECRET`) and fail fast with descriptive errors.
+  - Avoid reading env vars in clients; only server-executed `lib/**` code should depend on them.
+
+- **Type definitions**
+  - Define shared types (e.g. `XTweetWithMetrics`, `ReplyVariants`) in `lib/**` or `types/**` and reuse across routes/components.
+  - Keep exported types narrow and documented so API routes and UI can rely on them without re-parsing raw provider responses.

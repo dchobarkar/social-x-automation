@@ -1,0 +1,25 @@
+---
+description: Best practices for integrating OpenAI in this project
+globs: |
+  lib/openai.ts
+  app/api/**/generate-variants*.ts
+alwaysApply: false
+---
+
+# OpenAI Integration Guidelines
+
+- **Client construction**
+  - Use a small helper like `getOpenAI()` to construct the client, reading `OPENAI_API_KEY` from `process.env` and throwing if missing.
+  - Do not construct OpenAI clients in client components; only in server-side code and `lib/**` modules.
+
+- **Models & prompts**
+  - Default to `gpt-4o-mini` (or project-standard model) unless there is a strong reason to change; keep model names centralized in `lib/openai.ts`.
+  - Keep system prompts concise and aligned with the tool’s purpose (non-spammy, helpful replies) and reuse the style of the existing `SYSTEM_PROMPT`.
+
+- **Response handling**
+  - When expecting JSON output, use `response_format: { type: "json_object" }` and parse via `JSON.parse`, with clear errors when parsing fails.
+  - Validate that required fields exist (e.g. `humorous`, `insightful`) before returning; throw descriptive errors otherwise.
+
+- **Error handling**
+  - Do not expose raw OpenAI error objects to the client; normalize them to readable messages in API routes.
+  - For transient issues, surface a generic “generation failed” style message so the UI can show consistent feedback.

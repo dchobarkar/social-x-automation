@@ -1,0 +1,33 @@
+---
+description: Core architecture and layering rules for Social X Automation
+alwaysApply: true
+---
+
+# Core Architecture & Boundaries
+
+- **App Router separation**
+  - Use `app/` only for routing, layouts, and page-level composition.
+  - Keep side-effects and external API calls out of React components; delegate to `app/api/**` routes or `lib/**` utilities.
+
+- **Backend-in-frontend pattern**
+  - Treat `app/api/**` as the backend entry layer; never call X API or OpenAI directly from client components.
+  - API routes should delegate provider-specific logic to a service layer and integration layer instead of inlining HTTP calls.
+
+- **Layering rules (target structure)**
+  - `integrations/**` will own external provider integrations (X API, OpenAI, future platforms) and low-level SDK calls.
+  - `services/**` will own app-level orchestration and business logic, calling into `integrations/**` and shared helpers.
+  - `lib/**` is reserved for small, framework-agnostic utilities and helpers that can be safely shared across layers.
+  - `components/**` and `hooks/**` are UI/client-only and must not import from `app/api/**`, `services/**`, or `integrations/**`, or read process env vars.
+  - `app/api/**` may import from `services/**`, `lib/**`, `types/**`, and `utils/**` but must not import UI components.
+
+- **Token & secret handling**
+  - Access tokens, refresh tokens, and OpenAI keys must only be used on the server (API routes or `lib/**` used by API routes).
+  - Do not expose raw tokens to the client; client components should work with opaque IDs or safe, derived data only.
+
+- **Typing & safety**
+  - Prefer explicit TypeScript types/interfaces for API payloads and responses (`types/**`).
+  - Avoid `any`; if unavoidable (e.g. SDK responses), isolate it in `lib/**` and normalize to strong types before returning.
+
+- **Error handling**
+  - In API routes, return JSON `{ error: string }` with appropriate HTTP status codes; avoid leaking raw provider error payloads.
+  - Keep thrown `Error` messages user-safe and log the detailed provider response server-side only when needed.

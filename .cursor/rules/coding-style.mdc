@@ -1,0 +1,43 @@
+---
+description: Coding style, TypeScript usage, and general implementation guidelines
+alwaysApply: true
+---
+
+# Coding Style Guidelines
+
+Code should be simple, readable, and maintainable, optimized for small personal automation tools.
+
+## General Rules
+
+- Prefer clarity over cleverness; prioritize straightforward control flow.
+- Keep functions small and focused; extract helpers when logic grows.
+- Avoid deeply nested conditionals; return early where it improves readability.
+- Use descriptive variable and function names that reflect intent.
+
+## Function Design
+
+- Prefer:
+  - Single-purpose functions and pure utilities in `utils/**`.
+  - Reusable service functions in `lib/**` with clear inputs/outputs.
+- Avoid:
+  - Large monolithic handlers mixing parsing, business logic, and rendering.
+  - Duplicated logic across API routes and services.
+
+## TypeScript
+
+- Use explicit types for:
+  - Public functions exported from `lib/**`, `hooks/**`, and `types/**`.
+  - API request/response shapes and shared models (`types/tweet.ts`, `types/ui.ts`).
+- Avoid `any` unless required by an external SDK; isolate it and cast to internal types before returning.
+- Prefer type inference for local variables when the intent is clear.
+
+## Error Handling
+
+- Always handle API and network failures; return meaningful, user-safe error messages.
+- In API routes, wrap logic in `try/catch` and return JSON `{ error: string }` with appropriate status codes.
+- Log or preserve provider details server-side when needed, but do not expose raw error payloads to the UI.
+
+## Imports & Dependencies
+
+- Avoid unnecessary dependencies; prefer built-in Node.js and browser APIs when they suffice.
+- Use path aliases (e.g. `@/lib/...`, `@/components/...`) consistently as configured in `tsconfig.json`.

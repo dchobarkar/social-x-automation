@@ -1,0 +1,32 @@
+---
+description: Tailwind CSS and design token usage for this project
+globs: |
+  app/**/*.tsx
+  components/**/*.tsx
+  app/globals.css
+alwaysApply: false
+---
+
+# Tailwind CSS & Theme Conventions
+
+- **Use design tokens from `app/globals.css`**
+  - Prefer semantic classes that map to CSS vars defined in `@theme`:
+    - Colors: `bg-background`, `text-foreground`, `text-muted`, `border-border`, `text-primary`, `text-secondary`, `text-accent`, `text-error`, `text-success`, etc.
+    - Typography: `text-h1`, `text-h2`, `text-h3` for headings instead of ad‑hoc font sizes.
+    - Radius: `rounded-button`, `rounded-card`, `rounded-input` for buttons, cards, and inputs.
+  - Do not hard-code hex colors or radii in components when an equivalent tokenized utility exists.
+
+- **Preferred utility patterns**
+  - Compose layout with Tailwind utilities: `flex`, `grid`, `gap-*`, `items-center`, `justify-between`, `min-h-screen`, etc.
+  - Use spacing utilities consistent with the brand scale (4, 8, 12, 16, 24, 32px) via `p-*`, `m-*`, `gap-*`, and reuse patterns seen in existing components.
+  - For conditional classes, use the `cn()` helper (`utils/cn.ts`) rather than manual string concatenation.
+
+- **Component-level conventions**
+  - Buttons, cards, inputs, and layout sections should use existing primitives:
+    - `Button` (`components/ui/Button.tsx`) already encodes variant + size classes; avoid recreating button styles from scratch.
+    - `Card`, `SectionLayout`, `Modal`, and form controls (`Input`, `Textarea`, `Checkbox`, `Radio`, `Select`) should be preferred over raw `<div>` + utility blocks.
+  - When adding new variants or sizes, extend the centralized maps in those components instead of scattering custom class strings around the codebase.
+
+- **Globals.css edits**
+  - Keep `app/globals.css` focused on design tokens and truly global base styles; avoid per-page/component CSS here.
+  - When introducing new semantic tokens (e.g. additional semantic colors or spacings), add them under `@theme` and then consume via Tailwind utilities rather than custom class names.
