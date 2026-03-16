@@ -1,0 +1,31 @@
+---
+description: OAuth, token management, and security practices for X/OpenAI integrations
+globs: |
+  app/api/**/*.ts
+  app/auth/**/*.tsx
+  lib/**/*.ts
+  integrations/**/*.ts
+  services/**/*.ts
+alwaysApply: false
+---
+
+# Auth & Security Guidelines
+
+- **OAuth & PKCE**
+  - Keep OAuth flows and PKCE helpers in `app/auth/**`, `app/api/auth/**`, and `lib/pkce*.ts`; do not reimplement in random modules.
+  - Use `APP_BASE_URL` and `X_REDIRECT_URI` env vars as documented in `README.md` and prefer `127.0.0.1` over `localhost` for X redirect URLs.
+
+- **Token storage**
+  - Use `lib/tokenStore.ts` (and related stores like `feedStore`, `searchStore`, `pkceStateStore`) for all token and JSON persistence.
+  - Do not read or write raw token files directly in components or routes; always go through the dedicated store modules.
+
+- **Secret handling**
+  - Access secrets only via `process.env` on the server; never send them to the client or log them in responses.
+  - Validate required secrets (e.g. `X_CLIENT_ID`, `X_CLIENT_SECRET`, `OPENAI_API_KEY`, `STATE_SECRET`) and fail fast with clear messages if missing.
+
+- **API usage**
+  - All X API and OpenAI calls must be server-side (API routes or `lib/**` called from API routes); never from client-side React code.
+  - When posting replies or calling AI models, validate inputs (IDs, text length) and handle 4xx/5xx responses gracefully.
+
+- **User safety**
+  - Generated replies should be non-spammy, respectful, and policy-compliant; reuse and extend the `SYSTEM_PROMPT` conventions in `lib/openai.ts` when adding new AI features.

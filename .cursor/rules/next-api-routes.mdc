@@ -1,0 +1,27 @@
+---
+description: Conventions for Next.js App Router API routes (app/api/**)
+globs: app/api/**/*.ts
+alwaysApply: false
+---
+
+# API Route Conventions (`app/api/**`)
+
+- **Handler shape**
+  - Export HTTP handlers as `export const GET = (request: NextRequest) => { ... }` / `POST` / etc; avoid default exports.
+  - Keep handlers thin: parse/validate input, call `lib/**`, shape the JSON response.
+
+- **Input parsing & validation**
+  - For query params, always read via `request.nextUrl.searchParams` and normalize types (numbers, booleans) before use.
+  - For JSON bodies, handle invalid JSON with a guarded `await request.json().catch(() => ({}))` and validate required fields.
+
+- **Business logic location**
+  - Complex logic (e.g. calling X API, OpenAI, token refresh, timeline stitching) should live in `lib/**`, not inline in the route.
+  - API routes should never directly manipulate JSON storage files; route through `lib/tokenStore.ts`, `lib/feedStore.ts`, etc.
+
+- **Error responses**
+  - Wrap handler bodies in `try/catch`; on failure, return `NextResponse.json({ error: message }, { status })`.
+  - Normalize unknown errors using `err instanceof Error ? err.message : "Fallback message"` similar to `app/api/x/feed/route.ts`.
+
+- **Security & environment**
+  - Read secrets only from `process.env` inside server code; never echo them back in responses.
+  - Never trust client-provided IDs blindly when posting replies; validate shape and sanitize where necessary.

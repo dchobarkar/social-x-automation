@@ -1,0 +1,15 @@
+---
+description: Service layer conventions for lib/** (Twitter, OpenAI, storage)
+globs: lib/**/*.ts
+alwaysApply: false
+---
+
+# Service & integration patterns
+
+- **Error normalization**
+  - Catch provider-specific errors and throw `Error` objects with clear, user-safe messages (see `postReply` and `getHomeTimeline`).
+  - When an SDK forces `any`, confine it in the module and normalize to project types before returning.
+
+- **Type definitions**
+  - Define shared types (e.g. `XTweetWithMetrics`, `ReplyVariants`) in `lib/**` or `types/**` and reuse across routes/components.
+  - Keep exported types narrow and documented so API routes and UI can rely on them without re-parsing raw provider responses.

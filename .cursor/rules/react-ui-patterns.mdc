@@ -1,0 +1,29 @@
+---
+description: React UI component patterns for dashboard and shared components
+globs: |
+  app/**/*.tsx
+  components/**/*.tsx
+alwaysApply: false
+---
+
+# React UI Patterns
+
+- **Component style**
+  - Use functional components with explicit `Props` types; prefer named exports for shared primitives, default exports for pages.
+  - Mark interactive client components with `"use client";` at the top; keep server components free of browser-only APIs.
+
+- **Composition**
+  - Reuse existing primitives like `Button`, `Card`, `SectionLayout`, and form controls instead of ad-hoc markup.
+  - Keep page components (`app/**/page.tsx`) focused on layout and composition; push stateful logic into hooks (e.g. `useTweetList`).
+
+- **State & hooks**
+  - Co-locate UI state and side-effects in hooks under `hooks/**` and keep components mostly declarative.
+  - Derive simple values (e.g. formatted timestamps, follower text) inline in components rather than storing them in state.
+
+- **Accessibility & semantics**
+  - Use semantic HTML elements (`<main>`, `<section>`, `<button>`, `<label>`, `aria-*`) consistent with existing components.
+  - When using icon-only or icon-leading buttons, ensure labels remain readable and focus styles are preserved.
+
+- **Styling**
+  - Use Tailwind utility classes and design tokens (`bg-background`, `text-muted`, radius tokens) consistent with `app/globals.css`.
+  - Prefer `cn()` for conditional classes, particularly when toggling disabled/active states.
