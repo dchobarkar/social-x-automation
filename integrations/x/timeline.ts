@@ -3,19 +3,21 @@ import { getTokens } from "@/lib/tokenStore";
 import { getValidAccessToken, refreshTokens } from "./auth";
 import type {
   HomeTimelineOptions,
+  XReferencedTweet,
   XTweetPublicMetrics,
   XTweetWithMetrics,
   XUserPublicMetrics,
 } from "./types";
+import { TIMELINE_TWEET_FIELDS, TIMELINE_USER_FIELDS } from "./types";
 
 const X_API_BASE = "https://api.x.com/2";
 
 /**
  * Get the authenticated user's home timeline (same as X home feed).
  * Uses GET /2/users/:id/timelines/reverse_chronological.
+ * Request params follow docs/instructions.md (tweet.fields, user.fields, exclude)
+ * for reply decisions, AI context, and conversation threading.
  * Optional server-side filters: time range, exclude replies/retweets.
- * Returns tweets with public_metrics and author public_metrics so you can filter
- * client-side by reply_count, author followers, etc.
  */
 export const getHomeTimeline = async (
   userId: string,
@@ -24,9 +26,9 @@ export const getHomeTimeline = async (
   const accessToken = await getValidAccessToken();
   const maxResults = Math.min(Math.max(options.maxResults ?? 20, 1), 100);
   const params = new URLSearchParams({
-    "tweet.fields": "public_metrics,created_at,author_id,text",
+    "tweet.fields": TIMELINE_TWEET_FIELDS,
     expansions: "author_id",
-    "user.fields": "public_metrics,username,name,profile_image_url",
+    "user.fields": TIMELINE_USER_FIELDS,
     max_results: String(maxResults),
   });
   if (options.startTime) params.set("start_time", options.startTime);
@@ -59,6 +61,9 @@ export const getHomeTimeline = async (
       text: string;
       author_id?: string;
       created_at?: string;
+      conversation_id?: string;
+      lang?: string;
+      referenced_tweets?: XReferencedTweet[];
       public_metrics?: XTweetPublicMetrics;
     }>;
     includes?: {
@@ -80,6 +85,9 @@ export const getHomeTimeline = async (
       text: t.text,
       author_id: t.author_id,
       created_at: t.created_at,
+      conversation_id: t.conversation_id,
+      lang: t.lang,
+      referenced_tweets: t.referenced_tweets,
       public_metrics: t.public_metrics,
       author_metrics: author?.public_metrics,
       author_username: author?.username,
@@ -89,4 +97,3 @@ export const getHomeTimeline = async (
   });
   return result;
 };
-

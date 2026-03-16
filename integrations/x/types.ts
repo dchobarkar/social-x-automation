@@ -1,8 +1,17 @@
+/** Referenced tweet (reply, retweet, quote) from X API. */
+export type XReferencedTweet = {
+  type: "replied_to" | "retweeted" | "quoted";
+  id: string;
+};
+
 export type XTweet = {
   id: string;
   text: string;
   author_id?: string;
   created_at?: string;
+  conversation_id?: string;
+  lang?: string;
+  referenced_tweets?: XReferencedTweet[];
 };
 
 export type XUserPublicMetrics = {
@@ -28,6 +37,16 @@ export type XTweetWithMetrics = XTweet & {
   author_profile_image_url?: string;
 };
 
+/**
+ * Request parameters for GET /2/users/:id/timelines/reverse_chronological
+ * per docs/instructions.md (required params for reply decisions, AI context, conversation threading).
+ */
+export const TIMELINE_TWEET_FIELDS =
+  "author_id,created_at,conversation_id,public_metrics,referenced_tweets,lang,text" as const;
+
+export const TIMELINE_USER_FIELDS =
+  "id,username,name,profile_image_url,public_metrics" as const;
+
 export type HomeTimelineOptions = {
   maxResults?: number;
   startTime?: string; // ISO 8601 e.g. 2025-03-05T18:00:00Z
@@ -35,4 +54,3 @@ export type HomeTimelineOptions = {
   excludeReplies?: boolean;
   excludeRetweets?: boolean;
 };
-

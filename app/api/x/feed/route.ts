@@ -25,12 +25,14 @@ export const GET = async (request: NextRequest) => {
       ),
       startTime: startTime ?? searchParams.get("startTime") ?? undefined,
       endTime: searchParams.get("endTime") ?? undefined,
-      excludeReplies:
-        searchParams.get("excludeReplies") === "1" ||
-        searchParams.get("excludeReplies") === "true",
-      excludeRetweets:
-        searchParams.get("excludeRetweets") === "1" ||
-        searchParams.get("excludeRetweets") === "true",
+      excludeReplies: searchParams.has("excludeReplies")
+        ? searchParams.get("excludeReplies") === "1" ||
+          searchParams.get("excludeReplies") === "true"
+        : undefined,
+      excludeRetweets: searchParams.has("excludeRetweets")
+        ? searchParams.get("excludeRetweets") === "1" ||
+          searchParams.get("excludeRetweets") === "true"
+        : undefined,
       maxReplyCount:
         searchParams.get("maxReplyCount") != null
           ? Number.parseInt(searchParams.get("maxReplyCount")!, 10)
@@ -65,8 +67,14 @@ export const POST = async (request: NextRequest) => {
       startTime:
         typeof body.startTime === "string" ? body.startTime : undefined,
       endTime: typeof body.endTime === "string" ? body.endTime : undefined,
-      excludeReplies: Boolean(body.excludeReplies),
-      excludeRetweets: Boolean(body.excludeRetweets),
+      excludeReplies:
+        body.excludeReplies !== undefined
+          ? Boolean(body.excludeReplies)
+          : undefined,
+      excludeRetweets:
+        body.excludeRetweets !== undefined
+          ? Boolean(body.excludeRetweets)
+          : undefined,
       maxReplyCount:
         typeof body.maxReplyCount === "number" ? body.maxReplyCount : undefined,
       minAuthorFollowers:

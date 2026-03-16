@@ -20,8 +20,8 @@ export const getHomeFeed = async (
     maxResults: filters.maxResults ?? 20,
     startTime: filters.startTime,
     endTime: filters.endTime,
-    excludeReplies: filters.excludeReplies,
-    excludeRetweets: filters.excludeRetweets,
+    excludeReplies: filters.excludeReplies ?? true,
+    excludeRetweets: filters.excludeRetweets ?? true,
   });
 
   let result = tweets;

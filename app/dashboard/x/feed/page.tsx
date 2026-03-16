@@ -44,8 +44,8 @@ const FeedPage = () => {
   const [feedMaxResults, setFeedMaxResults] = useState(
     FEED_DEFAULT_MAX_RESULTS,
   );
-  const [feedExcludeReplies, setFeedExcludeReplies] = useState(false);
-  const [feedExcludeRetweets, setFeedExcludeRetweets] = useState(false);
+  const [feedExcludeReplies, setFeedExcludeReplies] = useState(true);
+  const [feedExcludeRetweets, setFeedExcludeRetweets] = useState(true);
   const [feedMaxReplyCount, setFeedMaxReplyCount] = useState("");
   const [feedMinAuthorFollowers, setFeedMinAuthorFollowers] = useState("");
 
@@ -80,10 +80,10 @@ const FeedPage = () => {
         const n = Number.parseInt(feedMinAuthorFollowers, 10);
         if (Number.isFinite(n) && n >= 0) body.minAuthorFollowers = n;
       }
-      const { res, data } = await postJson<{ items?: FeedApiItem[]; error?: string }>(
-        ROUTES.API_X_FEED,
-        body,
-      );
+      const { res, data } = await postJson<{
+        items?: FeedApiItem[];
+        error?: string;
+      }>(ROUTES.API_X_FEED, body);
       if (!res.ok) throw new Error(data.error ?? "Load feed failed");
       const raw = (data.items ?? []) as FeedApiItem[];
       const mapped = mapFeedApiItemsToStored(raw);
@@ -210,7 +210,9 @@ const FeedPage = () => {
         onDelete={handleDeleteTweet}
         onSelectionChange={handleChangeSelection}
         onHumorousChange={(id, value) => updateItem(id, { humorous: value })}
-        onInsightfulChange={(id, value) => updateItem(id, { insightful: value })}
+        onInsightfulChange={(id, value) =>
+          updateItem(id, { insightful: value })
+        }
         onPostReply={handlePostFor}
         className="mb-8"
       />
