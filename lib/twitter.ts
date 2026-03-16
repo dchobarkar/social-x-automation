@@ -172,7 +172,10 @@ export const postReply = async (
         message = parsed.title;
       }
     } catch {
-      message = result.status === 403 ? errText : `X API error: ${result.status} ${errText}`;
+      message =
+        result.status === 403
+          ? errText
+          : `X API error: ${result.status} ${errText}`;
     }
     throw new Error(message);
   }
