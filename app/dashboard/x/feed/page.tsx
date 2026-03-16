@@ -18,7 +18,7 @@ import {
 } from "@/constants/defaults";
 import { ROUTES } from "@/constants/routes";
 import { useTweetList } from "@/hooks/useTweetList";
-import { mapFeedApiItemsToStored } from "@/utils/tweet";
+import { mapFeedApiItemsToStored, mergeFeedWithExisting } from "@/utils/tweet";
 import { postJson } from "@/utils/http";
 import { getSavedItems, persistSavedItems } from "@/utils/savedItems";
 
@@ -87,14 +87,15 @@ const FeedPage = () => {
       if (!res.ok) throw new Error(data.error ?? "Load feed failed");
       const raw = (data.items ?? []) as FeedApiItem[];
       const mapped = mapFeedApiItemsToStored(raw);
-      setItems(mapped);
-      await persistSavedItems(ROUTES.API_X_FEED_SAVED, mapped);
+      const merged = mergeFeedWithExisting(items, mapped);
+      setItems(merged);
+      await persistSavedItems(ROUTES.API_X_FEED_SAVED, merged);
       if (mapped.length === 0) {
-        showMessage("success", "No tweets in your feed for these filters.");
+        showMessage("success", "No new tweets in your feed for these filters.");
       } else {
         showMessage(
           "success",
-          `Loaded ${mapped.length} tweet(s) from your home feed.`,
+          `Added ${mapped.length} tweet(s). Feed now has ${merged.length} total.`,
         );
       }
     } catch (e) {
@@ -106,6 +107,7 @@ const FeedPage = () => {
       setLoadingFeed(false);
     }
   }, [
+    items,
     feedLastHours,
     feedMaxResults,
     feedExcludeReplies,
