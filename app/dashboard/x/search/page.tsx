@@ -8,8 +8,8 @@ import Card from "@/components/ui/Card";
 import SectionLayout from "@/components/ui/SectionLayout";
 import PageHeader from "@/components/ui/PageHeader";
 import Input from "@/components/form/Input";
-import FlashMessageBar from "@/components/dashboard/FlashMessageBar";
-import TweetListSection from "@/components/dashboard/TweetListSection";
+import FlashMessageBar from "@/components/ui/FlashMessageBar";
+import TweetListSection from "@/components/dashboard/x/TweetListSection";
 import {
   SEARCH_DEFAULT_MAX_RESULTS,
   SEARCH_MAX_RESULTS_MAX,

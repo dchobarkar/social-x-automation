@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import {
   Reply,
   Trash2,
@@ -14,8 +15,8 @@ import type { StoredTweet, VariantChoice, TweetMedia } from "@/types/x/tweet";
 import Button from "@/components/ui/Button";
 import Textarea from "@/components/form/Textarea";
 import Modal from "@/components/ui/Modal";
-import { formatTime } from "@/utils/format";
-import { formatFollowerNumber } from "@/utils/format";
+import { formatTime, formatFollowerNumber } from "@/utils/format";
+import { cn } from "@/utils/cn";
 import {
   buildTwitterReplyIntent,
   buildTweetViewUrl,
@@ -25,7 +26,6 @@ import {
   REPLY_PLACEHOLDER_INSIGHTFUL,
   POST_COLLAPSE_LENGTH,
 } from "@/constants/x/dashboard";
-import { cn } from "@/utils/cn";
 
 const MediaViewerContent = ({ media }: { media: TweetMedia }) => {
   const imageUrl =
@@ -53,12 +53,13 @@ const MediaViewerContent = ({ media }: { media: TweetMedia }) => {
 
   if (imageUrl) {
     return (
-      <div className="flex max-h-[80vh] w-full items-center justify-center bg-black">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+      <div className="relative flex max-h-[80vh] w-full items-center justify-center bg-black min-h-50">
+        <Image
           src={imageUrl}
           alt=""
-          className="max-h-[80vh] max-w-full object-contain"
+          fill
+          className="object-contain"
+          sizes="(max-width: 1024px) 100vw, 1024px"
         />
       </div>
     );
@@ -115,10 +116,11 @@ const TweetCard = ({
       <div className="flex gap-3">
         <div className="shrink-0">
           {item.author_profile_image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={item.author_profile_image_url}
               alt=""
+              width={44}
+              height={44}
               className="h-11 w-11 rounded-full object-cover ring-1 ring-border/50"
             />
           ) : (
@@ -200,15 +202,16 @@ const TweetCard = ({
                         setViewingMedia(m);
                       }}
                       className={cn(
-                        "relative block aspect-video min-h-30 w-full bg-muted cursor-pointer border-0 p-0 text-left",
+                        "relative block aspect-video min-h-30 w-full bg-muted cursor-pointer border-0 p-0 text-left overflow-hidden",
                         spanFirst && "col-span-2",
                       )}
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                      <Image
                         src={src}
                         alt=""
-                        className="h-full w-full object-cover"
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 100vw, 320px"
                       />
                       {(m.type === "video" || m.type === "animated_gif") && (
                         <span className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-2xl pointer-events-none">
@@ -379,7 +382,8 @@ const TweetCard = ({
                     </Button>
                   </div>
                   <p className="mt-1.5 text-xs text-muted">
-                    Use “Open in X to post” when the API reply is not allowed.
+                    Use &quot;Open in X to post&quot; when the API reply is not
+                    allowed.
                   </p>
                 </>
               )}

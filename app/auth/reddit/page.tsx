@@ -1,24 +1,18 @@
-import Button from "@/components/ui/Button";
-import AuthPageLayout from "@/components/layout/AuthPageLayout";
-import { ROUTES } from "@/constants/routes";
+import Card from "@/components/ui/Card";
 import { PLATFORM_NAMES } from "@/constants/platforms";
 
 const Page = () => {
   return (
-    <AuthPageLayout
+    <Card
       title={PLATFORM_NAMES.REDDIT}
       description="Reddit authentication and dashboard are not available yet."
-      homeHref={ROUTES.HOME}
     >
       <div className="space-y-4">
         <p className="text-sm text-muted">
           We are working on Reddit support. Check back later.
         </p>
-        <Button variant="outline" href={ROUTES.HOME}>
-          Back to Home
-        </Button>
       </div>
-    </AuthPageLayout>
+    </Card>
   );
 };
 

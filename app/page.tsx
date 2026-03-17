@@ -1,10 +1,34 @@
-import Link from "next/link";
 import { Sparkles } from "lucide-react";
 
-import Card from "@/components/ui/Card";
+import PlatformCard from "@/components/ui/PlatformCard";
 import SectionLayout from "@/components/ui/SectionLayout";
 import { ROUTES } from "@/constants/routes";
 import { PLATFORM_NAMES } from "@/constants/platforms";
+
+const PLATFORMS = [
+  {
+    title: PLATFORM_NAMES.X,
+    description:
+      "Authenticate and manage your X (Twitter) feed, search, and AI replies.",
+    href: ROUTES.AUTH_X,
+    cta: "Connect →",
+    muted: false,
+  },
+  {
+    title: PLATFORM_NAMES.LINKEDIN,
+    description: "LinkedIn automation. Coming soon.",
+    href: ROUTES.AUTH_LINKEDIN,
+    cta: "Coming soon →",
+    muted: true,
+  },
+  {
+    title: PLATFORM_NAMES.REDDIT,
+    description: "Reddit automation. Coming soon.",
+    href: ROUTES.AUTH_REDDIT,
+    cta: "Coming soon →",
+    muted: true,
+  },
+] as const;
 
 const Page = () => {
   return (
@@ -26,50 +50,17 @@ const Page = () => {
         </p>
 
         <div className="grid gap-6 w-full sm:grid-cols-3">
-          <Link
-            href={ROUTES.AUTH_X}
-            className="block focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2 rounded-card"
-          >
-            <Card
-              title={PLATFORM_NAMES.X}
-              description="Authenticate and manage your X (Twitter) feed, search, and AI replies."
-              className="h-full transition-colors hover:border-primary/50 hover:shadow-md"
+          {PLATFORMS.map(({ title, description, href, cta, muted }) => (
+            <PlatformCard
+              key={href}
+              title={title}
+              description={description}
+              href={href}
+              muted={muted}
             >
-              <span className="text-sm text-primary font-medium">
-                Connect →
-              </span>
-            </Card>
-          </Link>
-
-          <Link
-            href={ROUTES.AUTH_LINKEDIN}
-            className="block focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2 rounded-card"
-          >
-            <Card
-              title={PLATFORM_NAMES.LINKEDIN}
-              description="LinkedIn automation. Coming soon."
-              className="h-full transition-colors hover:border-primary/50 hover:shadow-md"
-            >
-              <span className="text-sm text-muted font-medium">
-                Coming soon →
-              </span>
-            </Card>
-          </Link>
-
-          <Link
-            href={ROUTES.AUTH_REDDIT}
-            className="block focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2 rounded-card"
-          >
-            <Card
-              title={PLATFORM_NAMES.REDDIT}
-              description="Reddit automation. Coming soon."
-              className="h-full transition-colors hover:border-primary/50 hover:shadow-md"
-            >
-              <span className="text-sm text-muted font-medium">
-                Coming soon →
-              </span>
-            </Card>
-          </Link>
+              {cta}
+            </PlatformCard>
+          ))}
         </div>
       </SectionLayout>
     </div>

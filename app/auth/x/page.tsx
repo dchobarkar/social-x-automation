@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 
 import Button from "@/components/ui/Button";
-import AuthPageLayout from "@/components/layout/AuthPageLayout";
+import Card from "@/components/ui/Card";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import { ROUTES } from "@/constants/routes";
 import { useXConnectedStatus } from "@/hooks/useXConnectedStatus";
@@ -25,10 +25,9 @@ const Page = () => {
   }
 
   return (
-    <AuthPageLayout
+    <Card
       title="Connect X (Twitter)"
       description="Sign in with X (OAuth 2.0) to use the dashboard: load your home feed, search tweets, and post AI-generated replies."
-      homeHref={ROUTES.HOME}
     >
       <div className="space-y-4">
         <p className="text-sm text-muted">
@@ -39,7 +38,7 @@ const Page = () => {
           Connect X Account
         </Button>
       </div>
-    </AuthPageLayout>
+    </Card>
   );
 };
 

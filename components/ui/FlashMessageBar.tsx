@@ -1,5 +1,3 @@
-"use client";
-
 import type { FlashMessage } from "@/types/ui";
 import { cn } from "@/utils/cn";
 

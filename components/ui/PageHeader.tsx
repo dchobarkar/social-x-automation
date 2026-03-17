@@ -8,17 +8,11 @@ export type PageHeaderProps = {
   className?: string;
 };
 
-const PageHeader = ({
-  title,
-  description,
-  className,
-}: PageHeaderProps) => {
+const PageHeader = ({ title, description, className }: PageHeaderProps) => {
   return (
     <header className={cn("mb-6", className)}>
       <h1 className="text-h2 font-semibold tracking-tight mb-2">{title}</h1>
-      {description != null && (
-        <p className="text-muted">{description}</p>
-      )}
+      {description != null && <p className="text-muted">{description}</p>}
     </header>
   );
 };

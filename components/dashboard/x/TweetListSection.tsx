@@ -1,8 +1,6 @@
-"use client";
-
 import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
 import Card from "@/components/ui/Card";
-import TweetCard from "@/components/dashboard/TweetCard";
+import TweetCard from "./TweetCard";
 
 export type TweetListSectionProps = {
   items: StoredTweet[];
@@ -42,6 +40,7 @@ const TweetListSection = ({
   return (
     <Card title={title} className={className}>
       <p className="text-sm text-muted mb-5">{description}</p>
+
       <div className="space-y-4">
         {items.map((item) => (
           <TweetCard

@@ -10,8 +10,8 @@ import PageHeader from "@/components/ui/PageHeader";
 import Input from "@/components/form/Input";
 import Checkbox from "@/components/form/Checkbox";
 import Select from "@/components/form/Select";
-import FlashMessageBar from "@/components/dashboard/FlashMessageBar";
-import TweetListSection from "@/components/dashboard/TweetListSection";
+import FlashMessageBar from "@/components/ui/FlashMessageBar";
+import TweetListSection from "@/components/dashboard/x/TweetListSection";
 import {
   FEED_DEFAULT_MAX_RESULTS,
   FEED_LAST_HOURS_OPTIONS,

@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation";
 
-import XSidebar from "@/components/layout/XSidebar";
+import XSidebar from "@/components/layout/x/XSidebar";
 import Footer from "@/components/layout/Footer";
-import FlashMessageBar from "@/components/dashboard/FlashMessageBar";
+import FlashMessageBar from "@/components/ui/FlashMessageBar";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import { ROUTES } from "@/constants/routes";
 import { useXConnectedStatus } from "@/hooks/useXConnectedStatus";
