@@ -1,5 +1,3 @@
-import { getTokens } from "@/lib/storage/tokenStore";
-
 import type {
   HomeTimelineOptions,
   XReferencedTweet,
@@ -8,6 +6,7 @@ import type {
   XUserPublicMetrics,
 } from "@/types/x/api";
 import type { XMedia } from "@/types/x/api";
+import { getTokens } from "@/lib/storage/tokenStore";
 import {
   TIMELINE_TWEET_FIELDS,
   TIMELINE_USER_FIELDS,
@@ -36,6 +35,7 @@ export const getHomeTimeline = async (
     "media.fields": TIMELINE_MEDIA_FIELDS,
     max_results: String(maxResults),
   });
+
   if (options.startTime) params.set("start_time", options.startTime);
   if (options.endTime) params.set("end_time", options.endTime);
   const exclude: string[] = [];
@@ -47,6 +47,7 @@ export const getHomeTimeline = async (
   let res = await fetch(url, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
+
   if (res.status === 401) {
     await refreshTokens();
     const updated = await getTokens();

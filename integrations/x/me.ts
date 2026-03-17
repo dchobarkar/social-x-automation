@@ -1,5 +1,4 @@
 import { getTokens } from "@/lib/storage/tokenStore";
-
 import { X_API_BASE } from "@/constants/x/api";
 import { getValidAccessToken, refreshTokens } from "./auth";
 
@@ -13,6 +12,7 @@ export const getMe = async (): Promise<{
   let res = await fetch(`${X_API_BASE}/users/me?user.fields=public_metrics`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
+
   if (res.status === 401) {
     await refreshTokens();
     const updated = await getTokens();
@@ -30,6 +30,7 @@ export const getMe = async (): Promise<{
   const json = (await res.json()) as {
     data?: { id: string; username: string; name: string };
   };
+
   if (!json.data?.id) throw new Error("X API users/me returned no user");
   return json.data;
 };

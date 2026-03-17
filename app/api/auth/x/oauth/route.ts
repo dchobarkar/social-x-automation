@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { savePkceState } from "@/lib/storage/pkceStateStore";
-import { X_AUTH_URL, X_OAUTH_SCOPES } from "@/constants/x/api";
+import { buildXAuthorizeUrl } from "@/integrations/x/oauth";
 import {
   generateState,
   generateCodeVerifier,
@@ -26,16 +26,11 @@ export async function GET() {
 
   await savePkceState(state, code_verifier);
 
-  const params = new URLSearchParams({
-    response_type: "code",
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    scope: X_OAUTH_SCOPES,
+  const url = buildXAuthorizeUrl({
+    clientId,
+    redirectUri,
     state,
-    code_challenge,
-    code_challenge_method: "S256",
+    codeChallenge: code_challenge,
   });
-
-  const url = `${X_AUTH_URL}?${params.toString()}`;
   return NextResponse.redirect(url);
 }

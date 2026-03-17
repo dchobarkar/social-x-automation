@@ -1,11 +1,8 @@
 import { getTokens } from "@/lib/storage/tokenStore";
-
 import { X_API_BASE } from "@/constants/x/api";
 import { getValidAccessToken, refreshTokens } from "./auth";
 
-/**
- * Post a reply to a tweet. On 401, refreshes the token and retries once.
- */
+// Post a reply to a tweet. On 401, refreshes the token and retries once.
 export const postReply = async (
   text: string,
   tweetId: string,
