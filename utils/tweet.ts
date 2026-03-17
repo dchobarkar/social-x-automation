@@ -3,7 +3,7 @@ import type {
   FeedApiItem,
   SearchWithRepliesItem,
   VariantChoice,
-} from "@/types/tweet";
+} from "@/types/x/tweet";
 
 /**
  * Merge newly fetched feed items with existing stored items.
@@ -16,9 +16,9 @@ export const mergeFeedWithExisting = (
 ): StoredTweet[] => {
   const newIds = new Set(newItems.map((t) => t.id));
   const existingById = new Map(existing.map((t) => [t.id, t]));
-  for (const t of newItems) {
+  for (const t of newItems)
     if (!existingById.has(t.id)) existingById.set(t.id, t);
-  }
+
   const onlyExisting = existing.filter((t) => !newIds.has(t.id));
   const merged = [...newItems, ...onlyExisting];
   return merged;

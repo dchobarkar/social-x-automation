@@ -1,3 +1,8 @@
+/**
+ * X (Twitter) API types and timeline constants.
+ * Used by integrations/x for API calls.
+ */
+
 /** Referenced tweet (reply, retweet, quote) from X API. */
 export type XReferencedTweet = {
   type: "replied_to" | "retweeted" | "quoted";
@@ -47,10 +52,16 @@ export type XTweetWithMetrics = XTweet & {
   media?: XMedia[];
 };
 
-/**
- * Request parameters for GET /2/users/:id/timelines/reverse_chronological
- * per docs/instructions.md (required params for reply decisions, AI context, conversation threading).
- */
+// Request parameters for GET /2/users/:id/timelines/reverse_chronological.
+export type HomeTimelineOptions = {
+  maxResults?: number;
+  startTime?: string; // ISO 8601 e.g. 2025-03-05T18:00:00Z
+  endTime?: string;
+  excludeReplies?: boolean;
+  excludeRetweets?: boolean;
+};
+
+// Timeline request field sets (for X API query params).
 export const TIMELINE_TWEET_FIELDS =
   "author_id,created_at,conversation_id,public_metrics,referenced_tweets,lang,text,attachments" as const;
 
@@ -59,11 +70,3 @@ export const TIMELINE_USER_FIELDS =
 
 export const TIMELINE_MEDIA_FIELDS =
   "url,preview_image_url,type,width,height" as const;
-
-export type HomeTimelineOptions = {
-  maxResults?: number;
-  startTime?: string; // ISO 8601 e.g. 2025-03-05T18:00:00Z
-  endTime?: string;
-  excludeReplies?: boolean;
-  excludeRetweets?: boolean;
-};

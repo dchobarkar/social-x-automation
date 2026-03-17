@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import type { FeedApiItem } from "@/types/tweet";
+import type { FeedApiItem } from "@/types/x/tweet";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import SectionLayout from "@/components/ui/SectionLayout";

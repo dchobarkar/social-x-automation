@@ -1,18 +1,14 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 
+import type { StoredTokens } from "@/types/auth";
+
 const DATA_DIR = path.join(process.cwd(), "data");
 const FILE_PATH = path.join(DATA_DIR, "tokens.json");
 
 type TokenUpdate = Partial<Omit<StoredTokens, "expires_at">> & {
   expires_at?: number;
   expires_in?: number; // seconds from API
-};
-
-export type StoredTokens = {
-  access_token: string;
-  refresh_token: string;
-  expires_at: number; // Unix ms
 };
 
 const ensureDataDir = async (): Promise<void> => {

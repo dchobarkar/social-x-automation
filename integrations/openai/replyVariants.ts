@@ -1,9 +1,5 @@
+import type { ReplyVariants } from "@/types/ai";
 import { getOpenAI, OPENAI_DEFAULT_MODEL } from "./client";
-
-export type ReplyVariants = {
-  humorous: string;
-  insightful: string;
-};
 
 const SYSTEM_PROMPT =
   "You are a thoughtful developer engaging on X. Write concise, intelligent, non-spammy replies.";
@@ -66,4 +62,3 @@ export const generateReplyVariants = async (
     throw new Error("OpenAI variants missing humorous or insightful reply");
   return { humorous, insightful };
 };
-

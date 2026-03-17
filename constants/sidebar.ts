@@ -1,7 +1,6 @@
+import type { XNavIconKey } from "@/types/x/nav";
 import { ROUTES } from "./routes";
 import { PLATFORM_NAMES, PLATFORM_AUTH_ROUTES } from "./platforms";
-
-export type XNavIconKey = "dashboard" | "feed" | "search";
 
 export const X_NAV_LINKS = [
   {

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import type { SearchWithRepliesItem } from "@/types/tweet";
+import type { SearchWithRepliesItem } from "@/types/x/tweet";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import SectionLayout from "@/components/ui/SectionLayout";
@@ -144,7 +144,9 @@ const SearchPage = () => {
         onDelete={handleDeleteTweet}
         onSelectionChange={handleChangeSelection}
         onHumorousChange={(id, value) => updateItem(id, { humorous: value })}
-        onInsightfulChange={(id, value) => updateItem(id, { insightful: value })}
+        onInsightfulChange={(id, value) =>
+          updateItem(id, { insightful: value })
+        }
         onPostReply={handlePostFor}
         className="mb-8"
       />

@@ -1,19 +1,19 @@
 import { getTokens } from "@/lib/tokenStore";
 
-import { getValidAccessToken, refreshTokens } from "./auth";
 import type {
   HomeTimelineOptions,
   XReferencedTweet,
   XTweetPublicMetrics,
   XTweetWithMetrics,
   XUserPublicMetrics,
-} from "./types";
-import type { XMedia } from "./types";
+} from "@/types/x/api";
+import type { XMedia } from "@/types/x/api";
 import {
   TIMELINE_TWEET_FIELDS,
   TIMELINE_USER_FIELDS,
   TIMELINE_MEDIA_FIELDS,
-} from "./types";
+} from "@/types/x/api";
+import { getValidAccessToken, refreshTokens } from "./auth";
 
 const X_API_BASE = "https://api.x.com/2";
 
@@ -107,10 +107,9 @@ export const getHomeTimeline = async (
   );
   const result: XTweetWithMetrics[] = tweets.map((t) => {
     const author = t.author_id ? usersById.get(t.author_id) : undefined;
-    const media =
-      t.attachments?.media_keys?.map((k) => mediaByKey.get(k)).filter(Boolean) as
-        | XMedia[]
-        | undefined;
+    const media = t.attachments?.media_keys
+      ?.map((k) => mediaByKey.get(k))
+      .filter(Boolean) as XMedia[] | undefined;
     return {
       id: t.id,
       text: t.text,

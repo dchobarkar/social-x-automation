@@ -1,7 +1,7 @@
 import { TwitterApi } from "twitter-api-v2";
 
+import type { XTweet } from "@/types/x/api";
 import { getValidAccessToken } from "./auth";
-import type { XTweet } from "./types";
 
 const getTwitterClient = async (): Promise<TwitterApi> => {
   const accessToken = await getValidAccessToken();
@@ -34,4 +34,3 @@ export const searchTweetsByKeyword = async (
   }));
   return tweets;
 };
-

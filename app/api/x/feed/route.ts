@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getHomeFeed, type FeedFilters } from "@/services/x/feedService";
+import type { FeedFilters } from "@/types/x/feed";
+import { getHomeFeed } from "@/services/x/feedService";
 
 export const GET = async (request: NextRequest) => {
   try {

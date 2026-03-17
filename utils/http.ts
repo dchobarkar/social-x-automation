@@ -1,9 +1,6 @@
-export type JsonRecord = Record<string, unknown>;
+import type { JsonRecord } from "@/types/http";
 
-export const safeJson = async <T>(
-  res: Response,
-  fallback: T,
-): Promise<T> => {
+export const safeJson = async <T>(res: Response, fallback: T): Promise<T> => {
   try {
     return (await res.json()) as T;
   } catch {
@@ -25,4 +22,3 @@ export const postJson = async <TResponse>(
   const data = await safeJson<TResponse>(res, {} as TResponse);
   return { res, data };
 };
-

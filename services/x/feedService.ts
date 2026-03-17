@@ -1,16 +1,7 @@
+import type { FeedFilters } from "@/types/x/feed";
+import type { XTweetWithMetrics } from "@/types/x/api";
 import { getMe } from "@/integrations/x/me";
 import { getHomeTimeline } from "@/integrations/x/timeline";
-import type { XTweetWithMetrics } from "@/integrations/x/types";
-
-export type FeedFilters = {
-  maxResults?: number;
-  startTime?: string;
-  endTime?: string;
-  excludeReplies?: boolean;
-  excludeRetweets?: boolean;
-  maxReplyCount?: number;
-  minAuthorFollowers?: number;
-};
 
 export const getHomeFeed = async (
   filters: FeedFilters,

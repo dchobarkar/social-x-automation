@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 
-import type { StoredTweet, VariantChoice } from "@/types/tweet";
+import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
 import type { FlashMessage } from "@/types/ui";
 import { ROUTES } from "@/constants/routes";
 import { postJson } from "@/utils/http";

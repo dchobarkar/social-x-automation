@@ -10,12 +10,12 @@ import {
   Repeat2,
 } from "lucide-react";
 
-import type { StoredTweet, VariantChoice, TweetMedia } from "@/types/tweet";
+import type { StoredTweet, VariantChoice, TweetMedia } from "@/types/x/tweet";
 import Button from "@/components/ui/Button";
 import Textarea from "@/components/form/Textarea";
 import Modal from "@/components/ui/Modal";
-import { formatRelativeTime } from "@/utils/date";
-import { formatFollowers } from "@/utils/format";
+import { formatTime } from "@/utils/format";
+import { formatFollowerNumber } from "@/utils/format";
 import {
   buildTwitterReplyIntent,
   buildTweetViewUrl,
@@ -34,9 +34,8 @@ const MediaViewerContent = ({ media }: { media: TweetMedia }) => {
   const imageUrl =
     media.type === "photo" && media.url
       ? media.url
-      : media.preview_image_url ?? media.url;
-  const isVideoOrGif =
-    media.type === "video" || media.type === "animated_gif";
+      : (media.preview_image_url ?? media.url);
+  const isVideoOrGif = media.type === "video" || media.type === "animated_gif";
   const videoUrl = media.url;
 
   if (isVideoOrGif && videoUrl) {
@@ -102,7 +101,7 @@ const TweetCard = ({
   const [viewingMedia, setViewingMedia] = useState<TweetMedia | null>(null);
   const displayName = item.author_name ?? item.author_username ?? "Unknown";
   const initial = displayName.charAt(0).toUpperCase();
-  const timeStr = formatRelativeTime(item.created_at);
+  const timeStr = formatTime(item.created_at);
   const chosenText =
     item.selected === "humorous"
       ? (item.humorous ?? "").trim()
@@ -150,7 +149,7 @@ const TweetCard = ({
             <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted">
               {item.author_followers_count != null && (
                 <span>
-                  {formatFollowers(item.author_followers_count)} followers
+                  {formatFollowerNumber(item.author_followers_count)} followers
                 </span>
               )}
               <span className="font-mono" title="Tweet ID">
@@ -161,7 +160,7 @@ const TweetCard = ({
           <div className="mt-2">
             <p
               className={cn(
-                "text-[15px] text-foreground leading-snug whitespace-pre-wrap break-words",
+                "text-[15px] text-foreground leading-snug whitespace-pre-wrap wrap-break-word",
                 showCollapsed && "line-clamp-4",
               )}
             >
@@ -204,7 +203,7 @@ const TweetCard = ({
                         setViewingMedia(m);
                       }}
                       className={cn(
-                        "relative block aspect-video min-h-[120px] w-full bg-muted cursor-pointer border-0 p-0 text-left",
+                        "relative block aspect-video min-h-30 w-full bg-muted cursor-pointer border-0 p-0 text-left",
                         spanFirst && "col-span-2",
                       )}
                     >
@@ -217,7 +216,7 @@ const TweetCard = ({
                       {(m.type === "video" || m.type === "animated_gif") && (
                         <span className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-2xl pointer-events-none">
                           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-foreground">
-                            <span className="ml-0.5 h-0 w-0 border-y-8 border-l-[12px] border-y-transparent border-l-current" />
+                            <span className="ml-0.5 h-0 w-0 border-y-8 border-l-12 border-y-transparent border-l-current" />
                           </span>
                         </span>
                       )}
@@ -229,7 +228,7 @@ const TweetCard = ({
                 open={viewingMedia != null}
                 onClose={() => setViewingMedia(null)}
                 variant="centered"
-                className="!p-0 !pt-10 max-w-4xl w-full max-h-[90vh] overflow-hidden"
+                className="p-0! pt-10! max-w-4xl w-full max-h-[90vh] overflow-hidden"
                 ariaLabel="View media"
               >
                 {viewingMedia != null && (

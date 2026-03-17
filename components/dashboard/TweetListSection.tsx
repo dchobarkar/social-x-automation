@@ -1,6 +1,6 @@
 "use client";
 
-import type { StoredTweet, VariantChoice } from "@/types/tweet";
+import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
 import Card from "@/components/ui/Card";
 import TweetCard from "@/components/dashboard/TweetCard";
 

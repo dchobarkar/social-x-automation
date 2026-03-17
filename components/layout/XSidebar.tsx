@@ -5,11 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, LayoutDashboard, Rss, Search } from "lucide-react";
 
 import Button from "@/components/ui/Button";
-import {
-  X_NAV_LINKS,
-  X_SWITCH_PLATFORMS,
-  type XNavIconKey,
-} from "@/constants/sidebar";
+import { X_NAV_LINKS, X_SWITCH_PLATFORMS } from "@/constants/sidebar";
+import type { XNavIconKey } from "@/types/x/nav";
 import { cn } from "@/utils/cn";
 
 const NAV_ICONS: Record<

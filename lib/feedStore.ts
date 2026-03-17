@@ -1,7 +1,7 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 
-import type { StoredTweet } from "@/types/tweet";
+import type { StoredTweet } from "@/types/x/tweet";
 
 const DATA_X_DIR = path.join(process.cwd(), "data", "x");
 const FEED_FILE_PATH = path.join(DATA_X_DIR, "feed.json");
