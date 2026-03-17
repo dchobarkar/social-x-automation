@@ -10,9 +10,10 @@ import {
   Repeat2,
 } from "lucide-react";
 
-import type { StoredTweet, VariantChoice } from "@/types/tweet";
+import type { StoredTweet, VariantChoice, TweetMedia } from "@/types/tweet";
 import Button from "@/components/ui/Button";
 import Textarea from "@/components/form/Textarea";
+import Modal from "@/components/ui/Modal";
 import { formatRelativeTime } from "@/utils/date";
 import { formatFollowers } from "@/utils/format";
 import {
@@ -28,6 +29,47 @@ import {
 import { cn } from "@/utils/cn";
 
 const POST_COLLAPSE_LENGTH = 200;
+
+const MediaViewerContent = ({ media }: { media: TweetMedia }) => {
+  const imageUrl =
+    media.type === "photo" && media.url
+      ? media.url
+      : media.preview_image_url ?? media.url;
+  const isVideoOrGif =
+    media.type === "video" || media.type === "animated_gif";
+  const videoUrl = media.url;
+
+  if (isVideoOrGif && videoUrl) {
+    return (
+      <div className="flex max-h-[80vh] w-full items-center justify-center bg-black">
+        <video
+          src={videoUrl}
+          controls
+          autoPlay
+          loop={media.type === "animated_gif"}
+          muted={media.type === "animated_gif"}
+          playsInline
+          className="max-h-[80vh] w-full object-contain"
+        />
+      </div>
+    );
+  }
+
+  if (imageUrl) {
+    return (
+      <div className="flex max-h-[80vh] w-full items-center justify-center bg-black">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imageUrl}
+          alt=""
+          className="max-h-[80vh] max-w-full object-contain"
+        />
+      </div>
+    );
+  }
+
+  return null;
+};
 
 export type TweetCardProps = {
   item: StoredTweet;
@@ -57,6 +99,7 @@ const TweetCard = ({
   onPostReply,
 }: TweetCardProps) => {
   const [expanded, setExpanded] = useState(false);
+  const [viewingMedia, setViewingMedia] = useState<TweetMedia | null>(null);
   const displayName = item.author_name ?? item.author_username ?? "Unknown";
   const initial = displayName.charAt(0).toUpperCase();
   const timeStr = formatRelativeTime(item.created_at);
@@ -134,6 +177,67 @@ const TweetCard = ({
               </button>
             )}
           </div>
+          {item.media != null && item.media.length > 0 && (
+            <>
+              <div
+                className={cn(
+                  "mt-3 overflow-hidden rounded-2xl border border-border/60",
+                  item.media.length === 1 && "max-w-full",
+                  item.media.length === 2 && "grid grid-cols-2 gap-0.5",
+                  item.media.length === 3 && "grid grid-cols-2 gap-0.5",
+                  item.media.length >= 4 && "grid grid-cols-2 gap-0.5",
+                )}
+              >
+                {item.media.map((m, idx) => {
+                  const src =
+                    m.type === "photo" && m.url
+                      ? m.url
+                      : (m.preview_image_url ?? m.url);
+                  if (!src) return null;
+                  const spanFirst = item.media!.length === 3 && idx === 0;
+                  return (
+                    <button
+                      type="button"
+                      key={`${item.id}-${m.url ?? m.preview_image_url ?? idx}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setViewingMedia(m);
+                      }}
+                      className={cn(
+                        "relative block aspect-video min-h-[120px] w-full bg-muted cursor-pointer border-0 p-0 text-left",
+                        spanFirst && "col-span-2",
+                      )}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={src}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                      {(m.type === "video" || m.type === "animated_gif") && (
+                        <span className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-2xl pointer-events-none">
+                          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-foreground">
+                            <span className="ml-0.5 h-0 w-0 border-y-8 border-l-[12px] border-y-transparent border-l-current" />
+                          </span>
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              <Modal
+                open={viewingMedia != null}
+                onClose={() => setViewingMedia(null)}
+                variant="centered"
+                className="!p-0 !pt-10 max-w-4xl w-full max-h-[90vh] overflow-hidden"
+                ariaLabel="View media"
+              >
+                {viewingMedia != null && (
+                  <MediaViewerContent media={viewingMedia} />
+                )}
+              </Modal>
+            </>
+          )}
           {item.public_metrics != null &&
             (item.public_metrics.reply_count != null ||
               item.public_metrics.retweet_count != null ||

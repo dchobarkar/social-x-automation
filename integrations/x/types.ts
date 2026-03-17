@@ -29,12 +29,22 @@ export type XTweetPublicMetrics = {
   impression_count?: number;
 };
 
+/** Media attachment from X API (photo, video, animated_gif). */
+export type XMedia = {
+  type: "photo" | "video" | "animated_gif";
+  url?: string;
+  preview_image_url?: string;
+  width?: number;
+  height?: number;
+};
+
 export type XTweetWithMetrics = XTweet & {
   public_metrics?: XTweetPublicMetrics;
   author_metrics?: XUserPublicMetrics;
   author_username?: string;
   author_name?: string;
   author_profile_image_url?: string;
+  media?: XMedia[];
 };
 
 /**
@@ -42,10 +52,13 @@ export type XTweetWithMetrics = XTweet & {
  * per docs/instructions.md (required params for reply decisions, AI context, conversation threading).
  */
 export const TIMELINE_TWEET_FIELDS =
-  "author_id,created_at,conversation_id,public_metrics,referenced_tweets,lang,text" as const;
+  "author_id,created_at,conversation_id,public_metrics,referenced_tweets,lang,text,attachments" as const;
 
 export const TIMELINE_USER_FIELDS =
   "id,username,name,profile_image_url,public_metrics" as const;
+
+export const TIMELINE_MEDIA_FIELDS =
+  "url,preview_image_url,type,width,height" as const;
 
 export type HomeTimelineOptions = {
   maxResults?: number;

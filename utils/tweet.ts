@@ -35,6 +35,7 @@ export const mapFeedApiItemsToStored = (raw: FeedApiItem[]): StoredTweet[] =>
     created_at: item.created_at,
     public_metrics: item.public_metrics,
     author_followers_count: item.author_metrics?.followers_count,
+    media: item.media,
   }));
 
 export const mapSearchWithRepliesToStored = (
