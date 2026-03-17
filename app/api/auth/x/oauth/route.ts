@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { savePkceState } from "@/lib/pkceStateStore";
+import { savePkceState } from "@/lib/storage/pkceStateStore";
 import { X_AUTH_URL, X_OAUTH_SCOPES } from "@/constants/x/api";
 import {
   generateState,

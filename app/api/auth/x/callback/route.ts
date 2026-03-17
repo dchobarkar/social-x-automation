@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { X_OAUTH_TOKEN_URL } from "@/constants/x/api";
-import { consumePkceState } from "@/lib/pkceStateStore";
-import { saveTokens } from "@/lib/tokenStore";
+import { consumePkceState } from "@/lib/storage/pkceStateStore";
+import { saveTokens } from "@/lib/storage/tokenStore";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;

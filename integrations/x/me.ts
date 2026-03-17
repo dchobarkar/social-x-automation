@@ -1,4 +1,4 @@
-import { getTokens } from "@/lib/tokenStore";
+import { getTokens } from "@/lib/storage/tokenStore";
 
 import { X_API_BASE } from "@/constants/x/api";
 import { getValidAccessToken, refreshTokens } from "./auth";

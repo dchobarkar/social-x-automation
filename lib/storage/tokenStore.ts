@@ -21,9 +21,7 @@ const readTokens = async (): Promise<StoredTokens | null> => {
   }
 };
 
-/**
- * Save tokens. expires_in is seconds from X API; we store expires_at in ms.
- */
+// Save tokens. expires_in is seconds from X API; we store expires_at in ms.
 export const saveTokens = async (
   access_token: string,
   refresh_token: string,
@@ -41,16 +39,12 @@ export const saveTokens = async (
   await writeFile(getTokensFilePath(), JSON.stringify(data, null, 0), "utf8");
 };
 
-/**
- * Get stored tokens (server-side only).
- */
+// Get stored tokens (server-side only).
 export const getTokens = async (): Promise<StoredTokens | null> => {
   return readTokens();
 };
 
-/**
- * Update stored tokens (e.g. after refresh).
- */
+// Update stored tokens (e.g. after refresh).
 export const updateTokens = async (update: TokenUpdate): Promise<void> => {
   const current = await readTokens();
   if (!current) throw new Error("No tokens to update");

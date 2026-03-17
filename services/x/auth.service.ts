@@ -1,4 +1,4 @@
-import { getTokens } from "@/lib/tokenStore";
+import { getTokens } from "@/lib/storage/tokenStore";
 import { refreshTokens } from "@/integrations/x/auth";
 
 export const getXConnectedStatus = async (): Promise<{

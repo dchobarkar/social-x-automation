@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getSavedSearch, saveSearch } from "@/lib/searchStore";
+import { getSavedSearch, saveSearch } from "@/lib/storage/searchStore";
 import type { StoredTweet } from "@/types/x/tweet";
 
 export const GET = async () => {

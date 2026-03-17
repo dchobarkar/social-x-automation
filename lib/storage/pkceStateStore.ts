@@ -29,9 +29,7 @@ const writeState = async (data: PkceStateFile): Promise<void> => {
   );
 };
 
-/**
- * Store state and code_verifier for validation in callback.
- */
+// Store state and code_verifier for validation in callback.
 export const savePkceState = async (
   state: string,
   code_verifier: string,
@@ -41,9 +39,7 @@ export const savePkceState = async (
   await writeState(data);
 };
 
-/**
- * Get code_verifier for state and remove the entry (one-time use).
- */
+// Get code_verifier for state and remove the entry (one-time use).
 export const consumePkceState = async (
   state: string,
 ): Promise<string | null> => {
