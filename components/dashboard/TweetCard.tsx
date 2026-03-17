@@ -19,16 +19,13 @@ import { formatFollowerNumber } from "@/utils/format";
 import {
   buildTwitterReplyIntent,
   buildTweetViewUrl,
-} from "@/constants/dashboard";
-import {
   REPLY_VARIANT_HUMOROUS,
   REPLY_VARIANT_INSIGHTFUL,
   REPLY_PLACEHOLDER_HUMOROUS,
   REPLY_PLACEHOLDER_INSIGHTFUL,
-} from "@/constants/dashboard";
+  POST_COLLAPSE_LENGTH,
+} from "@/constants/x/dashboard";
 import { cn } from "@/utils/cn";
-
-const POST_COLLAPSE_LENGTH = 200;
 
 const MediaViewerContent = ({ media }: { media: TweetMedia }) => {
   const imageUrl =

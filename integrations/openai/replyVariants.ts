@@ -1,15 +1,17 @@
 import type { ReplyVariants } from "@/types/ai";
-import { getOpenAI, OPENAI_DEFAULT_MODEL } from "./client";
-
-const SYSTEM_PROMPT =
-  "You are a thoughtful developer engaging on X. Write concise, intelligent, non-spammy replies.";
+import {
+  OPENAI_DEFAULT_MODEL,
+  OPENAI_REPLY_SYSTEM_PROMPT,
+  OPENAI_VARIANTS_SYSTEM_PROMPT,
+} from "@/constants/ai";
+import { getOpenAI } from "./client";
 
 export const generateReply = async (tweetText: string): Promise<string> => {
   const openai = getOpenAI();
   const completion = await openai.chat.completions.create({
     model: OPENAI_DEFAULT_MODEL,
     messages: [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: OPENAI_REPLY_SYSTEM_PROMPT },
       { role: "user", content: tweetText },
     ],
     max_tokens: 280,
@@ -28,16 +30,7 @@ export const generateReplyVariants = async (
     model: OPENAI_DEFAULT_MODEL,
     response_format: { type: "json_object" },
     messages: [
-      {
-        role: "system",
-        content:
-          "You are helping craft replies to X (Twitter) posts. " +
-          "Given the original tweet text, return a JSON object with two keys: " +
-          '"humorous" and "insightful". Each value must be a concise, natural-sounding reply. ' +
-          "The humorous reply should be light, witty, and non-offensive. " +
-          "The insightful reply should add genuine perspective or value. " +
-          "Do not include explanations, only the JSON object.",
-      },
+      { role: "system", content: OPENAI_VARIANTS_SYSTEM_PROMPT },
       { role: "user", content: tweetText },
     ],
     max_tokens: 400,

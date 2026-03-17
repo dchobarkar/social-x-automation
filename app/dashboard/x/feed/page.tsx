@@ -15,7 +15,7 @@ import TweetListSection from "@/components/dashboard/TweetListSection";
 import {
   FEED_DEFAULT_MAX_RESULTS,
   FEED_LAST_HOURS_OPTIONS,
-} from "@/constants/defaults";
+} from "@/constants/x/defaults";
 import { ROUTES } from "@/constants/routes";
 import { useTweetList } from "@/hooks/useTweetList";
 import { mapFeedApiItemsToStored, mergeFeedWithExisting } from "@/utils/tweet";

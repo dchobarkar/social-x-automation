@@ -60,13 +60,3 @@ export type HomeTimelineOptions = {
   excludeReplies?: boolean;
   excludeRetweets?: boolean;
 };
-
-// Timeline request field sets (for X API query params).
-export const TIMELINE_TWEET_FIELDS =
-  "author_id,created_at,conversation_id,public_metrics,referenced_tweets,lang,text,attachments" as const;
-
-export const TIMELINE_USER_FIELDS =
-  "id,username,name,profile_image_url,public_metrics" as const;
-
-export const TIMELINE_MEDIA_FIELDS =
-  "url,preview_image_url,type,width,height" as const;

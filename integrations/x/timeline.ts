@@ -12,10 +12,9 @@ import {
   TIMELINE_TWEET_FIELDS,
   TIMELINE_USER_FIELDS,
   TIMELINE_MEDIA_FIELDS,
-} from "@/types/x/api";
+} from "@/constants/x/timeline";
+import { X_API_BASE } from "@/constants/x/api";
 import { getValidAccessToken, refreshTokens } from "./auth";
-
-const X_API_BASE = "https://api.x.com/2";
 
 /**
  * Get the authenticated user's home timeline (same as X home feed).

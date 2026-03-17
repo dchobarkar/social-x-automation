@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { X_OAUTH_TOKEN_URL } from "@/constants/x/api";
 import { consumePkceState } from "@/lib/pkceStateStore";
 import { saveTokens } from "@/lib/tokenStore";
-
-const TOKEN_URL = "https://api.x.com/2/oauth2/token";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -52,7 +51,7 @@ export async function GET(request: NextRequest) {
     code_verifier,
   });
 
-  const res = await fetch(TOKEN_URL, {
+  const res = await fetch(X_OAUTH_TOKEN_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",

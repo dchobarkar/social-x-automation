@@ -1,14 +1,8 @@
 import Link from "next/link";
 import { Home, Share2 } from "lucide-react";
 
+import { FOOTER_PLATFORM_LINKS } from "@/constants/footer";
 import { ROUTES } from "@/constants/routes";
-import { PLATFORM_NAMES } from "@/constants/platforms";
-
-const FOOTER_PLATFORM_LINKS = [
-  { href: ROUTES.AUTH_X, label: PLATFORM_NAMES.X },
-  { href: ROUTES.AUTH_LINKEDIN, label: PLATFORM_NAMES.LINKEDIN },
-  { href: ROUTES.AUTH_REDDIT, label: PLATFORM_NAMES.REDDIT },
-] as const;
 
 const Footer = () => {
   return (

@@ -1,6 +1,6 @@
 import { getTokens, updateTokens } from "@/lib/tokenStore";
 
-const X_API_BASE = "https://api.x.com/2";
+import { X_OAUTH_TOKEN_URL } from "@/constants/x/api";
 
 export const refreshTokens = async (): Promise<void> => {
   const tokens = await getTokens();
@@ -16,7 +16,7 @@ export const refreshTokens = async (): Promise<void> => {
     refresh_token: tokens.refresh_token,
     client_id: clientId,
   });
-  const res = await fetch(`${X_API_BASE.replace("/2", "")}/2/oauth2/token`, {
+  const res = await fetch(X_OAUTH_TOKEN_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -55,4 +55,3 @@ export const getValidAccessToken = async (): Promise<string> => {
   if (!updated) throw new Error("Token refresh failed");
   return updated.access_token;
 };
-

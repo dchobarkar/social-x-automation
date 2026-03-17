@@ -1,6 +1,7 @@
+// X dashboard sidebar nav links and platform switcher options.
 import type { XNavIconKey } from "@/types/x/nav";
-import { ROUTES } from "./routes";
-import { PLATFORM_NAMES, PLATFORM_AUTH_ROUTES } from "./platforms";
+import { ROUTES } from "@/constants/routes";
+import { PLATFORM_NAMES, PLATFORM_AUTH_ROUTES } from "@/constants/platforms";
 
 export const X_NAV_LINKS = [
   {

@@ -1,21 +1,18 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
-import path from "node:path";
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const FILE_PATH = path.join(DATA_DIR, "pkce-state.json");
+import { PKCE_STATE_TTL_MS } from "@/constants/auth";
+import { getDataDir, PKCE_STATE_FILE_PATH } from "@/constants/storage";
 
 type PkceEntry = { code_verifier: string; createdAt: number };
 type PkceStateFile = Record<string, PkceEntry>;
 
-const TTL_MS = 10 * 60 * 1000; // 10 minutes
-
 const ensureDataDir = async (): Promise<void> => {
-  await mkdir(DATA_DIR, { recursive: true });
+  await mkdir(getDataDir(), { recursive: true });
 };
 
 const readState = async (): Promise<PkceStateFile> => {
   try {
-    const raw = await readFile(FILE_PATH, "utf8");
+    const raw = await readFile(PKCE_STATE_FILE_PATH, "utf8");
     const data = JSON.parse(raw) as PkceStateFile;
     return data;
   } catch {
@@ -25,7 +22,7 @@ const readState = async (): Promise<PkceStateFile> => {
 
 const writeState = async (data: PkceStateFile): Promise<void> => {
   await ensureDataDir();
-  await writeFile(FILE_PATH, JSON.stringify(data, null, 0), "utf8");
+  await writeFile(PKCE_STATE_FILE_PATH, JSON.stringify(data, null, 0), "utf8");
 };
 
 /**
@@ -50,7 +47,7 @@ export const consumePkceState = async (
   const entry = data[state];
   if (!entry) return null;
 
-  if (Date.now() - entry.createdAt > TTL_MS) {
+  if (Date.now() - entry.createdAt > PKCE_STATE_TTL_MS) {
     delete data[state];
     await writeState(data);
     return null;

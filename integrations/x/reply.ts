@@ -1,8 +1,7 @@
 import { getTokens } from "@/lib/tokenStore";
 
+import { X_API_BASE } from "@/constants/x/api";
 import { getValidAccessToken, refreshTokens } from "./auth";
-
-const X_API_BASE = "https://api.x.com/2";
 
 /**
  * Post a reply to a tweet. On 401, refreshes the token and retries once.
@@ -47,10 +46,11 @@ export const postReply = async (
       }
     } catch {
       message =
-        result.status === 403 ? errText : `X API error: ${result.status} ${errText}`;
+        result.status === 403
+          ? errText
+          : `X API error: ${result.status} ${errText}`;
     }
     throw new Error(message);
   }
   return result.res.json() as Promise<{ data: { id: string } }>;
 };
-

@@ -1,3 +1,8 @@
+// X dashboard UI constants: reply variant labels, tweet card UI, and X (Twitter) URL helpers.
+
+// Character length after which tweet text is collapsed in the card. */
+export const POST_COLLAPSE_LENGTH = 200;
+
 export const REPLY_VARIANT_HUMOROUS = "Humorous" as const;
 export const REPLY_VARIANT_INSIGHTFUL = "Insightful" as const;
 export const REPLY_PLACEHOLDER_HUMOROUS = "Light, witty reply…";

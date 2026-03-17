@@ -1,13 +1,10 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
-import path from "node:path";
 
 import type { StoredTweet } from "@/types/x/tweet";
-
-const DATA_X_DIR = path.join(process.cwd(), "data", "x");
-const FEED_FILE_PATH = path.join(DATA_X_DIR, "feed.json");
+import { FEED_FILE_PATH, getDataXDir } from "@/constants/storage";
 
 const ensureDataDir = async (): Promise<void> => {
-  await mkdir(DATA_X_DIR, { recursive: true });
+  await mkdir(getDataXDir(), { recursive: true });
 };
 
 export const getSavedFeed = async (): Promise<StoredTweet[]> => {

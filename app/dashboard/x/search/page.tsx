@@ -13,7 +13,7 @@ import TweetListSection from "@/components/dashboard/TweetListSection";
 import {
   SEARCH_DEFAULT_MAX_RESULTS,
   SEARCH_MAX_RESULTS_MAX,
-} from "@/constants/defaults";
+} from "@/constants/x/defaults";
 import { ROUTES } from "@/constants/routes";
 import { useTweetList } from "@/hooks/useTweetList";
 import { mapSearchWithRepliesToStored } from "@/utils/tweet";

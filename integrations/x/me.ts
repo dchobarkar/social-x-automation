@@ -1,8 +1,7 @@
 import { getTokens } from "@/lib/tokenStore";
 
+import { X_API_BASE } from "@/constants/x/api";
 import { getValidAccessToken, refreshTokens } from "./auth";
-
-const X_API_BASE = "https://api.x.com/2";
 
 /** Get the authenticated user's id and profile (for timeline). */
 export const getMe = async (): Promise<{
@@ -34,4 +33,3 @@ export const getMe = async (): Promise<{
   if (!json.data?.id) throw new Error("X API users/me returned no user");
   return json.data;
 };
-
