@@ -1,35 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Button from "@/components/ui/Button";
 import AuthPageLayout from "@/components/layout/AuthPageLayout";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import { ROUTES } from "@/constants/routes";
+import { useXConnectedStatus } from "@/hooks/useXConnectedStatus";
 
 const Page = () => {
   const router = useRouter();
-  const [connected, setConnected] = useState<boolean | null>(null);
-
-  const fetchStatus = useCallback(async () => {
-    try {
-      const res = await fetch(ROUTES.API_AUTH_X_STATUS);
-      const data = await res.json();
-      setConnected(data.connected === true);
-    } catch {
-      setConnected(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchStatus();
-  }, [fetchStatus]);
-
-  useEffect(() => {
-    if (connected === true) router.replace(ROUTES.DASHBOARD_X);
-  }, [connected, router]);
+  const { connected } = useXConnectedStatus();
+  if (connected === true) {
+    router.replace(ROUTES.DASHBOARD_X);
+    return null;
+  }
 
   const handleConnect = () => {
     window.location.href = ROUTES.API_AUTH_X_OAUTH;
@@ -38,8 +23,6 @@ const Page = () => {
   if (connected === null) {
     return <LoadingScreen message="Checking authentication…" />;
   }
-
-  if (connected === true) return null;
 
   return (
     <AuthPageLayout

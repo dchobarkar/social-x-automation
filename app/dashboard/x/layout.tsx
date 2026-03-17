@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import XSidebar from "@/components/layout/XSidebar";
@@ -8,7 +7,8 @@ import Footer from "@/components/layout/Footer";
 import FlashMessageBar from "@/components/dashboard/FlashMessageBar";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import { ROUTES } from "@/constants/routes";
-import type { FlashMessage } from "@/types/ui";
+import { useXConnectedStatus } from "@/hooks/useXConnectedStatus";
+import { useQueryFlashMessage } from "@/hooks/useQueryFlashMessage";
 import { cn } from "@/utils/cn";
 
 const Layout = ({
@@ -17,50 +17,20 @@ const Layout = ({
   children: React.ReactNode;
 }>) => {
   const router = useRouter();
-  const [allowed, setAllowed] = useState<boolean | null>(null);
-  const [flashMessage, setFlashMessage] = useState<FlashMessage | null>(null);
-
-  const checkAuth = useCallback(async () => {
-    try {
-      const res = await fetch(ROUTES.API_AUTH_X_STATUS);
-      const data = await res.json();
-      setAllowed(data.connected === true);
-    } catch {
-      setAllowed(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    checkAuth();
-  }, [checkAuth]);
-
-  useEffect(() => {
-    if (allowed === false) router.replace(ROUTES.AUTH_X);
-  }, [allowed, router]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const params = new URLSearchParams(window.location.search);
-    const error = params.get("error");
-    const success = params.get("success");
-    if (error) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setFlashMessage({ type: "error", text: decodeURIComponent(error) });
+  const { connected } = useXConnectedStatus();
+  const flashMessage = useQueryFlashMessage({
+    successMessage: "X account connected successfully.",
+    onConsume: () => {
       window.history.replaceState({}, "", ROUTES.DASHBOARD_X);
-    } else if (success) {
-      setFlashMessage({
-        type: "success",
-        text: "X account connected successfully.",
-      });
-      window.history.replaceState({}, "", ROUTES.DASHBOARD_X);
-    }
-  }, []);
+    },
+  });
 
-  if (allowed === null) return <LoadingScreen />;
+  if (connected === null) return <LoadingScreen />;
 
-  if (allowed === false) return null;
+  if (connected === false) {
+    router.replace(ROUTES.AUTH_X);
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">

@@ -24,7 +24,6 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
   const showMessage = useCallback((type: "success" | "error", text: string) => {
     setMessage({ type, text });
   }, []);
-
   const handleChangeSelection = useCallback(
     (id: string, choice: VariantChoice) => {
       setItems((prev) =>
@@ -35,7 +34,6 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
     },
     [],
   );
-
   const updateItem = useCallback(
     (
       id: string,
@@ -47,7 +45,6 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
     },
     [],
   );
-
   const handleDeleteTweet = useCallback(
     (id: string) => {
       setItems((prev) => {
@@ -59,7 +56,6 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
     },
     [saveEndpoint],
   );
-
   const handleReplyClick = useCallback(
     async (item: StoredTweet) => {
       const isOpen = replyingToId === item.id;
@@ -108,7 +104,6 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
     },
     [replyingToId, saveEndpoint, showMessage],
   );
-
   const handlePostFor = useCallback(
     async (id: string) => {
       const item = items.find((i) => i.id === id);

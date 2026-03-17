@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import type { SearchWithRepliesItem } from "@/types/x/tweet";
 import Button from "@/components/ui/Button";
@@ -15,10 +15,11 @@ import {
   SEARCH_MAX_RESULTS_MAX,
 } from "@/constants/x/defaults";
 import { ROUTES } from "@/constants/routes";
+import { useLoadSavedTweets } from "@/hooks/useLoadSavedTweets";
 import { useTweetList } from "@/hooks/useTweetList";
 import { mapSearchWithRepliesToStored } from "@/utils/tweet";
 import { postJson } from "@/utils/http";
-import { getSavedItems, persistSavedItems } from "@/utils/savedItems";
+import { persistSavedItems } from "@/utils/savedItems";
 
 const SearchPage = () => {
   const {
@@ -41,16 +42,7 @@ const SearchPage = () => {
   const [maxResults, setMaxResults] = useState(SEARCH_DEFAULT_MAX_RESULTS);
   const [loadingSearch, setLoadingSearch] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    getSavedItems(ROUTES.API_X_SEARCH_SAVED).then((items) => {
-      if (cancelled || items.length === 0) return;
-      setItems(items);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [setItems]);
+  useLoadSavedTweets({ endpoint: ROUTES.API_X_SEARCH_SAVED, onLoad: setItems });
 
   const handleSearch = async () => {
     if (!query.trim()) {

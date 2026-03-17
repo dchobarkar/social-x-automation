@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 import type { FeedApiItem } from "@/types/x/tweet";
 import Button from "@/components/ui/Button";
@@ -17,10 +17,11 @@ import {
   FEED_LAST_HOURS_OPTIONS,
 } from "@/constants/x/defaults";
 import { ROUTES } from "@/constants/routes";
+import { useLoadSavedTweets } from "@/hooks/useLoadSavedTweets";
 import { useTweetList } from "@/hooks/useTweetList";
 import { mapFeedApiItemsToStored, mergeFeedWithExisting } from "@/utils/tweet";
 import { postJson } from "@/utils/http";
-import { getSavedItems, persistSavedItems } from "@/utils/savedItems";
+import { persistSavedItems } from "@/utils/savedItems";
 
 const FeedPage = () => {
   const {
@@ -49,16 +50,7 @@ const FeedPage = () => {
   const [feedMaxReplyCount, setFeedMaxReplyCount] = useState("");
   const [feedMinAuthorFollowers, setFeedMinAuthorFollowers] = useState("");
 
-  useEffect(() => {
-    let cancelled = false;
-    getSavedItems(ROUTES.API_X_FEED_SAVED).then((items) => {
-      if (cancelled || items.length === 0) return;
-      setItems(items);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [setItems]);
+  useLoadSavedTweets({ endpoint: ROUTES.API_X_FEED_SAVED, onLoad: setItems });
 
   const handleLoadFeed = useCallback(async () => {
     setLoadingFeed(true);
