@@ -6,6 +6,7 @@ import { Menu, X, LayoutDashboard, Rss, Search } from "lucide-react";
 
 import type { XNavIconKey } from "@/types/x/nav";
 import Button from "@/components/ui/Button";
+import Select from "@/components/form/Select";
 import { X_NAV_LINKS, X_SWITCH_PLATFORMS } from "@/constants/x/sidebar";
 import { cn } from "@/utils/cn";
 
@@ -24,8 +25,8 @@ const XSidebar = () => {
   const [open, setOpen] = useState(false);
   const closeSidebar = useCallback(() => setOpen(false), []);
 
-  const handleSwitchPlatform = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const href = e.target.value;
+  const handleSwitchPlatform = (value: string) => {
+    const href = value;
     if (href) {
       closeSidebar();
       router.push(href);
@@ -57,7 +58,7 @@ const XSidebar = () => {
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center justify-between p-4 border-b border-border min-h-(--x-chrome-header-h)">
           <span className="font-semibold text-foreground">X Dashboard</span>
           <button
             type="button"
@@ -96,27 +97,20 @@ const XSidebar = () => {
           })}
         </nav>
 
-        <div className="p-4 border-t border-border py-6 min-h-22 flex flex-col justify-end">
-          <p className="text-xs text-muted px-1 mb-2">Switch platform</p>
-
-          <select
+        <div className="p-4 border-t border-border py-4 h-(--x-chrome-footer-h) flex flex-col justify-center align-middle">
+          <Select
+            name="switch-platform"
             defaultValue=""
-            onChange={handleSwitchPlatform}
-            className="w-full rounded-input border border-border bg-background px-3 py-2 pr-8 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary appearance-none bg-no-repeat bg-size-[1rem] bg-position-[right_0.5rem_center]"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
-            }}
+            onChange={(e) => handleSwitchPlatform(e.target.value)}
+            options={[
+              { value: "", label: "Select platform…", disabled: true },
+              ...X_SWITCH_PLATFORMS.map(({ name, href }) => ({
+                value: href,
+                label: name,
+              })),
+            ]}
             aria-label="Switch platform"
-          >
-            <option value="" disabled>
-              Select platform…
-            </option>
-            {X_SWITCH_PLATFORMS.map(({ name, href }) => (
-              <option key={href} value={href}>
-                {name}
-              </option>
-            ))}
-          </select>
+          />
         </div>
       </aside>
     </>

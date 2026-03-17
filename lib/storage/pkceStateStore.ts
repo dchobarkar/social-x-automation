@@ -1,13 +1,17 @@
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir, unlink } from "node:fs/promises";
 
 import { PKCE_STATE_TTL_MS } from "@/constants/auth";
-import { getDataDir, getPkceStateFilePath } from "@/constants/storage";
+import {
+  getAuthXDir,
+  getLegacyPkceStateFilePath,
+  getPkceStateFilePath,
+} from "@/constants/storage";
 
 type PkceEntry = { code_verifier: string; createdAt: number };
 type PkceStateFile = Record<string, PkceEntry>;
 
 const ensureDataDir = async (): Promise<void> => {
-  await mkdir(getDataDir(), { recursive: true });
+  await mkdir(getAuthXDir(), { recursive: true });
 };
 
 const readState = async (): Promise<PkceStateFile> => {
@@ -16,7 +20,14 @@ const readState = async (): Promise<PkceStateFile> => {
     const data = JSON.parse(raw) as PkceStateFile;
     return data;
   } catch {
-    return {};
+    // Fall back to legacy path if present.
+    try {
+      const rawLegacy = await readFile(getLegacyPkceStateFilePath(), "utf8");
+      const dataLegacy = JSON.parse(rawLegacy) as PkceStateFile;
+      return dataLegacy;
+    } catch {
+      return {};
+    }
   }
 };
 
@@ -55,4 +66,11 @@ export const consumePkceState = async (
   delete data[state];
   await writeState(data);
   return entry.code_verifier;
+};
+
+export const clearPkceStateFile = async (): Promise<void> => {
+  await Promise.allSettled([
+    unlink(getPkceStateFilePath()),
+    unlink(getLegacyPkceStateFilePath()),
+  ]);
 };

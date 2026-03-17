@@ -1,7 +1,11 @@
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir, unlink } from "node:fs/promises";
 
 import type { StoredTokens } from "@/types/auth";
-import { getDataDir, getTokensFilePath } from "@/constants/storage";
+import {
+  getAuthXDir,
+  getLegacyTokensFilePath,
+  getTokensFilePath,
+} from "@/constants/storage";
 
 type TokenUpdate = Partial<Omit<StoredTokens, "expires_at">> & {
   expires_at?: number;
@@ -9,7 +13,7 @@ type TokenUpdate = Partial<Omit<StoredTokens, "expires_at">> & {
 };
 
 const ensureDataDir = async (): Promise<void> => {
-  await mkdir(getDataDir(), { recursive: true });
+  await mkdir(getAuthXDir(), { recursive: true });
 };
 
 const readTokens = async (): Promise<StoredTokens | null> => {
@@ -17,7 +21,13 @@ const readTokens = async (): Promise<StoredTokens | null> => {
     const raw = await readFile(getTokensFilePath(), "utf8");
     return JSON.parse(raw) as StoredTokens;
   } catch {
-    return null;
+    // Fall back to legacy path if present.
+    try {
+      const rawLegacy = await readFile(getLegacyTokensFilePath(), "utf8");
+      return JSON.parse(rawLegacy) as StoredTokens;
+    } catch {
+      return null;
+    }
   }
 };
 
@@ -58,4 +68,11 @@ export const updateTokens = async (update: TokenUpdate): Promise<void> => {
     next.expires_at = Date.now() + update.expires_in * 1000;
 
   await writeFile(getTokensFilePath(), JSON.stringify(next, null, 0), "utf8");
+};
+
+export const clearTokens = async (): Promise<void> => {
+  await Promise.allSettled([
+    unlink(getTokensFilePath()),
+    unlink(getLegacyTokensFilePath()),
+  ]);
 };

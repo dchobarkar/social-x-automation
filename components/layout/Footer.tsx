@@ -17,7 +17,10 @@ const PLATFORM_ICON_BY_LABEL: Record<
 const Footer = () => {
   return (
     <footer className="border-t border-border bg-background mt-auto">
-      <div className="max-w-4xl mx-auto px-4 py-6 flex flex-wrap items-center justify-between gap-4 text-sm text-muted">
+      <div
+        className="mx-auto px-4 py-6 flex flex-wrap items-center justify-between gap-4 text-sm text-muted"
+        style={{ height: "var(--x-chrome-footer-h, 5.5rem)" }}
+      >
         <span>© 2026. All rights reserved.</span>
 
         <nav

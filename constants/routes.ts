@@ -10,6 +10,7 @@ export const ROUTES = {
   DASHBOARD_REDDIT: "/dashboard/reddit",
   API_AUTH_X_OAUTH: "/api/auth/x/oauth",
   API_AUTH_X_STATUS: "/api/auth/x/status",
+  API_AUTH_X_SIGNOUT: "/api/auth/x/signout",
   API_X_FEED: "/api/x/feed",
   API_X_FEED_SAVED: "/api/x/feed/saved",
   API_X_SEARCH_SAVED: "/api/x/search/saved",

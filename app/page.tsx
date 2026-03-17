@@ -2,33 +2,7 @@ import { Sparkles } from "lucide-react";
 
 import PlatformCard from "@/components/ui/PlatformCard";
 import SectionLayout from "@/components/ui/SectionLayout";
-import { ROUTES } from "@/constants/routes";
-import { PLATFORM_NAMES } from "@/constants/platforms";
-
-const PLATFORMS = [
-  {
-    title: PLATFORM_NAMES.X,
-    description:
-      "Authenticate and manage your X (Twitter) feed, search, and AI replies.",
-    href: ROUTES.AUTH_X,
-    cta: "Connect →",
-    muted: false,
-  },
-  {
-    title: PLATFORM_NAMES.LINKEDIN,
-    description: "LinkedIn automation. Coming soon.",
-    href: ROUTES.AUTH_LINKEDIN,
-    cta: "Coming soon →",
-    muted: true,
-  },
-  {
-    title: PLATFORM_NAMES.REDDIT,
-    description: "Reddit automation. Coming soon.",
-    href: ROUTES.AUTH_REDDIT,
-    cta: "Coming soon →",
-    muted: true,
-  },
-] as const;
+import { HOME_PLATFORM_CARDS } from "@/constants/home";
 
 const Page = () => {
   return (
@@ -50,17 +24,19 @@ const Page = () => {
         </p>
 
         <div className="grid gap-6 w-full sm:grid-cols-3">
-          {PLATFORMS.map(({ title, description, href, cta, muted }) => (
-            <PlatformCard
-              key={href}
-              title={title}
-              description={description}
-              href={href}
-              muted={muted}
-            >
-              {cta}
-            </PlatformCard>
-          ))}
+          {HOME_PLATFORM_CARDS.map(
+            ({ title, description, href, cta, muted }) => (
+              <PlatformCard
+                key={href}
+                title={title}
+                description={description}
+                href={href}
+                muted={muted}
+              >
+                {cta}
+              </PlatformCard>
+            ),
+          )}
         </div>
       </SectionLayout>
     </div>
