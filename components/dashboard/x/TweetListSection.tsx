@@ -5,7 +5,6 @@ import TweetCard from "./TweetCard";
 export type TweetListSectionProps = {
   items: StoredTweet[];
   title: string;
-  description: string;
   loadingReplyForId: string | null;
   replyingToId: string | null;
   postingForId: string | null;
@@ -22,7 +21,6 @@ export type TweetListSectionProps = {
 const TweetListSection = ({
   items,
   title,
-  description,
   loadingReplyForId,
   replyingToId,
   postingForId,
@@ -39,8 +37,6 @@ const TweetListSection = ({
 
   return (
     <Card title={title} className={className}>
-      <p className="text-sm text-muted mb-5">{description}</p>
-
       <div className="space-y-4">
         {items.map((item) => (
           <TweetCard

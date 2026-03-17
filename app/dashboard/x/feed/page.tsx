@@ -3,27 +3,20 @@
 import { useCallback, useState } from "react";
 
 import type { FeedApiItem } from "@/types/x/tweet";
-import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
 import SectionLayout from "@/components/ui/SectionLayout";
 import PageHeader from "@/components/ui/PageHeader";
-import Input from "@/components/form/Input";
-import Checkbox from "@/components/form/Checkbox";
-import Select from "@/components/form/Select";
 import FlashMessageBar from "@/components/ui/FlashMessageBar";
+import FeedFilterBox from "@/components/dashboard/x/FeedFilterBox";
 import TweetListSection from "@/components/dashboard/x/TweetListSection";
-import {
-  FEED_DEFAULT_MAX_RESULTS,
-  FEED_LAST_HOURS_OPTIONS,
-} from "@/constants/x/defaults";
+import { FEED_DEFAULT_MAX_RESULTS } from "@/constants/x/defaults";
 import { ROUTES } from "@/constants/routes";
-import { useLoadSavedTweets } from "@/hooks/useLoadSavedTweets";
-import { useTweetList } from "@/hooks/useTweetList";
 import { mapFeedApiItemsToStored, mergeFeedWithExisting } from "@/utils/tweet";
 import { postJson } from "@/utils/http";
 import { persistSavedItems } from "@/utils/savedItems";
+import { useLoadSavedTweets } from "@/hooks/useLoadSavedTweets";
+import { useTweetList } from "@/hooks/useTweetList";
 
-const FeedPage = () => {
+const Page = () => {
   const {
     items,
     setItems,
@@ -54,42 +47,47 @@ const FeedPage = () => {
 
   const handleLoadFeed = useCallback(async () => {
     setLoadingFeed(true);
+
     try {
       const body: Record<string, unknown> = {
         maxResults: Math.min(Math.max(feedMaxResults, 1), 100),
         excludeReplies: feedExcludeReplies,
         excludeRetweets: feedExcludeRetweets,
       };
+
       if (feedLastHours !== "") {
         const h = Number(feedLastHours);
         if (Number.isFinite(h) && h > 0) body.lastHours = h;
       }
+
       if (feedMaxReplyCount.trim() !== "") {
         const n = Number.parseInt(feedMaxReplyCount, 10);
         if (Number.isFinite(n) && n >= 0) body.maxReplyCount = n;
       }
+
       if (feedMinAuthorFollowers.trim() !== "") {
         const n = Number.parseInt(feedMinAuthorFollowers, 10);
         if (Number.isFinite(n) && n >= 0) body.minAuthorFollowers = n;
       }
+
       const { res, data } = await postJson<{
         items?: FeedApiItem[];
         error?: string;
       }>(ROUTES.API_X_FEED, body);
       if (!res.ok) throw new Error(data.error ?? "Load feed failed");
+
       const raw = (data.items ?? []) as FeedApiItem[];
       const mapped = mapFeedApiItemsToStored(raw);
       const merged = mergeFeedWithExisting(items, mapped);
       setItems(merged);
       await persistSavedItems(ROUTES.API_X_FEED_SAVED, merged);
-      if (mapped.length === 0) {
+      if (mapped.length === 0)
         showMessage("success", "No new tweets in your feed for these filters.");
-      } else {
+      else
         showMessage(
           "success",
           `Added ${mapped.length} tweet(s). Feed now has ${merged.length} total.`,
         );
-      }
     } catch (e) {
       showMessage(
         "error",
@@ -117,85 +115,27 @@ const FeedPage = () => {
         description="Load your X home timeline. Tweets are stored in data/x/feed.json. Click Reply to generate options with OpenAI."
       />
 
-      <Card title="Load feed" className="mb-8">
-        <div className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Select
-              label="Posted in last"
-              value={feedLastHours === "" ? "" : String(feedLastHours)}
-              onChange={(e) =>
-                setFeedLastHours(
-                  e.target.value === "" ? "" : Number(e.target.value),
-                )
-              }
-              name="feedLastHours"
-              options={[
-                { value: "", label: "All time" },
-                ...FEED_LAST_HOURS_OPTIONS.map((h) => ({
-                  value: String(h),
-                  label: `${h} hour${h !== 1 ? "s" : ""}`,
-                })),
-              ]}
-            />
-            <Input
-              label="Max (1–100)"
-              type="number"
-              min={1}
-              max={100}
-              value={String(feedMaxResults)}
-              onChange={(e) =>
-                setFeedMaxResults(
-                  Math.min(
-                    100,
-                    Math.max(
-                      1,
-                      Number.parseInt(e.target.value, 10) ||
-                        FEED_DEFAULT_MAX_RESULTS,
-                    ),
-                  ),
-                )
-              }
-              name="feedMaxResults"
-            />
-            <Input
-              label="Max reply count"
-              placeholder="e.g. 20"
-              value={feedMaxReplyCount}
-              onChange={(e) => setFeedMaxReplyCount(e.target.value)}
-              name="feedMaxReplyCount"
-            />
-            <Input
-              label="Min author followers"
-              placeholder="e.g. 100"
-              value={feedMinAuthorFollowers}
-              onChange={(e) => setFeedMinAuthorFollowers(e.target.value)}
-              name="feedMinAuthorFollowers"
-            />
-          </div>
-          <div className="flex flex-wrap gap-4 items-center">
-            <Checkbox
-              name="feedExcludeReplies"
-              label="Exclude replies"
-              checked={feedExcludeReplies}
-              onChange={(e) => setFeedExcludeReplies(e.target.checked)}
-            />
-            <Checkbox
-              name="feedExcludeRetweets"
-              label="Exclude retweets"
-              checked={feedExcludeRetweets}
-              onChange={(e) => setFeedExcludeRetweets(e.target.checked)}
-            />
-            <Button onClick={handleLoadFeed} disabled={loadingFeed}>
-              {loadingFeed ? "Loading feed…" : "Load feed"}
-            </Button>
-          </div>
-        </div>
-      </Card>
+      <FeedFilterBox
+        className="mb-8"
+        feedLastHours={feedLastHours}
+        setFeedLastHours={setFeedLastHours}
+        feedMaxResults={feedMaxResults}
+        setFeedMaxResults={setFeedMaxResults}
+        feedExcludeReplies={feedExcludeReplies}
+        setFeedExcludeReplies={setFeedExcludeReplies}
+        feedExcludeRetweets={feedExcludeRetweets}
+        setFeedExcludeRetweets={setFeedExcludeRetweets}
+        feedMaxReplyCount={feedMaxReplyCount}
+        setFeedMaxReplyCount={setFeedMaxReplyCount}
+        feedMinAuthorFollowers={feedMinAuthorFollowers}
+        setFeedMinAuthorFollowers={setFeedMinAuthorFollowers}
+        loadingFeed={loadingFeed}
+        onLoadFeed={handleLoadFeed}
+      />
 
       <TweetListSection
         items={items}
         title="Tweets"
-        description="Click Reply to generate Humorous &amp; Insightful options. Delete removes from list."
         loadingReplyForId={loadingReplyForId}
         replyingToId={replyingToId}
         postingForId={postingForId}
@@ -216,4 +156,4 @@ const FeedPage = () => {
   );
 };
 
-export default FeedPage;
+export default Page;
