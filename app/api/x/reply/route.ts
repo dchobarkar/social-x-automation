@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { replyToTweet } from "@/services/x/replyService";
+import { replyToTweet } from "@/services/x/reply.service";
 
 export const POST = async (request: NextRequest) => {
   try {

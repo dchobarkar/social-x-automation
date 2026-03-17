@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { refreshXTokens } from "@/services/x/authService";
+import { refreshXTokens } from "@/services/x/auth.service";
 
 export async function POST() {
   try {
@@ -9,7 +9,8 @@ export async function POST() {
   } catch (err) {
     const message = err instanceof Error ? err.message : "Refresh failed";
     const status =
-      typeof message === "string" && message.toLowerCase().includes("no refresh token")
+      typeof message === "string" &&
+      message.toLowerCase().includes("no refresh token")
         ? 401
         : 500;
     return NextResponse.json({ error: message }, { status });

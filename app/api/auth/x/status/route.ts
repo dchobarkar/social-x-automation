@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getXConnectedStatus } from "@/services/x/authService";
+import { getXConnectedStatus } from "@/services/x/auth.service";
 
 /**
  * Returns whether the app has stored X credentials (user has connected).

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { searchTweetsWithReplyVariants } from "@/services/x/searchService";
+import { searchTweetsWithReplyVariants } from "@/services/x/search.service";
 
 export const POST = async (request: NextRequest) => {
   try {

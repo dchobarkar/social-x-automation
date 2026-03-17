@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { generateReplyVariants } from "@/integrations/openai/replyVariants";
+import { generateXReplyVariants } from "@/services/x/variants.service";
 
 export const POST = async (request: NextRequest) => {
   try {
@@ -14,14 +14,7 @@ export const POST = async (request: NextRequest) => {
       );
     }
 
-    if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json(
-        { error: "OPENAI_API_KEY is not set in .env.local" },
-        { status: 500 },
-      );
-    }
-
-    const variants = await generateReplyVariants(tweetText.trim());
+    const variants = await generateXReplyVariants(tweetText.trim());
     return NextResponse.json({
       humorous: variants.humorous,
       insightful: variants.insightful,

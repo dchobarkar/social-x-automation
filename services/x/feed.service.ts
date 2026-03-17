@@ -27,5 +27,6 @@ export const getHomeFeed = async (
         (t.author_metrics?.followers_count ?? 0) >= filters.minAuthorFollowers!,
     );
   }
+
   return result;
 };

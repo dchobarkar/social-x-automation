@@ -1,7 +1,7 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 
 import type { StoredTokens } from "@/types/auth";
-import { getDataDir, TOKENS_FILE_PATH } from "@/constants/storage";
+import { getDataDir, getTokensFilePath } from "@/constants/storage";
 
 type TokenUpdate = Partial<Omit<StoredTokens, "expires_at">> & {
   expires_at?: number;
@@ -14,7 +14,7 @@ const ensureDataDir = async (): Promise<void> => {
 
 const readTokens = async (): Promise<StoredTokens | null> => {
   try {
-    const raw = await readFile(TOKENS_FILE_PATH, "utf8");
+    const raw = await readFile(getTokensFilePath(), "utf8");
     return JSON.parse(raw) as StoredTokens;
   } catch {
     return null;
@@ -38,7 +38,7 @@ export const saveTokens = async (
     expires_at,
   };
 
-  await writeFile(TOKENS_FILE_PATH, JSON.stringify(data, null, 0), "utf8");
+  await writeFile(getTokensFilePath(), JSON.stringify(data, null, 0), "utf8");
 };
 
 /**
@@ -63,5 +63,5 @@ export const updateTokens = async (update: TokenUpdate): Promise<void> => {
   if (update.expires_in !== undefined)
     next.expires_at = Date.now() + update.expires_in * 1000;
 
-  await writeFile(TOKENS_FILE_PATH, JSON.stringify(next, null, 0), "utf8");
+  await writeFile(getTokensFilePath(), JSON.stringify(next, null, 0), "utf8");
 };

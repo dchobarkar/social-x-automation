@@ -7,4 +7,3 @@ export const replyToTweet = async (
   const result = await postReply(text, tweetId);
   return { tweetId: result.data?.id };
 };
-

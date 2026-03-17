@@ -1,17 +1,18 @@
 /**
  * Local storage paths (data dir and file paths).
- * Used by lib/tokenStore, lib/pkceStateStore, lib/feedStore, lib/searchStore.
+ * Resolved at call time so process.cwd() is correct in Next.js API routes.
  */
 
 import path from "node:path";
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const DATA_X_DIR = path.join(DATA_DIR, "x");
+export const getDataDir = (): string => path.join(process.cwd(), "data");
+export const getDataXDir = (): string => path.join(getDataDir(), "x");
 
-export const TOKENS_FILE_PATH = path.join(DATA_DIR, "tokens.json");
-export const PKCE_STATE_FILE_PATH = path.join(DATA_DIR, "pkce-state.json");
-export const FEED_FILE_PATH = path.join(DATA_X_DIR, "feed.json");
-export const SEARCH_FILE_PATH = path.join(DATA_X_DIR, "search.json");
-
-export const getDataDir = (): string => DATA_DIR;
-export const getDataXDir = (): string => DATA_X_DIR;
+export const getTokensFilePath = (): string =>
+  path.join(getDataDir(), "tokens.json");
+export const getPkceStateFilePath = (): string =>
+  path.join(getDataDir(), "pkce-state.json");
+export const getFeedFilePath = (): string =>
+  path.join(getDataXDir(), "feed.json");
+export const getSearchFilePath = (): string =>
+  path.join(getDataXDir(), "search.json");

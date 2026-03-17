@@ -1,7 +1,7 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 
 import { PKCE_STATE_TTL_MS } from "@/constants/auth";
-import { getDataDir, PKCE_STATE_FILE_PATH } from "@/constants/storage";
+import { getDataDir, getPkceStateFilePath } from "@/constants/storage";
 
 type PkceEntry = { code_verifier: string; createdAt: number };
 type PkceStateFile = Record<string, PkceEntry>;
@@ -12,7 +12,7 @@ const ensureDataDir = async (): Promise<void> => {
 
 const readState = async (): Promise<PkceStateFile> => {
   try {
-    const raw = await readFile(PKCE_STATE_FILE_PATH, "utf8");
+    const raw = await readFile(getPkceStateFilePath(), "utf8");
     const data = JSON.parse(raw) as PkceStateFile;
     return data;
   } catch {
@@ -22,7 +22,11 @@ const readState = async (): Promise<PkceStateFile> => {
 
 const writeState = async (data: PkceStateFile): Promise<void> => {
   await ensureDataDir();
-  await writeFile(PKCE_STATE_FILE_PATH, JSON.stringify(data, null, 0), "utf8");
+  await writeFile(
+    getPkceStateFilePath(),
+    JSON.stringify(data, null, 0),
+    "utf8",
+  );
 };
 
 /**
