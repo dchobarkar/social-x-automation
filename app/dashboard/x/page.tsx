@@ -14,14 +14,14 @@ const Page = () => {
     >
       <PageHeader
         title="X Dashboard"
-        description="Manage your X (Twitter) feed, search tweets, and post AI-generated replies."
+        description="Manage your X home feed and generate AI reply drafts for manual posting on X."
         className="text-center mb-6"
       />
 
       <div className="grid gap-4 sm:grid-cols-2 w-full max-w-2xl">
         <Card
           title="Feed"
-          description="Load your home timeline and reply to tweets with AI-generated options."
+          description="Load your home timeline and generate AI reply drafts you can review before opening in X."
           footer={
             <Button size="sm" href={ROUTES.DASHBOARD_X_FEED}>
               Open Feed
@@ -36,16 +36,16 @@ const Page = () => {
 
         <Card
           title="Search"
-          description="Search tweets by keyword and generate reply variants with OpenAI."
+          description="Keyword search is being redesigned and will return later."
           footer={
             <Button size="sm" href={ROUTES.DASHBOARD_X_SEARCH}>
-              Open Search
+              View Placeholder
             </Button>
           }
         >
           <p className="text-sm text-muted">
-            Search results are stored in data/x/search.json. Generate Humorous
-            and Insightful replies, then post or open in X.
+            The future search flow will focus on draft generation and manual
+            posting through X.
           </p>
         </Card>
       </div>

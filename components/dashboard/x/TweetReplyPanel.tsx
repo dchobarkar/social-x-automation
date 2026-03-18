@@ -23,7 +23,6 @@ export type TweetReplyPanelProps = {
   item: StoredTweet;
   isReplying: boolean;
   isLoadingReply: boolean;
-  isPosting: boolean;
   analysisTone?: string;
   analysisIntent?: string;
   analysisLoading?: boolean;
@@ -36,14 +35,12 @@ export type TweetReplyPanelProps = {
   onToneChange: (tone: ReplyTone) => void;
   onReplyChange: (value: string) => void;
   onGenerate: () => void;
-  onPostReply: () => void;
 };
 
 const TweetReplyPanel = ({
   item,
   isReplying,
   isLoadingReply,
-  isPosting,
   analysisTone,
   analysisIntent,
   analysisLoading,
@@ -56,7 +53,6 @@ const TweetReplyPanel = ({
   onToneChange,
   onReplyChange,
   onGenerate,
-  onPostReply,
 }: TweetReplyPanelProps) => {
   if (!isReplying) return null;
 
@@ -65,7 +61,7 @@ const TweetReplyPanel = ({
     return (value ?? "").trim();
   })();
   const hasReplyText = Boolean(selectedText);
-  const canPost = hasReplyText && (validation?.isSafe ?? true);
+  const canOpenInX = hasReplyText && (validation?.isSafe ?? true);
 
   const topicPreview = (analysisTopics ?? []).slice(0, 5).join(", ");
 
@@ -164,20 +160,11 @@ const TweetReplyPanel = ({
         </Button>
 
         <Button
-          size="sm"
-          type="button"
-          onClick={onPostReply}
-          disabled={isPosting || !canPost}
-        >
-          {isPosting ? "Posting…" : "Post reply"}
-        </Button>
-
-        <Button
           variant="outline"
           size="sm"
           href={buildTwitterReplyIntent(item.id, selectedText)}
           external
-          className={cn(!hasReplyText && "opacity-50 pointer-events-none")}
+          className={cn(!canOpenInX && "opacity-50 pointer-events-none")}
         >
           Open in X to post
         </Button>
@@ -198,7 +185,7 @@ const TweetReplyPanel = ({
       ) : null}
 
       <p className="mt-1.5 text-xs text-muted">
-        Use “Open in X to post” when the API reply is not allowed.
+        Generated replies stay local until you open X to post them manually.
       </p>
     </div>
   );

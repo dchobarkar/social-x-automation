@@ -22,5 +22,3 @@ export const getPkceStateFilePath = (): string =>
 
 export const getFeedFilePath = (): string =>
   path.join(getDataXDir(), "feed.json");
-export const getSearchFilePath = (): string =>
-  path.join(getDataXDir(), "search.json");

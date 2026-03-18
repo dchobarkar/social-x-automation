@@ -21,7 +21,6 @@ export type TweetCardProps = {
   item: StoredTweet;
   isReplying: boolean;
   isLoadingReply: boolean;
-  isPosting: boolean;
   replyState?: ReplyUIState;
   onReplyClick: () => void;
   onCloseReply: () => void;
@@ -30,14 +29,12 @@ export type TweetCardProps = {
   onReplyChange: (value: string) => void;
   onToneChange: (tone: VariantChoice) => void;
   onGenerate: () => void;
-  onPostReply: () => void;
 };
 
 const TweetCard = ({
   item,
   isReplying,
   isLoadingReply,
-  isPosting,
   replyState,
   onReplyClick,
   onCloseReply,
@@ -46,7 +43,6 @@ const TweetCard = ({
   onReplyChange,
   onToneChange,
   onGenerate,
-  onPostReply,
 }: TweetCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -181,7 +177,6 @@ const TweetCard = ({
             item={item}
             isReplying={isReplying}
             isLoadingReply={isLoadingReply}
-            isPosting={isPosting}
             analysisTone={replyState?.analysisTone}
             analysisIntent={replyState?.analysisIntent}
             analysisLoading={replyState?.analysisLoading}
@@ -194,7 +189,6 @@ const TweetCard = ({
             onToneChange={onToneChange}
             onReplyChange={onReplyChange}
             onGenerate={onGenerate}
-            onPostReply={onPostReply}
           />
         </div>
       </div>

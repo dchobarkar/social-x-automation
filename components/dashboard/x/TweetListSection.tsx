@@ -8,7 +8,6 @@ export type TweetListSectionProps = {
   title: string;
   loadingReplyForId: string | null;
   replyingToId: string | null;
-  postingForId: string | null;
   replyUI: Record<string, ReplyUIState>;
   onReplyClick: (item: StoredTweet) => void;
   onCloseReply: () => void;
@@ -17,7 +16,6 @@ export type TweetListSectionProps = {
   onToneChange: (id: string, tone: VariantChoice) => void;
   onReplyChange: (id: string, value: string) => void;
   onGenerate: (id: string) => void;
-  onPostReply: (id: string) => void;
   className?: string;
 };
 
@@ -26,7 +24,6 @@ const TweetListSection = ({
   title,
   loadingReplyForId,
   replyingToId,
-  postingForId,
   replyUI,
   onReplyClick,
   onCloseReply,
@@ -35,7 +32,6 @@ const TweetListSection = ({
   onToneChange,
   onReplyChange,
   onGenerate,
-  onPostReply,
   className,
 }: TweetListSectionProps) => {
   if (items.length === 0) return null;
@@ -50,7 +46,6 @@ const TweetListSection = ({
             replyState={replyUI[item.id]}
             isReplying={replyingToId === item.id}
             isLoadingReply={loadingReplyForId === item.id}
-            isPosting={postingForId === item.id}
             onReplyClick={() => onReplyClick(item)}
             onCloseReply={onCloseReply}
             onDelete={() => onDelete(item.id)}
@@ -58,7 +53,6 @@ const TweetListSection = ({
             onToneChange={(tone) => onToneChange(item.id, tone)}
             onReplyChange={(value) => onReplyChange(item.id, value)}
             onGenerate={() => onGenerate(item.id)}
-            onPostReply={() => onPostReply(item.id)}
           />
         ))}
       </div>

@@ -20,19 +20,17 @@ const Page = () => {
   const {
     items,
     setItems,
-    message,
-    showMessage,
-    loadingReplyForId,
-    replyingToId,
-    setReplyingToId,
-    postingForId,
-    replyUI,
-    handleChangeSelection,
-    handleDeleteTweet,
-    handleReplyClick,
-    handlePostFor,
-    setReplyTone,
-    generateReplyForId,
+      message,
+      showMessage,
+      loadingReplyForId,
+      replyingToId,
+      setReplyingToId,
+      replyUI,
+      handleChangeSelection,
+      handleDeleteTweet,
+      handleReplyClick,
+      setReplyTone,
+      generateReplyForId,
   } = useTweetList(ROUTES.API_X_FEED_SAVED);
 
   const [loadingFeed, setLoadingFeed] = useState(false);
@@ -114,7 +112,7 @@ const Page = () => {
     <SectionLayout padding="none" variant="transparent" as="div">
       <PageHeader
         title="Home Feed"
-        description="Load your X home timeline. Tweets are stored in data/x/feed.json. Click Reply to generate options with OpenAI."
+        description="Load your X home timeline. Tweets are stored in data/x/feed.json. Generate AI reply drafts, then open X to post manually."
       />
 
       <FeedFilterBox
@@ -143,7 +141,6 @@ const Page = () => {
         replyUI={replyUI}
         loadingReplyForId={loadingReplyForId}
         replyingToId={replyingToId}
-        postingForId={postingForId}
         onReplyClick={handleReplyClick}
         onCloseReply={() => setReplyingToId(null)}
         onDelete={handleDeleteTweet}
@@ -157,7 +154,6 @@ const Page = () => {
           )
         }
         onGenerate={generateReplyForId}
-        onPostReply={handlePostFor}
         className="mb-8"
       />
     </SectionLayout>

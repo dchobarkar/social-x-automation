@@ -5,13 +5,8 @@ import { useCallback, useState } from "react";
 import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
 import type { ReplyTone, ReplyValidation } from "@/types/ai/replies";
 import type { FlashMessage } from "@/types/ui";
-import { ROUTES } from "@/constants/routes";
 import { postJson } from "@/utils/http";
 import { persistSavedItems } from "@/utils/savedItems";
-
-type SaveEndpoint =
-  | typeof ROUTES.API_X_FEED_SAVED
-  | typeof ROUTES.API_X_SEARCH_SAVED;
 
 export type ReplyUIState = {
   tone?: ReplyTone;
@@ -26,14 +21,13 @@ export type ReplyUIState = {
   validationError?: string;
 };
 
-export const useTweetList = (saveEndpoint: SaveEndpoint) => {
+export const useTweetList = (saveEndpoint: string) => {
   const [items, setItems] = useState<StoredTweet[]>([]);
   const [message, setMessage] = useState<FlashMessage | null>(null);
   const [loadingReplyForId, setLoadingReplyForId] = useState<string | null>(
     null,
   );
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
-  const [postingForId, setPostingForId] = useState<string | null>(null);
   const [replyUI, setReplyUI] = useState<Record<string, ReplyUIState>>({});
 
   const showMessage = useCallback((type: "success" | "error", text: string) => {
@@ -105,7 +99,7 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
             topics?: string[];
           };
           error?: string;
-        }>(ROUTES.API_X_REPLIES_ANALYZE, { post: item.text });
+        }>("/api/x/replies/analyze", { post: item.text });
 
         if (!res.ok || !data.analysis) {
           throw new Error(data.error ?? "Analyze post failed");
@@ -165,7 +159,7 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
           validation?: ReplyValidation;
           tone?: ReplyTone;
           error?: string;
-        }>(ROUTES.API_X_REPLIES_GENERATE, { post: item.text, tone });
+        }>("/api/x/replies/generate", { post: item.text, tone });
 
         const toneUsed = (data.tone ?? tone) as ReplyTone;
 
@@ -223,43 +217,6 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
     },
     [items, replyUI, showMessage],
   );
-  const handlePostFor = useCallback(
-    async (id: string) => {
-      const tweet = items.find((t) => t.id === id);
-      const chosenText = tweet ? (tweet[tweet.selected] ?? "").toString() : "";
-      if (!chosenText?.trim()) {
-        showMessage("error", "Reply is empty.");
-        return;
-      }
-      setPostingForId(id);
-      setMessage(null);
-      try {
-        const { res, data } = await postJson<{ error?: string }>(
-          ROUTES.API_X_REPLY,
-          { tweetId: id, text: chosenText.trim() },
-        );
-        if (!res.ok) throw new Error(data.error ?? "Post failed");
-        showMessage("success", "Reply posted successfully.");
-        setReplyingToId(null);
-        const nextItems = items.filter((i) => i.id !== id);
-        setItems(nextItems);
-        await persistSavedItems(saveEndpoint, nextItems);
-        setReplyUI((prev) => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { [id]: _removed, ...rest } = prev;
-          return rest;
-        });
-      } catch (e) {
-        showMessage(
-          "error",
-          e instanceof Error ? e.message : "Failed to post reply",
-        );
-      } finally {
-        setPostingForId(null);
-      }
-    },
-    [items, saveEndpoint, showMessage],
-  );
 
   return {
     items,
@@ -270,12 +227,10 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
     loadingReplyForId,
     replyingToId,
     setReplyingToId,
-    postingForId,
     replyUI,
     handleChangeSelection,
     handleDeleteTweet,
     handleReplyClick,
-    handlePostFor,
     updateItem,
     setReplyTone,
     generateReplyForId,

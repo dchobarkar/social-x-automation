@@ -13,10 +13,6 @@ export const ROUTES = {
   API_AUTH_X_SIGNOUT: "/api/auth/x/signout",
   API_X_FEED: "/api/x/feed",
   API_X_FEED_SAVED: "/api/x/feed/saved",
-  API_X_SEARCH_SAVED: "/api/x/search/saved",
-  API_X_SEARCH_WITH_REPLIES: "/api/x/search/with-replies",
-  API_X_GENERATE_VARIANTS: "/api/x/generate-variants",
-  API_X_REPLY: "/api/x/reply",
   API_X_REPLIES_GENERATE: "/api/x/replies/generate",
   API_X_REPLIES_ANALYZE: "/api/x/replies/analyze",
 } as const;
