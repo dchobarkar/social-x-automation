@@ -13,8 +13,16 @@ const ensureDataDir = async (): Promise<void> => {
 };
 
 const readTokens = async (): Promise<StoredTokens | null> => {
-  const raw = await readFile(getTokensFilePath(), "utf8");
-  return JSON.parse(raw) as StoredTokens;
+  try {
+    const raw = await readFile(getTokensFilePath(), "utf8");
+    return JSON.parse(raw) as StoredTokens;
+  } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+      return null;
+    }
+
+    throw error;
+  }
 };
 
 // Save tokens. expires_in is seconds from X API; we store expires_at in ms.
@@ -44,6 +52,8 @@ export const getTokens = async (): Promise<StoredTokens | null> => {
 export const updateTokens = async (update: TokenUpdate): Promise<void> => {
   const current = await readTokens();
   if (!current) throw new Error("No tokens to update");
+
+  await ensureDataDir();
 
   const next: StoredTokens = {
     ...current,

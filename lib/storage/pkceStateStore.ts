@@ -11,9 +11,17 @@ const ensureDataDir = async (): Promise<void> => {
 };
 
 const readState = async (): Promise<PkceStateFile> => {
-  const raw = await readFile(getPkceStateFilePath(), "utf8");
-  const data = JSON.parse(raw) as PkceStateFile;
-  return data;
+  try {
+    const raw = await readFile(getPkceStateFilePath(), "utf8");
+    const data = JSON.parse(raw) as PkceStateFile;
+    return data;
+  } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+      return {};
+    }
+
+    throw error;
+  }
 };
 
 const writeState = async (data: PkceStateFile): Promise<void> => {
