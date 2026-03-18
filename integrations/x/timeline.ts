@@ -1,11 +1,6 @@
-import type {
-  HomeTimelineOptions,
-  XReferencedTweet,
-  XTweetPublicMetrics,
-  XTweetWithMetrics,
-  XUserPublicMetrics,
-} from "@/types/x/api";
+import type { HomeTimelineOptions, XTweetWithMetrics } from "@/types/x/api";
 import type { XMedia } from "@/types/x/api";
+import type { XHomeTimelineResponse } from "@/types/x/timeline";
 import { getTokens } from "@/lib/storage/tokenStore";
 import {
   TIMELINE_TWEET_FIELDS,
@@ -14,6 +9,11 @@ import {
 } from "@/constants/x/timeline";
 import { X_API_BASE } from "@/constants/x/api";
 import { getValidAccessToken, refreshTokens } from "./auth";
+
+const getTweetText = (tweet: {
+  text: string;
+  note_tweet?: { text: string };
+}): string => tweet.note_tweet?.text ?? tweet.text;
 
 /**
  * Get the authenticated user's home timeline (same as X home feed).
@@ -30,7 +30,8 @@ export const getHomeTimeline = async (
   const maxResults = Math.min(Math.max(options.maxResults ?? 20, 1), 100);
   const params = new URLSearchParams({
     "tweet.fields": TIMELINE_TWEET_FIELDS,
-    expansions: "author_id,attachments.media_keys",
+    expansions:
+      "author_id,attachments.media_keys,referenced_tweets.id,referenced_tweets.id.author_id",
     "user.fields": TIMELINE_USER_FIELDS,
     "media.fields": TIMELINE_MEDIA_FIELDS,
     max_results: String(maxResults),
@@ -61,58 +62,48 @@ export const getHomeTimeline = async (
     const err = await res.text();
     throw new Error(`X API timeline error: ${res.status} ${err}`);
   }
-  const json = (await res.json()) as {
-    data?: Array<{
-      id: string;
-      text: string;
-      author_id?: string;
-      created_at?: string;
-      conversation_id?: string;
-      lang?: string;
-      referenced_tweets?: XReferencedTweet[];
-      public_metrics?: XTweetPublicMetrics;
-      attachments?: { media_keys?: string[] };
-    }>;
-    includes?: {
-      users?: Array<{
-        id: string;
-        username?: string;
-        name?: string;
-        profile_image_url?: string;
-        public_metrics?: XUserPublicMetrics;
-      }>;
-      media?: Array<{
-        media_key: string;
-        type: string;
-        url?: string;
-        preview_image_url?: string;
-        width?: number;
-        height?: number;
-      }>;
-    };
-  };
+  const json = (await res.json()) as XHomeTimelineResponse;
   const tweets = json.data ?? [];
   const usersById = new Map((json.includes?.users ?? []).map((u) => [u.id, u]));
+  const tweetsById = new Map(
+    (json.includes?.tweets ?? []).map((t) => [t.id, t]),
+  );
   const mediaByKey = new Map(
     (json.includes?.media ?? []).map((m) => [
       m.media_key,
       {
-        type: m.type as XMedia["type"],
+        media_key: m.media_key,
+        type: m.type,
         url: m.url,
         preview_image_url: m.preview_image_url,
         width: m.width,
         height: m.height,
+        variants: m.variants,
       } satisfies XMedia,
     ]),
   );
   const result: XTweetWithMetrics[] = tweets.map((t) => {
     const author = t.author_id ? usersById.get(t.author_id) : undefined;
+    const retweetedTweetId = t.referenced_tweets?.find(
+      (ref) => ref.type === "retweeted",
+    )?.id;
+    const retweetedTweet = retweetedTweetId
+      ? tweetsById.get(retweetedTweetId)
+      : undefined;
+    const retweetedAuthor = retweetedTweet?.author_id
+      ? usersById.get(retweetedTweet.author_id)
+      : undefined;
     const media = t.attachments?.media_keys
       ?.map((k) => mediaByKey.get(k))
       .filter(Boolean) as XMedia[] | undefined;
+    const text = retweetedTweet
+      ? `RT ${retweetedAuthor?.username ? `@${retweetedAuthor.username}: ` : ""}${getTweetText(retweetedTweet)}`
+      : getTweetText(t);
+
     return {
       id: t.id,
-      text: t.text,
+      text,
+      note_tweet: t.note_tweet,
       author_id: t.author_id,
       created_at: t.created_at,
       conversation_id: t.conversation_id,

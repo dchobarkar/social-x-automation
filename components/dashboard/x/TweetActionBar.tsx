@@ -34,7 +34,7 @@ const TweetActionBar = ({
         onClick={onReplyClick}
         iconBefore={<Reply className="h-4 w-4 shrink-0" />}
       >
-        Reply
+        {isLoadingReply ? "Working…" : "Draft reply"}
       </Button>
     </div>
   );

@@ -1,11 +1,11 @@
 # Social X Automation
 
-Automates commenting on posts using the X (Twitter) API and OpenAI.
+Generates AI-assisted reply drafts for X (Twitter) using OpenAI.
 
 This is a personal automation tool built to reduce repetitive manual
-engagement. It runs locally and allows generating AI-powered replies and
-posting them directly via the X API using OAuth 2.0 Authorization Code
-Flow with PKCE.
+engagement. It runs locally and allows generating AI-powered replies from
+your X home feed, then opening X manually when you are ready to post.
+Authentication uses OAuth 2.0 Authorization Code Flow with PKCE.
 
 ---
 
@@ -14,8 +14,9 @@ Flow with PKCE.
 - Authenticates with X using OAuth 2.0 (Authorization Code Flow +
   PKCE)
 - Stores access and refresh tokens securely (local JSON storage)
-- Generates contextual replies using OpenAI
-- Posts replies via X API v2
+- Loads your X home feed with optional filters
+- Generates contextual reply drafts using OpenAI
+- Lets you open X manually to post the drafted reply
 - Handles token refresh automatically
 - Provides a minimal dashboard to control the full flow (shows “Connected to X” when logged in)
 
@@ -82,9 +83,9 @@ Visit:
 
 1. Click Connect X Account
 2. Approve OAuth permissions
-3. Get tweets either by **search** (keyword query) or **load my home feed** (same as your X home/feed, with optional filters)
-4. Generate AI reply variants (humorous / insightful)
-5. Review, edit if needed, and post reply
+3. Load tweets from your **home feed** with optional filters
+4. Generate AI reply drafts
+5. Review, edit if needed, and use **Open in X to post**
 
 Everything runs locally.
 
@@ -104,12 +105,12 @@ Everything runs locally.
 This project currently focuses on:
 
 - Local execution
-- Manual trigger commenting (search by keyword or load home feed)
+- Manual trigger drafting from your X home feed
 - Optional filters: time range, exclude replies/retweets, max reply count, min author followers
-- AI-assisted reply generation (humorous / insightful)
-- Review and post replies
+- AI-assisted reply drafting and validation
+- Review drafts and post manually through X
 
-Future enhancements may include: auto scanning posts, scheduling replies, multi-account support, advanced prompt customization.
+Future enhancements may include: redesigned search workflows, auto scanning posts, scheduling replies, multi-account support, LinkedIn/Reddit support, and advanced prompt customization.
 
 ---
 

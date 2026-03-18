@@ -38,7 +38,7 @@ const XSidebar = () => {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed left-4 top-4 z-40 md:hidden flex items-center justify-center w-10 h-10 rounded-button border border-border bg-background text-foreground hover:bg-border focus:outline-none focus:ring-2 focus:ring-primary/30"
+        className="glass-panel soft-ring fixed left-4 top-4 z-40 flex h-11 w-11 items-center justify-center rounded-button border border-white/60 text-foreground md:hidden"
         aria-label="Open menu"
       >
         <Menu className="h-5 w-5" />
@@ -54,12 +54,14 @@ const XSidebar = () => {
 
       <aside
         className={cn(
-          "fixed top-0 left-0 z-50 h-full w-64 border-r border-border bg-background flex flex-col transition-transform duration-200 ease-out md:translate-x-0",
+          "glass-panel fixed left-0 top-0 z-50 flex h-full w-72 flex-col border-r border-white/60 transition-transform duration-200 ease-out md:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="flex items-center justify-between p-4 border-b border-border min-h-(--x-chrome-header-h)">
-          <span className="font-semibold text-foreground">X Dashboard</span>
+        <div className="flex min-h-(--x-chrome-header-h) items-center justify-between border-b border-border/70 px-5 py-4">
+          <span className="text-lg font-semibold text-foreground">
+            X Workspace
+          </span>
           <button
             type="button"
             onClick={closeSidebar}
@@ -70,7 +72,7 @@ const XSidebar = () => {
           </button>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 space-y-1 p-5">
           {X_NAV_LINKS.map(({ href, label, iconKey }) => {
             const isActive = pathname === href;
             const Icon = NAV_ICONS[iconKey];
@@ -81,10 +83,10 @@ const XSidebar = () => {
                 size="sm"
                 href={href}
                 className={cn(
-                  "w-full justify-start font-medium",
+                  "h-11 w-full justify-start rounded-2xl px-4 text-sm font-medium",
                   isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-foreground hover:bg-border",
+                    ? "border-primary/10 bg-primary text-white shadow-[0_12px_24px_rgba(22,93,245,0.2)]"
+                    : "border-transparent text-foreground hover:bg-white/80",
                 )}
                 onClick={closeSidebar}
                 iconBefore={
@@ -97,7 +99,7 @@ const XSidebar = () => {
           })}
         </nav>
 
-        <div className="p-4 border-t border-border py-4 h-(--x-chrome-footer-h) flex flex-col justify-center align-middle">
+        <div className="flex h-(--x-chrome-footer-h) flex-col justify-center border-t border-border/70 px-5 py-4">
           <Select
             name="switch-platform"
             defaultValue=""

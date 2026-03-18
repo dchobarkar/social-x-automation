@@ -12,6 +12,9 @@ export type XReferencedTweet = {
 export type XTweet = {
   id: string;
   text: string;
+  note_tweet?: {
+    text: string;
+  };
   author_id?: string;
   created_at?: string;
   conversation_id?: string;
@@ -36,11 +39,17 @@ export type XTweetPublicMetrics = {
 
 /** Media attachment from X API (photo, video, animated_gif). */
 export type XMedia = {
+  media_key?: string;
   type: "photo" | "video" | "animated_gif";
   url?: string;
   preview_image_url?: string;
   width?: number;
   height?: number;
+  variants?: {
+    bit_rate?: number;
+    content_type?: string;
+    url: string;
+  }[];
 };
 
 export type XTweetWithMetrics = XTweet & {

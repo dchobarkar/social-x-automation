@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   const state = searchParams.get("state");
   const error = searchParams.get("error");
 
-  const baseUrl = process.env.APP_BASE_URL ?? "http://localhost:3000";
+  const baseUrl = process.env.APP_BASE_URL;
   const redirectUri =
     process.env.X_REDIRECT_URI ?? `${baseUrl}/api/auth/x/callback`;
   const clientId = process.env.X_CLIENT_ID;

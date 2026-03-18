@@ -1,56 +1,73 @@
 "use client";
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Heart, MessageCircle, Repeat2, Trash2 } from "lucide-react";
 
 import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
+import type { XReplyDraftUiState } from "@/types/x/reply-drafts";
 import TweetActionBar from "@/components/dashboard/x/TweetActionBar";
 import TweetMediaGrid from "@/components/dashboard/x/TweetMediaGrid";
-import TweetReplyPanel from "@/components/dashboard/x/TweetReplyPanel";
+import TweetReplyDraftPanel from "@/components/dashboard/x/TweetReplyDraftPanel";
 import TweetDeleteModal from "@/components/dashboard/x/TweetDeleteModal";
 import { formatTime, formatFollowerNumber } from "@/utils/format";
 import { cn } from "@/utils/cn";
-import {
-  buildTweetViewUrl,
-  POST_COLLAPSE_LENGTH,
-} from "@/constants/x/dashboard";
+import { buildXPostUrl } from "@/constants/x/reply-drafts";
 
 export type TweetCardProps = {
   item: StoredTweet;
   isReplying: boolean;
   isLoadingReply: boolean;
-  isPosting: boolean;
+  replyState?: XReplyDraftUiState;
   onReplyClick: () => void;
   onCloseReply: () => void;
   onDelete: () => void;
   onSelectionChange: (choice: VariantChoice) => void;
-  onHumorousChange: (value: string) => void;
-  onInsightfulChange: (value: string) => void;
-  onPostReply: () => void;
+  onReplyChange: (value: string) => void;
+  onToneChange: (tone: VariantChoice) => void;
+  onGenerate: () => void;
 };
 
 const TweetCard = ({
   item,
   isReplying,
   isLoadingReply,
-  isPosting,
+  replyState,
   onReplyClick,
   onCloseReply,
   onDelete,
   onSelectionChange,
-  onHumorousChange,
-  onInsightfulChange,
-  onPostReply,
+  onReplyChange,
+  onToneChange,
+  onGenerate,
 }: TweetCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [hasCollapsedOverflow, setHasCollapsedOverflow] = useState(false);
+  const textRef = useRef<HTMLParagraphElement | null>(null);
   const displayName = item.author_name ?? item.author_username ?? "Unknown";
   const initial = displayName.charAt(0).toUpperCase();
   const timeStr = formatTime(item.created_at);
-  const isLongPost = (item.text?.length ?? 0) > POST_COLLAPSE_LENGTH;
-  const showCollapsed = isLongPost && !expanded;
-  const viewUrl = buildTweetViewUrl(item.id, item.author_username);
+  const viewUrl = buildXPostUrl(item.id, item.author_username);
+
+  useLayoutEffect(() => {
+    const element = textRef.current;
+    if (!element) return;
+
+    const measureOverflow = () => {
+      setHasCollapsedOverflow(element.scrollHeight > element.clientHeight + 1);
+    };
+
+    const frameId = window.requestAnimationFrame(measureOverflow);
+
+    const observer = new ResizeObserver(measureOverflow);
+    observer.observe(element);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      observer.disconnect();
+    };
+  }, [item.text, expanded]);
 
   const handleConfirmDelete = () => {
     setDeleteConfirmOpen(false);
@@ -58,18 +75,18 @@ const TweetCard = ({
   };
 
   return (
-    <article className="relative rounded-card border border-border/80 bg-background p-4 shadow-sm transition-shadow hover:shadow-md">
+    <article className="relative rounded-[28px] border border-white/70 bg-white/85 p-4 shadow-(--shadow-card) transition-all hover:-translate-y-0.5 hover:shadow-(--shadow-soft) sm:p-5">
       <button
         type="button"
         onClick={() => setDeleteConfirmOpen(true)}
-        className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-button border border-error/20 bg-error/10 text-error transition-colors hover:bg-error/20 focus:outline-none focus:ring-2 focus:ring-error/30"
+        className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-button border border-error/20 bg-white text-error transition-colors hover:bg-error/10 focus:outline-none focus:ring-2 focus:ring-error/30"
         aria-label="Delete tweet"
         title="Delete tweet"
       >
         <Trash2 className="h-4 w-4" />
       </button>
 
-      <div className="flex gap-3">
+      <div className="flex gap-4">
         <div className="shrink-0">
           {item.author_profile_image_url ? (
             <Image
@@ -77,11 +94,11 @@ const TweetCard = ({
               alt=""
               width={44}
               height={44}
-              className="h-11 w-11 rounded-full object-cover ring-1 ring-border/50"
+              className="h-12 w-12 rounded-full object-cover ring-2 ring-white"
             />
           ) : (
             <div
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-base font-semibold text-primary"
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-base font-semibold text-primary"
               aria-hidden
             >
               {initial}
@@ -90,10 +107,10 @@ const TweetCard = ({
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
+          <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
             <span className="font-semibold text-foreground">{displayName}</span>
             {item.author_username != null && (
-              <span className="text-sm text-muted">
+              <span className="rounded-full bg-primary/5 px-2 py-0.5 text-sm text-primary">
                 @{item.author_username}
               </span>
             )}
@@ -104,14 +121,17 @@ const TweetCard = ({
           </div>
 
           {(item.author_followers_count != null || item.id) && (
-            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted">
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
               {item.author_followers_count != null && (
-                <span>
+                <span className="rounded-full border border-border/70 bg-surface-strong px-2.5 py-1 text-muted">
                   {formatFollowerNumber(item.author_followers_count)} followers
                 </span>
               )}
 
-              <span className="font-mono" title="Tweet ID">
+              <span
+                className="rounded-full border border-border/70 bg-surface-strong px-2.5 py-1 font-mono text-muted"
+                title="Tweet ID"
+              >
                 {item.id}
               </span>
             </div>
@@ -119,19 +139,20 @@ const TweetCard = ({
 
           <div className="mt-2">
             <p
+              ref={textRef}
               className={cn(
-                "text-[15px] text-foreground leading-snug whitespace-pre-wrap wrap-break-word",
-                showCollapsed && "line-clamp-4",
+                "text-[15px] leading-7 text-foreground whitespace-pre-wrap wrap-break-word",
+                !expanded && "tweet-card-text-collapsed",
               )}
             >
               {item.text}
             </p>
 
-            {isLongPost && (
+            {hasCollapsedOverflow && (
               <button
                 type="button"
                 onClick={() => setExpanded((value) => !value)}
-                className="mt-0.5 text-sm text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-1 rounded"
+                className="mt-1 rounded text-sm text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-1"
               >
                 {expanded ? "Show less" : "Show more"}
               </button>
@@ -144,21 +165,21 @@ const TweetCard = ({
             (item.public_metrics.reply_count != null ||
               item.public_metrics.retweet_count != null ||
               item.public_metrics.like_count != null) && (
-              <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted">
+              <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted">
                 {item.public_metrics.reply_count != null && (
-                  <span className="inline-flex items-center gap-1">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-surface-strong px-2.5 py-1">
                     <MessageCircle className="h-3.5 w-3.5" />
                     {item.public_metrics.reply_count}
                   </span>
                 )}
                 {item.public_metrics.retweet_count != null && (
-                  <span className="inline-flex items-center gap-1">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-surface-strong px-2.5 py-1">
                     <Repeat2 className="h-3.5 w-3.5" />
                     {item.public_metrics.retweet_count}
                   </span>
                 )}
                 {item.public_metrics.like_count != null && (
-                  <span className="inline-flex items-center gap-1">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-surface-strong px-2.5 py-1">
                     <Heart className="h-3.5 w-3.5" />
                     {item.public_metrics.like_count}
                   </span>
@@ -172,16 +193,22 @@ const TweetCard = ({
             onReplyClick={onReplyClick}
           />
 
-          <TweetReplyPanel
+          <TweetReplyDraftPanel
             item={item}
             isReplying={isReplying}
             isLoadingReply={isLoadingReply}
-            isPosting={isPosting}
+            analysisTone={replyState?.analysisTone}
+            analysisIntent={replyState?.analysisIntent}
+            analysisLoading={replyState?.analysisLoading}
+            analysisError={replyState?.analysisError}
+            analysisTopics={replyState?.analysisTopics}
+            validation={replyState?.validation}
+            validationLoading={replyState?.validationLoading}
             onCloseReply={onCloseReply}
             onSelectionChange={onSelectionChange}
-            onHumorousChange={onHumorousChange}
-            onInsightfulChange={onInsightfulChange}
-            onPostReply={onPostReply}
+            onToneChange={onToneChange}
+            onReplyChange={onReplyChange}
+            onGenerate={onGenerate}
           />
         </div>
       </div>

@@ -20,12 +20,5 @@ export const getTokensFilePath = (): string =>
 export const getPkceStateFilePath = (): string =>
   path.join(getAuthXDir(), "pkce-state.json");
 
-// Legacy (pre-platform-scoped) paths for backward compatibility.
-export const getLegacyTokensFilePath = (): string =>
-  path.join(getDataDir(), "tokens.json");
-export const getLegacyPkceStateFilePath = (): string =>
-  path.join(getDataDir(), "pkce-state.json");
 export const getFeedFilePath = (): string =>
   path.join(getDataXDir(), "feed.json");
-export const getSearchFilePath = (): string =>
-  path.join(getDataXDir(), "search.json");

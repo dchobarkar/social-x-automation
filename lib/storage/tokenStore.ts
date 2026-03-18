@@ -1,11 +1,7 @@
 import { readFile, writeFile, mkdir, unlink } from "node:fs/promises";
 
 import type { StoredTokens } from "@/types/auth";
-import {
-  getAuthXDir,
-  getLegacyTokensFilePath,
-  getTokensFilePath,
-} from "@/constants/storage";
+import { getAuthXDir, getTokensFilePath } from "@/constants/storage";
 
 type TokenUpdate = Partial<Omit<StoredTokens, "expires_at">> & {
   expires_at?: number;
@@ -20,14 +16,12 @@ const readTokens = async (): Promise<StoredTokens | null> => {
   try {
     const raw = await readFile(getTokensFilePath(), "utf8");
     return JSON.parse(raw) as StoredTokens;
-  } catch {
-    // Fall back to legacy path if present.
-    try {
-      const rawLegacy = await readFile(getLegacyTokensFilePath(), "utf8");
-      return JSON.parse(rawLegacy) as StoredTokens;
-    } catch {
+  } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
       return null;
     }
+
+    throw error;
   }
 };
 
@@ -59,6 +53,8 @@ export const updateTokens = async (update: TokenUpdate): Promise<void> => {
   const current = await readTokens();
   if (!current) throw new Error("No tokens to update");
 
+  await ensureDataDir();
+
   const next: StoredTokens = {
     ...current,
     ...update,
@@ -71,8 +67,5 @@ export const updateTokens = async (update: TokenUpdate): Promise<void> => {
 };
 
 export const clearTokens = async (): Promise<void> => {
-  await Promise.allSettled([
-    unlink(getTokensFilePath()),
-    unlink(getLegacyTokensFilePath()),
-  ]);
+  await Promise.allSettled([unlink(getTokensFilePath())]);
 };

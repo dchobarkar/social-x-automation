@@ -10,44 +10,64 @@ const Page = () => {
       padding="none"
       variant="transparent"
       as="div"
-      className="flex-1 flex flex-col items-center justify-center min-h-0"
+      className="flex min-h-0 flex-1 flex-col justify-center"
     >
-      <PageHeader
-        title="X Dashboard"
-        description="Manage your X (Twitter) feed, search tweets, and post AI-generated replies."
-        className="text-center mb-6"
-      />
+      <div className="mx-auto w-full max-w-5xl rounded-4xl border border-white/70 bg-white/80 p-6 shadow-(--shadow-soft) backdrop-blur-xl md:p-8">
+        <PageHeader
+          title="X Dashboard"
+          description="Move through the workflow with minimal friction: load your feed, draft in context, and only open X when you are ready to publish."
+          className="mb-8"
+        />
 
-      <div className="grid gap-4 sm:grid-cols-2 w-full max-w-2xl">
-        <Card
-          title="Feed"
-          description="Load your home timeline and reply to tweets with AI-generated options."
-          footer={
-            <Button size="sm" href={ROUTES.DASHBOARD_X_FEED}>
-              Open Feed
-            </Button>
-          }
-        >
-          <p className="text-sm text-muted">
-            Tweets are stored in data/x/feed.json. You can filter by time,
-            exclude replies/retweets, and set min author followers.
-          </p>
-        </Card>
+        <div className="mb-6 grid gap-3 md:grid-cols-3">
+          {[
+            "Filter for fresher or higher-signal posts",
+            "Generate AI reply drafts in the same workspace",
+            "Open X only when the reply is ready",
+          ].map((item, index) => (
+            <div
+              key={item}
+              className="rounded-3xl border border-border/70 bg-surface p-4"
+            >
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/75">
+                Step {index + 1}
+              </p>
+              <p className="mt-2 text-sm font-medium text-foreground">{item}</p>
+            </div>
+          ))}
+        </div>
 
-        <Card
-          title="Search"
-          description="Search tweets by keyword and generate reply variants with OpenAI."
-          footer={
-            <Button size="sm" href={ROUTES.DASHBOARD_X_SEARCH}>
-              Open Search
-            </Button>
-          }
-        >
-          <p className="text-sm text-muted">
-            Search results are stored in data/x/search.json. Generate Humorous
-            and Insightful replies, then post or open in X.
-          </p>
-        </Card>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Card
+            title="Feed"
+            description="Load your home timeline and generate AI reply drafts you can review before opening in X."
+            footer={
+              <Button size="sm" href={ROUTES.DASHBOARD_X_FEED}>
+                Open Feed
+              </Button>
+            }
+          >
+            <p className="text-sm leading-6 text-muted">
+              Tweets are stored in `data/x/feed.json`. You can filter by time,
+              exclude replies or reposts, and bias toward higher reach authors.
+            </p>
+          </Card>
+
+          <Card
+            title="Search"
+            description="Keyword search is being redesigned and will return later."
+            footer={
+              <Button size="sm" href={ROUTES.DASHBOARD_X_SEARCH}>
+                View Placeholder
+              </Button>
+            }
+          >
+            <p className="text-sm leading-6 text-muted">
+              The upcoming search flow will follow the same draft-first pattern
+              so the writing experience stays consistent across discovery modes.
+            </p>
+          </Card>
+        </div>
       </div>
     </SectionLayout>
   );

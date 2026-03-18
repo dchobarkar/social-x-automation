@@ -9,12 +9,4 @@ export const ROUTES = {
   DASHBOARD_LINKEDIN: "/dashboard/linkedin",
   DASHBOARD_REDDIT: "/dashboard/reddit",
   API_AUTH_X_OAUTH: "/api/auth/x/oauth",
-  API_AUTH_X_STATUS: "/api/auth/x/status",
-  API_AUTH_X_SIGNOUT: "/api/auth/x/signout",
-  API_X_FEED: "/api/x/feed",
-  API_X_FEED_SAVED: "/api/x/feed/saved",
-  API_X_SEARCH_SAVED: "/api/x/search/saved",
-  API_X_SEARCH_WITH_REPLIES: "/api/x/search/with-replies",
-  API_X_GENERATE_VARIANTS: "/api/x/generate-variants",
-  API_X_REPLY: "/api/x/reply",
 } as const;

@@ -6,7 +6,7 @@ import {
   generateState,
   generateCodeVerifier,
   generateCodeChallenge,
-} from "@/lib/pkce";
+} from "@/lib/auth/pkce";
 
 export async function GET() {
   const clientId = process.env.X_CLIENT_ID;

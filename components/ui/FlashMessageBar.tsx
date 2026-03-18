@@ -12,10 +12,10 @@ const FlashMessageBar = ({ message, className }: FlashMessageBarProps) => {
     <div
       role="alert"
       className={cn(
-        "rounded-card p-4",
+        "rounded-card border p-4 shadow-(--shadow-card)",
         message.type === "success"
-          ? "bg-success/10 text-success"
-          : "bg-error/10 text-error",
+          ? "border-success/20 bg-success/10 text-success"
+          : "border-error/20 bg-error/10 text-error",
         className,
       )}
     >
