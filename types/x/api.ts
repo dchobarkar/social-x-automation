@@ -12,6 +12,9 @@ export type XReferencedTweet = {
 export type XTweet = {
   id: string;
   text: string;
+  note_tweet?: {
+    text: string;
+  };
   author_id?: string;
   created_at?: string;
   conversation_id?: string;

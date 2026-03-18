@@ -10,6 +10,11 @@ import {
 import { X_API_BASE } from "@/constants/x/api";
 import { getValidAccessToken, refreshTokens } from "./auth";
 
+const getTweetText = (tweet: {
+  text: string;
+  note_tweet?: { text: string };
+}): string => tweet.note_tweet?.text ?? tweet.text;
+
 /**
  * Get the authenticated user's home timeline (same as X home feed).
  * Uses GET /2/users/:id/timelines/reverse_chronological.
@@ -25,7 +30,8 @@ export const getHomeTimeline = async (
   const maxResults = Math.min(Math.max(options.maxResults ?? 20, 1), 100);
   const params = new URLSearchParams({
     "tweet.fields": TIMELINE_TWEET_FIELDS,
-    expansions: "author_id,attachments.media_keys",
+    expansions:
+      "author_id,attachments.media_keys,referenced_tweets.id,referenced_tweets.id.author_id",
     "user.fields": TIMELINE_USER_FIELDS,
     "media.fields": TIMELINE_MEDIA_FIELDS,
     max_results: String(maxResults),
@@ -59,6 +65,9 @@ export const getHomeTimeline = async (
   const json = (await res.json()) as XHomeTimelineResponse;
   const tweets = json.data ?? [];
   const usersById = new Map((json.includes?.users ?? []).map((u) => [u.id, u]));
+  const tweetsById = new Map(
+    (json.includes?.tweets ?? []).map((t) => [t.id, t]),
+  );
   const mediaByKey = new Map(
     (json.includes?.media ?? []).map((m) => [
       m.media_key,
@@ -75,12 +84,26 @@ export const getHomeTimeline = async (
   );
   const result: XTweetWithMetrics[] = tweets.map((t) => {
     const author = t.author_id ? usersById.get(t.author_id) : undefined;
+    const retweetedTweetId = t.referenced_tweets?.find(
+      (ref) => ref.type === "retweeted",
+    )?.id;
+    const retweetedTweet = retweetedTweetId
+      ? tweetsById.get(retweetedTweetId)
+      : undefined;
+    const retweetedAuthor = retweetedTweet?.author_id
+      ? usersById.get(retweetedTweet.author_id)
+      : undefined;
     const media = t.attachments?.media_keys
       ?.map((k) => mediaByKey.get(k))
       .filter(Boolean) as XMedia[] | undefined;
+    const text = retweetedTweet
+      ? `RT ${retweetedAuthor?.username ? `@${retweetedAuthor.username}: ` : ""}${getTweetText(retweetedTweet)}`
+      : getTweetText(t);
+
     return {
       id: t.id,
-      text: t.text,
+      text,
+      note_tweet: t.note_tweet,
       author_id: t.author_id,
       created_at: t.created_at,
       conversation_id: t.conversation_id,

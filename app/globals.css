@@ -89,3 +89,9 @@ textarea {
 .text-balance {
   text-wrap: balance;
 }
+
+.tweet-card-text-collapsed {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}

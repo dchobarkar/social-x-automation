@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Heart, MessageCircle, Repeat2, Trash2 } from "lucide-react";
 
@@ -48,25 +48,23 @@ const TweetCard = ({
   const displayName = item.author_name ?? item.author_username ?? "Unknown";
   const initial = displayName.charAt(0).toUpperCase();
   const timeStr = formatTime(item.created_at);
-  const showCollapsed = hasCollapsedOverflow && !expanded;
   const viewUrl = buildXPostUrl(item.id, item.author_username);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const element = textRef.current;
     if (!element) return;
 
     const measureOverflow = () => {
-      if (expanded) return;
-
       setHasCollapsedOverflow(element.scrollHeight > element.clientHeight + 1);
     };
 
-    measureOverflow();
+    const frameId = window.requestAnimationFrame(measureOverflow);
 
     const observer = new ResizeObserver(measureOverflow);
     observer.observe(element);
 
     return () => {
+      window.cancelAnimationFrame(frameId);
       observer.disconnect();
     };
   }, [item.text, expanded]);
@@ -144,7 +142,7 @@ const TweetCard = ({
               ref={textRef}
               className={cn(
                 "text-[15px] leading-7 text-foreground whitespace-pre-wrap wrap-break-word",
-                showCollapsed && "line-clamp-4",
+                !expanded && "tweet-card-text-collapsed",
               )}
             >
               {item.text}

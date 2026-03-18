@@ -8,6 +8,9 @@ import type {
 export type XHomeTimelineTweet = {
   id: string;
   text: string;
+  note_tweet?: {
+    text: string;
+  };
   author_id?: string;
   created_at?: string;
   conversation_id?: string;
@@ -40,6 +43,7 @@ export type XHomeTimelineMedia = {
 export type XHomeTimelineResponse = {
   data?: XHomeTimelineTweet[];
   includes?: {
+    tweets?: XHomeTimelineTweet[];
     users?: XHomeTimelineUser[];
     media?: XHomeTimelineMedia[];
   };
