@@ -1,32 +1,13 @@
-"use client";
-
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import LoadingScreen from "@/components/ui/LoadingScreen";
 import { ROUTES } from "@/constants/routes";
-import { useXConnectedStatus } from "@/hooks/useXConnectedStatus";
+import { getXConnectedStatus } from "@/services/x/auth.service";
 
-const Page = () => {
-  const router = useRouter();
-  const { connected } = useXConnectedStatus();
-
-  useEffect(() => {
-    if (connected === true) {
-      router.replace(ROUTES.DASHBOARD_X);
-    }
-  }, [connected, router]);
-
-  const handleConnect = () => {
-    window.location.href = ROUTES.API_AUTH_X_OAUTH;
-  };
-
-  if (connected === null)
-    return <LoadingScreen message="Checking authentication…" />;
-
-  if (connected === true) return <LoadingScreen message="Redirecting…" />;
+const Page = async () => {
+  const { connected } = await getXConnectedStatus();
+  if (connected) redirect(ROUTES.DASHBOARD_X);
 
   return (
     <Card
@@ -39,9 +20,7 @@ const Page = () => {
           you can access the X dashboard.
         </p>
 
-        <Button onClick={handleConnect} type="button">
-          Connect X Account
-        </Button>
+        <Button href={ROUTES.API_AUTH_X_OAUTH}>Connect X Account</Button>
       </div>
     </Card>
   );

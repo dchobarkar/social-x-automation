@@ -5,8 +5,11 @@ import { useCallback, useState } from "react";
 import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
 import type { ReplyTone, ReplyValidation } from "@/types/ai/replies";
 import type { FlashMessage } from "@/types/ui";
-import { postJson } from "@/utils/http";
-import { persistSavedItems } from "@/utils/savedItems";
+import {
+  analyzeXPostAction,
+  generateXReplyAction,
+  saveXFeedItemsAction,
+} from "@/app/actions/x";
 
 export type ReplyUIState = {
   tone?: ReplyTone;
@@ -21,8 +24,8 @@ export type ReplyUIState = {
   validationError?: string;
 };
 
-export const useTweetList = (saveEndpoint: string) => {
-  const [items, setItems] = useState<StoredTweet[]>([]);
+export const useTweetList = (initialItems: StoredTweet[] = []) => {
+  const [items, setItems] = useState<StoredTweet[]>(initialItems);
   const [message, setMessage] = useState<FlashMessage | null>(null);
   const [loadingReplyForId, setLoadingReplyForId] = useState<string | null>(
     null,
@@ -33,21 +36,41 @@ export const useTweetList = (saveEndpoint: string) => {
   const showMessage = useCallback((type: "success" | "error", text: string) => {
     setMessage({ type, text });
   }, []);
+  const replaceItems = useCallback((next: StoredTweet[]) => {
+    setItems(next);
+    void saveXFeedItemsAction(next);
+  }, []);
   const handleChangeSelection = useCallback(
     (id: string, choice: VariantChoice) => {
-      setItems((prev) =>
-        prev.map((item) =>
+      setItems((prev) => {
+        const next = prev.map((item) =>
           item.id === id ? { ...item, selected: choice } : item,
-        ),
-      );
+        );
+        void saveXFeedItemsAction(next);
+        return next;
+      });
     },
     [],
   );
   const updateItem = useCallback(
     (id: string, partial: Partial<StoredTweet>) => {
-      setItems((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, ...partial } : item)),
-      );
+      setItems((prev) => {
+        const next = prev.map((item) =>
+          item.id === id ? { ...item, ...partial } : item,
+        );
+        void saveXFeedItemsAction(next);
+        return next;
+      });
+    },
+    [],
+  );
+  const updateItems = useCallback(
+    (updater: (items: StoredTweet[]) => StoredTweet[]) => {
+      setItems((prev) => {
+        const next = updater(prev);
+        void saveXFeedItemsAction(next);
+        return next;
+      });
     },
     [],
   );
@@ -55,7 +78,7 @@ export const useTweetList = (saveEndpoint: string) => {
     (id: string) => {
       setItems((prev) => {
         const next = prev.filter((item) => item.id !== id);
-        persistSavedItems(saveEndpoint, next);
+        void saveXFeedItemsAction(next);
         return next;
       });
       setReplyingToId((curr) => (curr === id ? null : curr));
@@ -65,7 +88,7 @@ export const useTweetList = (saveEndpoint: string) => {
         return rest;
       });
     },
-    [saveEndpoint],
+    [],
   );
   const handleReplyClick = useCallback(
     async (item: StoredTweet) => {
@@ -92,28 +115,15 @@ export const useTweetList = (saveEndpoint: string) => {
       }));
 
       try {
-        const { res, data } = await postJson<{
-          analysis?: {
-            tone?: string;
-            intent?: string;
-            topics?: string[];
-          };
-          error?: string;
-        }>("/api/x/replies/analyze", { post: item.text });
-
-        if (!res.ok || !data.analysis) {
-          throw new Error(data.error ?? "Analyze post failed");
-        }
+        const analysis = await analyzeXPostAction(item.text);
 
         setReplyUI((prev) => ({
           ...prev,
           [item.id]: {
             ...prev[item.id],
-            analysisTone: data.analysis?.tone ?? prev[item.id]?.analysisTone,
-            analysisIntent:
-              data.analysis?.intent ?? prev[item.id]?.analysisIntent,
-            analysisTopics:
-              data.analysis?.topics ?? prev[item.id]?.analysisTopics,
+            analysisTone: analysis.tone ?? prev[item.id]?.analysisTone,
+            analysisIntent: analysis.intent ?? prev[item.id]?.analysisIntent,
+            analysisTopics: analysis.topics ?? prev[item.id]?.analysisTopics,
             analysisLoading: false,
           },
         }));
@@ -154,22 +164,8 @@ export const useTweetList = (saveEndpoint: string) => {
       setMessage(null);
 
       try {
-        const { res, data } = await postJson<{
-          reply?: string;
-          validation?: ReplyValidation;
-          tone?: ReplyTone;
-          error?: string;
-        }>("/api/x/replies/generate", { post: item.text, tone });
-
+        const data = await generateXReplyAction({ post: item.text, tone });
         const toneUsed = (data.tone ?? tone) as ReplyTone;
-
-        if (data.reply) {
-          setItems((prev) =>
-            prev.map((tweet) =>
-              tweet.id === id ? { ...tweet, [toneUsed]: data.reply } : tweet,
-            ),
-          );
-        }
 
         if (data.validation) {
           setReplyUI((prev) => ({
@@ -183,7 +179,6 @@ export const useTweetList = (saveEndpoint: string) => {
             },
           }));
         } else {
-          // Backend should always return validation, but keep a safe fallback.
           setReplyUI((prev) => ({
             ...prev,
             [id]: {
@@ -195,13 +190,15 @@ export const useTweetList = (saveEndpoint: string) => {
           }));
         }
 
-        if (!res.ok) {
-          if (data.validation) {
-            // Validation response is already stored; don't throw.
-            return;
-          }
-          throw new Error(data.error ?? "Generate reply failed");
-        }
+        setItems((prev) => {
+          const next = prev.map((tweet) =>
+            tweet.id === id && data.reply
+              ? { ...tweet, [toneUsed]: data.reply }
+              : tweet,
+          );
+          void saveXFeedItemsAction(next);
+          return next;
+        });
       } catch (e) {
         showMessage(
           "error",
@@ -221,6 +218,7 @@ export const useTweetList = (saveEndpoint: string) => {
   return {
     items,
     setItems,
+    replaceItems,
     message,
     setMessage,
     showMessage,
@@ -232,6 +230,7 @@ export const useTweetList = (saveEndpoint: string) => {
     handleDeleteTweet,
     handleReplyClick,
     updateItem,
+    updateItems,
     setReplyTone,
     generateReplyForId,
   };
