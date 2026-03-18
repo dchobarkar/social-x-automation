@@ -1,5 +1,5 @@
 import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
-import type { ReplyUIState } from "@/hooks/useTweetList";
+import type { XReplyDraftUiState } from "@/types/x/reply-drafts";
 import Card from "@/components/ui/Card";
 import TweetCard from "./TweetCard";
 
@@ -8,7 +8,7 @@ export type TweetListSectionProps = {
   title: string;
   loadingReplyForId: string | null;
   replyingToId: string | null;
-  replyUI: Record<string, ReplyUIState>;
+  replyUiByTweetId: Record<string, XReplyDraftUiState>;
   onReplyClick: (item: StoredTweet) => void;
   onCloseReply: () => void;
   onDelete: (id: string) => void;
@@ -24,7 +24,7 @@ const TweetListSection = ({
   title,
   loadingReplyForId,
   replyingToId,
-  replyUI,
+  replyUiByTweetId,
   onReplyClick,
   onCloseReply,
   onDelete,
@@ -43,7 +43,7 @@ const TweetListSection = ({
           <TweetCard
             key={item.id}
             item={item}
-            replyState={replyUI[item.id]}
+            replyState={replyUiByTweetId[item.id]}
             isReplying={replyingToId === item.id}
             isLoadingReply={loadingReplyForId === item.id}
             onReplyClick={() => onReplyClick(item)}

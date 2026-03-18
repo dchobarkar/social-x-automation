@@ -2,70 +2,38 @@
 
 import { useCallback, useState } from "react";
 
-import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
-import type { ReplyTone, ReplyValidation } from "@/types/ai/replies";
+import type { ReplyTone } from "@/types/ai/replies";
 import type { FlashMessage } from "@/types/ui";
+import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
+import type { XReplyDraftUiState } from "@/types/x/reply-drafts";
+import { saveXFeedItemsAction } from "@/services/x/feed.actions";
 import {
   analyzeXPostAction,
-  generateXReplyAction,
-  saveXFeedItemsAction,
-} from "@/app/actions/x";
+  generateXReplyDraftAction,
+} from "@/services/x/reply-drafts.actions";
 
-export type ReplyUIState = {
-  tone?: ReplyTone;
-  loading?: boolean;
-  analysisTone?: string;
-  analysisIntent?: string;
-  analysisTopics?: string[];
-  analysisLoading?: boolean;
-  analysisError?: string;
-  validation?: ReplyValidation;
-  validationLoading?: boolean;
-  validationError?: string;
-};
-
-export const useTweetList = (initialItems: StoredTweet[] = []) => {
+export const useXFeedTweetList = (initialItems: StoredTweet[] = []) => {
   const [items, setItems] = useState<StoredTweet[]>(initialItems);
   const [message, setMessage] = useState<FlashMessage | null>(null);
   const [loadingReplyForId, setLoadingReplyForId] = useState<string | null>(
     null,
   );
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
-  const [replyUI, setReplyUI] = useState<Record<string, ReplyUIState>>({});
+  const [replyUiByTweetId, setReplyUiByTweetId] = useState<
+    Record<string, XReplyDraftUiState>
+  >({});
 
   const showMessage = useCallback((type: "success" | "error", text: string) => {
     setMessage({ type, text });
   }, []);
+
   const replaceItems = useCallback((next: StoredTweet[]) => {
     setItems(next);
     void saveXFeedItemsAction(next);
   }, []);
-  const handleChangeSelection = useCallback(
-    (id: string, choice: VariantChoice) => {
-      setItems((prev) => {
-        const next = prev.map((item) =>
-          item.id === id ? { ...item, selected: choice } : item,
-        );
-        void saveXFeedItemsAction(next);
-        return next;
-      });
-    },
-    [],
-  );
-  const updateItem = useCallback(
-    (id: string, partial: Partial<StoredTweet>) => {
-      setItems((prev) => {
-        const next = prev.map((item) =>
-          item.id === id ? { ...item, ...partial } : item,
-        );
-        void saveXFeedItemsAction(next);
-        return next;
-      });
-    },
-    [],
-  );
+
   const updateItems = useCallback(
-    (updater: (items: StoredTweet[]) => StoredTweet[]) => {
+    (updater: (currentItems: StoredTweet[]) => StoredTweet[]) => {
       setItems((prev) => {
         const next = updater(prev);
         void saveXFeedItemsAction(next);
@@ -74,22 +42,31 @@ export const useTweetList = (initialItems: StoredTweet[] = []) => {
     },
     [],
   );
+
+  const handleChangeSelection = useCallback(
+    (id: string, choice: VariantChoice) => {
+      updateItems((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, selected: choice } : item,
+        ),
+      );
+    },
+    [updateItems],
+  );
+
   const handleDeleteTweet = useCallback(
     (id: string) => {
-      setItems((prev) => {
-        const next = prev.filter((item) => item.id !== id);
-        void saveXFeedItemsAction(next);
-        return next;
-      });
+      updateItems((prev) => prev.filter((item) => item.id !== id));
       setReplyingToId((curr) => (curr === id ? null : curr));
-      setReplyUI((prev) => {
+      setReplyUiByTweetId((prev) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { [id]: _removed, ...rest } = prev;
         return rest;
       });
     },
-    [],
+    [updateItems],
   );
+
   const handleReplyClick = useCallback(
     async (item: StoredTweet) => {
       const isOpen = replyingToId === item.id;
@@ -97,8 +74,9 @@ export const useTweetList = (initialItems: StoredTweet[] = []) => {
         setReplyingToId(null);
         return;
       }
+
       setReplyingToId(item.id);
-      setReplyUI((prev) => ({
+      setReplyUiByTweetId((prev) => ({
         ...prev,
         [item.id]: {
           tone: prev[item.id]?.tone ?? item.selected ?? "insightful",
@@ -117,7 +95,7 @@ export const useTweetList = (initialItems: StoredTweet[] = []) => {
       try {
         const analysis = await analyzeXPostAction(item.text);
 
-        setReplyUI((prev) => ({
+        setReplyUiByTweetId((prev) => ({
           ...prev,
           [item.id]: {
             ...prev[item.id],
@@ -128,7 +106,7 @@ export const useTweetList = (initialItems: StoredTweet[] = []) => {
           },
         }));
       } catch (e) {
-        setReplyUI((prev) => ({
+        setReplyUiByTweetId((prev) => ({
           ...prev,
           [item.id]: {
             ...prev[item.id],
@@ -143,7 +121,7 @@ export const useTweetList = (initialItems: StoredTweet[] = []) => {
   );
 
   const setReplyTone = useCallback((id: string, tone: ReplyTone) => {
-    setReplyUI((prev) => ({
+    setReplyUiByTweetId((prev) => ({
       ...prev,
       [id]: { ...prev[id], tone },
     }));
@@ -151,60 +129,43 @@ export const useTweetList = (initialItems: StoredTweet[] = []) => {
 
   const generateReplyForId = useCallback(
     async (id: string) => {
-      const item = items.find((i) => i.id === id);
+      const item = items.find((candidate) => candidate.id === id);
       if (!item) return;
 
-      const tone = replyUI[id]?.tone ?? item.selected ?? "insightful";
+      const tone = replyUiByTweetId[id]?.tone ?? item.selected ?? "insightful";
       setLoadingReplyForId(id);
-
-      setReplyUI((prev) => ({
+      setReplyUiByTweetId((prev) => ({
         ...prev,
         [id]: { ...prev[id], loading: true, validationLoading: true },
       }));
       setMessage(null);
 
       try {
-        const data = await generateXReplyAction({ post: item.text, tone });
+        const data = await generateXReplyDraftAction({ post: item.text, tone });
         const toneUsed = (data.tone ?? tone) as ReplyTone;
 
-        if (data.validation) {
-          setReplyUI((prev) => ({
-            ...prev,
-            [id]: {
-              ...prev[id],
-              tone: toneUsed,
-              validation: data.validation,
-              validationLoading: false,
-              loading: false,
-            },
-          }));
-        } else {
-          setReplyUI((prev) => ({
-            ...prev,
-            [id]: {
-              ...prev[id],
-              tone: toneUsed,
-              validationLoading: false,
-              loading: false,
-            },
-          }));
-        }
+        setReplyUiByTweetId((prev) => ({
+          ...prev,
+          [id]: {
+            ...prev[id],
+            tone: toneUsed,
+            validation: data.validation,
+            validationLoading: false,
+            loading: false,
+          },
+        }));
 
-        setItems((prev) => {
-          const next = prev.map((tweet) =>
-            tweet.id === id && data.reply
-              ? { ...tweet, [toneUsed]: data.reply }
-              : tweet,
-          );
-          void saveXFeedItemsAction(next);
-          return next;
-        });
+        updateItems((prev) =>
+          prev.map((tweet) =>
+            tweet.id === id ? { ...tweet, [toneUsed]: data.reply } : tweet,
+          ),
+        );
       } catch (e) {
         showMessage(
           "error",
           e instanceof Error ? e.message : "Failed to generate reply",
         );
-        setReplyUI((prev) => ({
+        setReplyUiByTweetId((prev) => ({
           ...prev,
           [id]: { ...prev[id], loading: false, validationLoading: false },
         }));
@@ -212,25 +173,23 @@ export const useTweetList = (initialItems: StoredTweet[] = []) => {
         setLoadingReplyForId(null);
       }
     },
-    [items, replyUI, showMessage],
+    [items, replyUiByTweetId, showMessage, updateItems],
   );
 
   return {
     items,
-    setItems,
     replaceItems,
+    updateItems,
     message,
     setMessage,
     showMessage,
     loadingReplyForId,
     replyingToId,
     setReplyingToId,
-    replyUI,
+    replyUiByTweetId,
     handleChangeSelection,
     handleDeleteTweet,
     handleReplyClick,
-    updateItem,
-    updateItems,
     setReplyTone,
     generateReplyForId,
   };

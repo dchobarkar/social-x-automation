@@ -5,23 +5,23 @@ import Image from "next/image";
 import { Heart, MessageCircle, Repeat2, Trash2 } from "lucide-react";
 
 import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
-import type { ReplyUIState } from "@/hooks/useTweetList";
+import type { XReplyDraftUiState } from "@/types/x/reply-drafts";
 import TweetActionBar from "@/components/dashboard/x/TweetActionBar";
 import TweetMediaGrid from "@/components/dashboard/x/TweetMediaGrid";
-import TweetReplyPanel from "@/components/dashboard/x/TweetReplyPanel";
+import TweetReplyDraftPanel from "@/components/dashboard/x/TweetReplyDraftPanel";
 import TweetDeleteModal from "@/components/dashboard/x/TweetDeleteModal";
 import { formatTime, formatFollowerNumber } from "@/utils/format";
 import { cn } from "@/utils/cn";
 import {
-  buildTweetViewUrl,
-  POST_COLLAPSE_LENGTH,
-} from "@/constants/x/dashboard";
+  buildXPostUrl,
+  X_POST_COLLAPSE_LENGTH,
+} from "@/constants/x/reply-drafts";
 
 export type TweetCardProps = {
   item: StoredTweet;
   isReplying: boolean;
   isLoadingReply: boolean;
-  replyState?: ReplyUIState;
+  replyState?: XReplyDraftUiState;
   onReplyClick: () => void;
   onCloseReply: () => void;
   onDelete: () => void;
@@ -49,9 +49,9 @@ const TweetCard = ({
   const displayName = item.author_name ?? item.author_username ?? "Unknown";
   const initial = displayName.charAt(0).toUpperCase();
   const timeStr = formatTime(item.created_at);
-  const isLongPost = (item.text?.length ?? 0) > POST_COLLAPSE_LENGTH;
+  const isLongPost = (item.text?.length ?? 0) > X_POST_COLLAPSE_LENGTH;
   const showCollapsed = isLongPost && !expanded;
-  const viewUrl = buildTweetViewUrl(item.id, item.author_username);
+  const viewUrl = buildXPostUrl(item.id, item.author_username);
 
   const handleConfirmDelete = () => {
     setDeleteConfirmOpen(false);
@@ -173,7 +173,7 @@ const TweetCard = ({
             onReplyClick={onReplyClick}
           />
 
-          <TweetReplyPanel
+          <TweetReplyDraftPanel
             item={item}
             isReplying={isReplying}
             isLoadingReply={isLoadingReply}

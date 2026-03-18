@@ -4,9 +4,9 @@ import Checkbox from "@/components/form/Checkbox";
 import Input from "@/components/form/Input";
 import Select from "@/components/form/Select";
 import {
-  FEED_DEFAULT_MAX_RESULTS,
-  FEED_LAST_HOURS_OPTIONS,
-} from "@/constants/x/defaults";
+  X_FEED_DEFAULT_MAX_RESULTS,
+  X_FEED_LAST_HOURS_OPTIONS,
+} from "@/constants/x/feed";
 
 export type FeedFilterBoxProps = {
   feedLastHours: number | "";
@@ -58,7 +58,7 @@ const FeedFilterBox = ({
             name="feedLastHours"
             options={[
               { value: "", label: "All time" },
-              ...FEED_LAST_HOURS_OPTIONS.map((h) => ({
+              ...X_FEED_LAST_HOURS_OPTIONS.map((h) => ({
                 value: String(h),
                 label: `${h} hour${h !== 1 ? "s" : ""}`,
               })),
@@ -78,7 +78,7 @@ const FeedFilterBox = ({
                   Math.max(
                     1,
                     Number.parseInt(e.target.value, 10) ||
-                      FEED_DEFAULT_MAX_RESULTS,
+                      X_FEED_DEFAULT_MAX_RESULTS,
                   ),
                 ),
               )

@@ -8,12 +8,16 @@ import PageHeader from "@/components/ui/PageHeader";
 import FlashMessageBar from "@/components/ui/FlashMessageBar";
 import FeedFilterBox from "@/components/dashboard/x/FeedFilterBox";
 import TweetListSection from "@/components/dashboard/x/TweetListSection";
-import { FEED_DEFAULT_MAX_RESULTS } from "@/constants/x/defaults";
+import { X_FEED_DEFAULT_MAX_RESULTS } from "@/constants/x/feed";
 import { mapFeedApiItemsToStored, mergeFeedWithExisting } from "@/utils/tweet";
-import { useTweetList } from "@/hooks/useTweetList";
-import { loadXFeedAction } from "@/app/actions/x";
+import { useXFeedTweetList } from "@/hooks/useXFeedTweetList";
+import { loadXFeedAction } from "@/services/x/feed.actions";
 
-const XFeedPageClient = ({ initialItems }: { initialItems: StoredTweet[] }) => {
+const XFeedDashboardClient = ({
+  initialItems,
+}: {
+  initialItems: StoredTweet[];
+}) => {
   const {
     items,
     replaceItems,
@@ -23,18 +27,18 @@ const XFeedPageClient = ({ initialItems }: { initialItems: StoredTweet[] }) => {
     loadingReplyForId,
     replyingToId,
     setReplyingToId,
-    replyUI,
+    replyUiByTweetId,
     handleChangeSelection,
     handleDeleteTweet,
     handleReplyClick,
     setReplyTone,
     generateReplyForId,
-  } = useTweetList(initialItems);
+  } = useXFeedTweetList(initialItems);
 
   const [loadingFeed, setLoadingFeed] = useState(false);
   const [feedLastHours, setFeedLastHours] = useState<number | "">("");
   const [feedMaxResults, setFeedMaxResults] = useState(
-    FEED_DEFAULT_MAX_RESULTS,
+    X_FEED_DEFAULT_MAX_RESULTS,
   );
   const [feedExcludeReplies, setFeedExcludeReplies] = useState(true);
   const [feedExcludeRetweets, setFeedExcludeRetweets] = useState(true);
@@ -136,7 +140,7 @@ const XFeedPageClient = ({ initialItems }: { initialItems: StoredTweet[] }) => {
       <TweetListSection
         items={items}
         title="Tweets"
-        replyUI={replyUI}
+        replyUiByTweetId={replyUiByTweetId}
         loadingReplyForId={loadingReplyForId}
         replyingToId={replyingToId}
         onReplyClick={handleReplyClick}
@@ -158,4 +162,4 @@ const XFeedPageClient = ({ initialItems }: { initialItems: StoredTweet[] }) => {
   );
 };
 
-export default XFeedPageClient;
+export default XFeedDashboardClient;

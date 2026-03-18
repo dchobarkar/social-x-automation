@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 
-import { signOutXAction } from "@/app/actions/x";
-import XDashboardLayoutClient from "@/components/layout/x/XDashboardLayoutClient";
+import XDashboardLayoutShell from "@/components/layout/x/XDashboardLayoutShell";
 import { X_DASHBOARD_CHROME_HEIGHTS } from "@/constants/x/layout";
+import { signOutXAction } from "@/services/x/auth.actions";
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const chromeStyle = {
@@ -12,9 +12,9 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div style={chromeStyle}>
-      <XDashboardLayoutClient signOutAction={signOutXAction}>
+      <XDashboardLayoutShell signOutAction={signOutXAction}>
         {children}
-      </XDashboardLayoutClient>
+      </XDashboardLayoutShell>
     </div>
   );
 };

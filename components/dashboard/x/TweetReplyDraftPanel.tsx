@@ -4,22 +4,14 @@ import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
 import type { ReplyTone, ReplyValidation } from "@/types/ai/replies";
 import Button from "@/components/ui/Button";
 import Textarea from "@/components/form/Textarea";
-import { buildTwitterReplyIntent } from "@/constants/x/dashboard";
 import {
-  REPLY_VARIANT_HELPFUL,
-  REPLY_VARIANT_INSIGHTFUL,
-  REPLY_VARIANT_WITTY,
-  REPLY_VARIANT_EMPATHETIC,
-  REPLY_VARIANT_PROFESSIONAL,
-  REPLY_PLACEHOLDER_HELPFUL,
-  REPLY_PLACEHOLDER_INSIGHTFUL,
-  REPLY_PLACEHOLDER_WITTY,
-  REPLY_PLACEHOLDER_EMPATHETIC,
-  REPLY_PLACEHOLDER_PROFESSIONAL,
-} from "@/constants/x/dashboard";
+  buildXReplyIntentUrl,
+  X_REPLY_DRAFT_PLACEHOLDERS,
+  X_REPLY_DRAFT_TONE_LABELS,
+} from "@/constants/x/reply-drafts";
 import { cn } from "@/utils/cn";
 
-export type TweetReplyPanelProps = {
+export type TweetReplyDraftPanelProps = {
   item: StoredTweet;
   isReplying: boolean;
   isLoadingReply: boolean;
@@ -37,7 +29,7 @@ export type TweetReplyPanelProps = {
   onGenerate: () => void;
 };
 
-const TweetReplyPanel = ({
+const TweetReplyDraftPanel = ({
   item,
   isReplying,
   isLoadingReply,
@@ -53,7 +45,7 @@ const TweetReplyPanel = ({
   onToneChange,
   onReplyChange,
   onGenerate,
-}: TweetReplyPanelProps) => {
+}: TweetReplyDraftPanelProps) => {
   if (!isReplying) return null;
 
   const selectedText = (() => {
@@ -65,21 +57,9 @@ const TweetReplyPanel = ({
 
   const topicPreview = (analysisTopics ?? []).slice(0, 5).join(", ");
 
-  const tones: { tone: ReplyTone; label: string }[] = [
-    { tone: "helpful", label: REPLY_VARIANT_HELPFUL },
-    { tone: "insightful", label: REPLY_VARIANT_INSIGHTFUL },
-    { tone: "witty", label: REPLY_VARIANT_WITTY },
-    { tone: "empathetic", label: REPLY_VARIANT_EMPATHETIC },
-    { tone: "professional", label: REPLY_VARIANT_PROFESSIONAL },
-  ];
-
-  const placeholderByTone: Record<ReplyTone, string> = {
-    helpful: REPLY_PLACEHOLDER_HELPFUL,
-    insightful: REPLY_PLACEHOLDER_INSIGHTFUL,
-    witty: REPLY_PLACEHOLDER_WITTY,
-    empathetic: REPLY_PLACEHOLDER_EMPATHETIC,
-    professional: REPLY_PLACEHOLDER_PROFESSIONAL,
-  };
+  const tones: { tone: ReplyTone; label: string }[] = (
+    Object.entries(X_REPLY_DRAFT_TONE_LABELS) as [ReplyTone, string][]
+  ).map(([tone, label]) => ({ tone, label }));
 
   return (
     <div className="mt-4 pt-4 border-t border-border space-y-3">
@@ -143,7 +123,7 @@ const TweetReplyPanel = ({
           rows={3}
           value={selectedText}
           onChange={(e) => onReplyChange(e.target.value)}
-          placeholder={placeholderByTone[item.selected]}
+          placeholder={X_REPLY_DRAFT_PLACEHOLDERS[item.selected]}
           name={`reply-${item.id}`}
         />
       </div>
@@ -162,7 +142,7 @@ const TweetReplyPanel = ({
         <Button
           variant="outline"
           size="sm"
-          href={buildTwitterReplyIntent(item.id, selectedText)}
+          href={buildXReplyIntentUrl(item.id, selectedText)}
           external
           className={cn(!canOpenInX && "opacity-50 pointer-events-none")}
         >
@@ -191,4 +171,4 @@ const TweetReplyPanel = ({
   );
 };
 
-export default TweetReplyPanel;
+export default TweetReplyDraftPanel;

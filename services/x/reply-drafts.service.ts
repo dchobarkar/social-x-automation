@@ -5,25 +5,23 @@ import type {
   ReplyValidation,
 } from "@/types/ai/replies";
 import { analyzePost } from "@/services/ai/replies/analyze-post.service";
-import {
-  generateSingleReplyForPostWithValidation,
-} from "@/services/ai/replies/process-post.service";
+import { generateSingleReplyForPostWithValidation } from "@/services/ai/replies/process-post.service";
 
 const PLATFORM_X: PlatformId = "x";
 
-export type GenerateXReplyInput = {
+export type GenerateXReplyDraftInput = {
   post: string;
   tone?: ReplyTone;
 };
 
-export type AnalyzeXPostInput = {
+export type AnalyzeXPostForReplyDraftInput = {
   post: string;
 };
 
-export const generateXReplyForPostWithValidation = async ({
+export const generateXReplyDraft = async ({
   post,
   tone,
-}: GenerateXReplyInput): Promise<{
+}: GenerateXReplyDraftInput): Promise<{
   reply: string;
   tone: ReplyTone;
   validation: ReplyValidation;
@@ -34,9 +32,9 @@ export const generateXReplyForPostWithValidation = async ({
   return generateSingleReplyForPostWithValidation(post, PLATFORM_X, tone);
 };
 
-export const analyzeXPost = async ({
+export const analyzeXPostForReplyDraft = async ({
   post,
-}: AnalyzeXPostInput): Promise<PostAnalysis> => {
+}: AnalyzeXPostForReplyDraftInput): Promise<PostAnalysis> => {
   if (!process.env.OPENAI_API_KEY)
     throw new Error("OPENAI_API_KEY is not set in .env.local");
 

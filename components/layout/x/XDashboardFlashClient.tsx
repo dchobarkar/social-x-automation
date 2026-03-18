@@ -1,8 +1,8 @@
 "use client";
 
 import FlashMessageBar from "@/components/ui/FlashMessageBar";
-import { ROUTES } from "@/constants/routes";
 import { useQueryFlashMessage } from "@/hooks/useQueryFlashMessage";
+import { ROUTES } from "@/constants/routes";
 
 const XDashboardFlashClient = () => {
   const flashMessage = useQueryFlashMessage({

@@ -1,22 +1,22 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 
-import Footer from "@/components/layout/Footer";
 import XDashboardFlashClient from "@/components/layout/x/XDashboardFlashClient";
+import Footer from "@/components/layout/Footer";
 import XNavbar from "@/components/layout/x/XNavbar";
 import XSidebar from "@/components/layout/x/XSidebar";
 import { ROUTES } from "@/constants/routes";
 import { getXConnectedStatus } from "@/services/x/auth.service";
 
-export type XDashboardLayoutClientProps = {
+export type XDashboardLayoutShellProps = {
   children: ReactNode;
   signOutAction: () => Promise<void>;
 };
 
-const XDashboardLayoutClient = async ({
+const XDashboardLayoutShell = async ({
   children,
   signOutAction,
-}: XDashboardLayoutClientProps) => {
+}: XDashboardLayoutShellProps) => {
   const { connected } = await getXConnectedStatus();
   if (!connected) redirect(ROUTES.AUTH_X);
 
@@ -37,4 +37,4 @@ const XDashboardLayoutClient = async ({
   );
 };
 
-export default XDashboardLayoutClient;
+export default XDashboardLayoutShell;
