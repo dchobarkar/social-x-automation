@@ -34,6 +34,7 @@ export type XHomeTimelineMedia = {
   preview_image_url?: string;
   width?: number;
   height?: number;
+  variants?: XMedia["variants"];
 };
 
 export type XHomeTimelineResponse = {

@@ -36,11 +36,17 @@ export type XTweetPublicMetrics = {
 
 /** Media attachment from X API (photo, video, animated_gif). */
 export type XMedia = {
+  media_key?: string;
   type: "photo" | "video" | "animated_gif";
   url?: string;
   preview_image_url?: string;
   width?: number;
   height?: number;
+  variants?: {
+    bit_rate?: number;
+    content_type?: string;
+    url: string;
+  }[];
 };
 
 export type XTweetWithMetrics = XTweet & {

@@ -6,4 +6,4 @@ export const TIMELINE_USER_FIELDS =
   "id,username,name,profile_image_url,public_metrics" as const;
 
 export const TIMELINE_MEDIA_FIELDS =
-  "url,preview_image_url,type,width,height" as const;
+  "media_key,url,preview_image_url,type,width,height,variants" as const;

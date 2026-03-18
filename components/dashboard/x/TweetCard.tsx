@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Heart, MessageCircle, Repeat2, Trash2 } from "lucide-react";
 
@@ -12,10 +12,7 @@ import TweetReplyDraftPanel from "@/components/dashboard/x/TweetReplyDraftPanel"
 import TweetDeleteModal from "@/components/dashboard/x/TweetDeleteModal";
 import { formatTime, formatFollowerNumber } from "@/utils/format";
 import { cn } from "@/utils/cn";
-import {
-  buildXPostUrl,
-  X_POST_COLLAPSE_LENGTH,
-} from "@/constants/x/reply-drafts";
+import { buildXPostUrl } from "@/constants/x/reply-drafts";
 
 export type TweetCardProps = {
   item: StoredTweet;
@@ -46,12 +43,33 @@ const TweetCard = ({
 }: TweetCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [hasCollapsedOverflow, setHasCollapsedOverflow] = useState(false);
+  const textRef = useRef<HTMLParagraphElement | null>(null);
   const displayName = item.author_name ?? item.author_username ?? "Unknown";
   const initial = displayName.charAt(0).toUpperCase();
   const timeStr = formatTime(item.created_at);
-  const isLongPost = (item.text?.length ?? 0) > X_POST_COLLAPSE_LENGTH;
-  const showCollapsed = isLongPost && !expanded;
+  const showCollapsed = hasCollapsedOverflow && !expanded;
   const viewUrl = buildXPostUrl(item.id, item.author_username);
+
+  useEffect(() => {
+    const element = textRef.current;
+    if (!element) return;
+
+    const measureOverflow = () => {
+      if (expanded) return;
+
+      setHasCollapsedOverflow(element.scrollHeight > element.clientHeight + 1);
+    };
+
+    measureOverflow();
+
+    const observer = new ResizeObserver(measureOverflow);
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [item.text, expanded]);
 
   const handleConfirmDelete = () => {
     setDeleteConfirmOpen(false);
@@ -123,6 +141,7 @@ const TweetCard = ({
 
           <div className="mt-2">
             <p
+              ref={textRef}
               className={cn(
                 "text-[15px] leading-7 text-foreground whitespace-pre-wrap wrap-break-word",
                 showCollapsed && "line-clamp-4",
@@ -131,7 +150,7 @@ const TweetCard = ({
               {item.text}
             </p>
 
-            {isLongPost && (
+            {hasCollapsedOverflow && (
               <button
                 type="button"
                 onClick={() => setExpanded((value) => !value)}

@@ -9,11 +9,17 @@ export type TweetMetrics = {
 };
 
 export type TweetMedia = {
+  media_key?: string;
   type: "photo" | "video" | "animated_gif";
   url?: string;
   preview_image_url?: string;
   width?: number;
   height?: number;
+  variants?: {
+    bit_rate?: number;
+    content_type?: string;
+    url: string;
+  }[];
 };
 
 export type VariantChoice = ReplyTone;

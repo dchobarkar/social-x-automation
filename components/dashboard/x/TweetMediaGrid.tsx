@@ -16,6 +16,11 @@ const MediaTile = ({
   className?: string;
   fit?: "cover" | "contain";
 }) => {
+  const playableVideoUrl =
+    media.variants
+      ?.filter((variant) => variant.content_type === "video/mp4")
+      .sort((a, b) => (b.bit_rate ?? 0) - (a.bit_rate ?? 0))[0]?.url ??
+    media.url;
   const src =
     media.type === "photo" && media.url
       ? media.url
@@ -32,13 +37,13 @@ const MediaTile = ({
         className,
       )}
     >
-      {isVideo ? (
+      {isVideo && playableVideoUrl ? (
         <video
           className={cn(
             "absolute inset-0 h-full w-full",
             fit === "cover" ? "object-cover" : "object-contain",
           )}
-          src={media.url ?? src}
+          src={playableVideoUrl}
           poster={media.preview_image_url ?? undefined}
           controls={media.type === "video"}
           autoPlay={shouldAutoPlay}
@@ -47,6 +52,23 @@ const MediaTile = ({
           playsInline
           preload="metadata"
         />
+      ) : isVideo ? (
+        <>
+          <Image
+            src={src}
+            alt=""
+            fill
+            className={cn(
+              "h-full w-full",
+              fit === "cover" ? "object-cover" : "object-contain",
+            )}
+            sizes="(max-width: 640px) 100vw, 50vw"
+          />
+
+          <div className="absolute inset-x-3 bottom-3 rounded-full bg-black/65 px-3 py-1.5 text-center text-xs text-white">
+            Open on X to play this video
+          </div>
+        </>
       ) : (
         <Image
           src={src}
@@ -95,7 +117,7 @@ const TweetMediaGrid = ({ media }: TweetMediaGridProps) => {
       >
         {media.map((item) => (
           <MediaTile
-            key={item.url ?? item.preview_image_url}
+            key={item.media_key ?? item.url ?? item.preview_image_url}
             media={item}
             className="h-full"
           />
@@ -136,7 +158,7 @@ const TweetMediaGrid = ({ media }: TweetMediaGridProps) => {
     >
       {media.slice(0, 4).map((item) => (
         <MediaTile
-          key={item.url ?? item.preview_image_url}
+          key={item.media_key ?? item.url ?? item.preview_image_url}
           media={item}
           className="h-full"
         />

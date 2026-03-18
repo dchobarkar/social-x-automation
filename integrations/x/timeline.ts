@@ -1,7 +1,4 @@
-import type {
-  HomeTimelineOptions,
-  XTweetWithMetrics,
-} from "@/types/x/api";
+import type { HomeTimelineOptions, XTweetWithMetrics } from "@/types/x/api";
 import type { XMedia } from "@/types/x/api";
 import type { XHomeTimelineResponse } from "@/types/x/timeline";
 import { getTokens } from "@/lib/storage/tokenStore";
@@ -66,11 +63,13 @@ export const getHomeTimeline = async (
     (json.includes?.media ?? []).map((m) => [
       m.media_key,
       {
+        media_key: m.media_key,
         type: m.type,
         url: m.url,
         preview_image_url: m.preview_image_url,
         width: m.width,
         height: m.height,
+        variants: m.variants,
       } satisfies XMedia,
     ]),
   );
