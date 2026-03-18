@@ -1,6 +1,5 @@
-import { getOpenAI } from "@/integrations/openai/client";
-
 import type { PlatformId, PostIntent, ReplyTone } from "./types";
+import { getOpenAI } from "@/integrations/openai/client";
 import { getGenerateReplyPrompt } from "./prompts";
 
 export interface GenerateReplyInput {

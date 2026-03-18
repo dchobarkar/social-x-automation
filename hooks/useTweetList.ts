@@ -153,8 +153,9 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
       const item = items.find((i) => i.id === id);
       if (!item) return;
 
-      const tone = replyUI[id]?.tone ?? "insightful";
+      const tone = replyUI[id]?.tone ?? item.selected ?? "insightful";
       setLoadingReplyForId(id);
+
       setReplyUI((prev) => ({
         ...prev,
         [id]: { ...prev[id], loading: true },

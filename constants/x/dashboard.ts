@@ -15,7 +15,7 @@ export const REPLY_PLACEHOLDER_WITTY = "Light, clever, and on-topic…";
 export const REPLY_PLACEHOLDER_EMPATHETIC = "Show understanding and care…";
 export const REPLY_PLACEHOLDER_PROFESSIONAL =
   "Polished, respectful, and on-brand…";
-export const TWITTER_INTENT_BASE = "https://twitter.com/intent/tweet";
+export const TWITTER_INTENT_BASE = "https://x.com/intent/tweet";
 
 export const buildTwitterReplyIntent = (
   tweetId: string,

@@ -7,45 +7,14 @@ export type TweetMediaGridProps = {
   media: TweetMedia[];
 };
 
-const getMediaAspectRatio = (media: TweetMedia): string => {
-  if (media.width != null && media.height != null && media.height > 0)
-    return `${media.width} / ${media.height}`;
-
-  if (media.type === "video") return "16 / 9";
-  if (media.type === "animated_gif") return "1 / 1";
-  return "1 / 1";
-};
-
-const getFixedImageSize = (
-  media: TweetMedia,
-  aspectRatio?: string | null,
-): { width: number; height: number } => {
-  if (media.width != null && media.height != null && media.height > 0) {
-    // Cap to keep image optimization reasonable while preserving ratio.
-    const maxW = 1200;
-    const scale = Math.min(1, maxW / media.width);
-    return {
-      width: Math.round(media.width * scale),
-      height: Math.round(media.height * scale),
-    };
-  }
-
-  const ar = aspectRatio ?? getMediaAspectRatio(media);
-  if (ar === "16 / 9") return { width: 1200, height: 675 };
-  // Default square tiles (matches X multi-image grid feel).
-  return { width: 900, height: 900 };
-};
-
 const MediaTile = ({
   media,
   className,
   fit = "cover",
-  aspectRatio,
 }: {
   media: TweetMedia;
   className?: string;
   fit?: "cover" | "contain";
-  aspectRatio?: string | null;
 }) => {
   const src =
     media.type === "photo" && media.url
@@ -56,21 +25,17 @@ const MediaTile = ({
 
   if (!src) return null;
 
-  const fixedSize = getFixedImageSize(media, aspectRatio);
-
   return (
     <div
-      className={cn("relative overflow-hidden bg-muted", className)}
-      style={
-        aspectRatio === null
-          ? undefined
-          : { aspectRatio: aspectRatio ?? getMediaAspectRatio(media) }
-      }
+      className={cn(
+        "relative h-full w-full overflow-hidden bg-muted",
+        className,
+      )}
     >
       {isVideo ? (
         <video
           className={cn(
-            "h-full w-full",
+            "absolute inset-0 h-full w-full",
             fit === "cover" ? "object-cover" : "object-contain",
           )}
           src={media.url ?? src}
@@ -86,8 +51,7 @@ const MediaTile = ({
         <Image
           src={src}
           alt=""
-          width={fixedSize.width}
-          height={fixedSize.height}
+          fill
           className={cn(
             "h-full w-full",
             fit === "cover" ? "object-cover" : "object-contain",
@@ -102,22 +66,38 @@ const MediaTile = ({
 const TweetMediaGrid = ({ media }: TweetMediaGridProps) => {
   if (media.length === 0) return null;
 
+  // Fixed heights so the media grid doesn't balloon with varying aspect ratios.
+  const singleHeight = "h-72 sm:h-80"; // ~288px -> 320px
+  const twoHeight = "h-56 sm:h-64"; // ~224px -> 256px
+  const threeHeight = "h-64 sm:h-72"; // ~256px -> 288px
+  const fourHeight = "h-56 sm:h-64"; // ~224px -> 256px
+
   if (media.length === 1) {
     return (
-      <div className="mt-3 overflow-hidden rounded-2xl border border-border/60">
-        <MediaTile media={media[0]} fit="cover" />
+      <div
+        className={cn(
+          "mt-3 overflow-hidden rounded-2xl border border-border/60",
+          singleHeight,
+        )}
+      >
+        <MediaTile media={media[0]} fit="cover" className="h-full" />
       </div>
     );
   }
 
   if (media.length === 2) {
     return (
-      <div className="mt-3 grid grid-cols-2 gap-0.5 overflow-hidden rounded-2xl border border-border/60 bg-muted">
+      <div
+        className={cn(
+          "mt-3 grid grid-cols-2 gap-0.5 overflow-hidden rounded-2xl border border-border/60 bg-muted",
+          twoHeight,
+        )}
+      >
         {media.map((item) => (
           <MediaTile
             key={item.url ?? item.preview_image_url}
             media={item}
-            aspectRatio="1 / 1"
+            className="h-full"
           />
         ))}
       </div>
@@ -126,40 +106,39 @@ const TweetMediaGrid = ({ media }: TweetMediaGridProps) => {
 
   if (media.length === 3) {
     return (
-      <div className="mt-3 grid h-105 gap-0.5 overflow-hidden rounded-2xl border border-border/60 bg-muted sm:h-120">
-        <div className="grid h-full grid-cols-2 grid-rows-2 gap-0.5">
+      <div
+        className={cn(
+          "mt-3 grid gap-0.5 overflow-hidden rounded-2xl border border-border/60 bg-muted",
+          threeHeight,
+        )}
+      >
+        <div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-0.5">
           <MediaTile
             media={media[0]}
-            className="row-span-2 h-full"
+            className="row-span-2 col-span-1 h-full"
             fit="cover"
-            aspectRatio={null}
           />
 
-          <MediaTile
-            media={media[1]}
-            className="h-full"
-            fit="cover"
-            aspectRatio="1 / 1"
-          />
+          <MediaTile media={media[1]} className="h-full" fit="cover" />
 
-          <MediaTile
-            media={media[2]}
-            className="h-full"
-            fit="cover"
-            aspectRatio="1 / 1"
-          />
+          <MediaTile media={media[2]} className="h-full" fit="cover" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mt-3 grid grid-cols-2 gap-0.5 overflow-hidden rounded-2xl border border-border/60 bg-muted">
+    <div
+      className={cn(
+        "mt-3 grid grid-cols-2 gap-0.5 overflow-hidden rounded-2xl border border-border/60 bg-muted",
+        fourHeight,
+      )}
+    >
       {media.slice(0, 4).map((item) => (
         <MediaTile
           key={item.url ?? item.preview_image_url}
           media={item}
-          aspectRatio="1 / 1"
+          className="h-full"
         />
       ))}
     </div>

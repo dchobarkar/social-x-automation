@@ -1,3 +1,5 @@
+import { X } from "lucide-react";
+
 import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
 import type { ReplyTone } from "@/services/ai/replies/types";
 import Button from "@/components/ui/Button";
@@ -80,94 +82,95 @@ const TweetReplyPanel = ({
         <span className="text-sm font-medium">Reply options</span>
 
         <Button variant="ghost" size="sm" type="button" onClick={onCloseReply}>
-          Close
+          <X />
         </Button>
       </div>
 
-      {isLoadingReply ? (
-        <p className="text-sm text-muted">Generating reply options…</p>
-      ) : (
-        <>
-          <div className="text-xs text-muted">
-            {analysisLoading ? (
-              <span>Analyzing post tone…</span>
-            ) : analysisTone || analysisIntent ? (
-              <span>
-                Analyzed as{" "}
-                {analysisTone ? analysisTone.toLowerCase() : "unknown tone"}
-                {analysisIntent ? ` • ${analysisIntent.toLowerCase()}` : ""}
-              </span>
-            ) : (
-              <span>Post tone not analyzed.</span>
-            )}
-            {analysisError && (
-              <span className="ml-2 text-error">({analysisError})</span>
-            )}
-          </div>
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-wrap gap-3">
-              {tones.map(({ tone, label }) => (
-                <label
-                  key={tone}
-                  htmlFor={`${tone}-${item.id}`}
-                  className="inline-flex items-center gap-2 text-sm"
-                >
-                  <input
-                    id={`${tone}-${item.id}`}
-                    type="radio"
-                    name={`choice-${item.id}`}
-                    checked={item.selected === tone}
-                    onChange={() => {
-                      onSelectionChange(tone);
-                      onToneChange(tone);
-                    }}
-                    className="rounded-full border-border text-primary focus:ring-primary/30"
-                  />
-                  <span className="font-medium">{label}</span>
-                </label>
-              ))}
-            </div>
-            <Textarea
-              rows={3}
-              value={selectedText}
-              onChange={(e) => onReplyChange(e.target.value)}
-              placeholder={placeholderByTone[item.selected]}
-              name={`reply-${item.id}`}
-            />
-          </div>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <Button
-              size="sm"
-              type="button"
-              variant="secondary"
-              onClick={onGenerate}
-              disabled={isLoadingReply}
+      <div className="text-xs text-muted">
+        {analysisLoading ? (
+          <span>Analyzing post tone…</span>
+        ) : analysisTone || analysisIntent ? (
+          <span>
+            Analyzed as{" "}
+            {analysisTone ? analysisTone.toLowerCase() : "unknown tone"}
+            {analysisIntent ? ` • ${analysisIntent.toLowerCase()}` : ""}
+          </span>
+        ) : (
+          <span>Post tone not analyzed.</span>
+        )}
+
+        {analysisError && (
+          <span className="ml-2 text-error">({analysisError})</span>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-wrap gap-3">
+          {tones.map(({ tone, label }) => (
+            <label
+              key={tone}
+              htmlFor={`${tone}-${item.id}`}
+              className="inline-flex items-center gap-2 text-sm"
             >
-              {isLoadingReply ? "Generating…" : "Generate with AI"}
-            </Button>
-            <Button
-              size="sm"
-              type="button"
-              onClick={onPostReply}
-              disabled={isPosting || !canPost}
-            >
-              {isPosting ? "Posting…" : "Post reply"}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              href={buildTwitterReplyIntent(item.id, selectedText)}
-              external
-              className={cn(!canPost && "opacity-50 pointer-events-none")}
-            >
-              Open in X to post
-            </Button>
-          </div>
-          <p className="mt-1.5 text-xs text-muted">
-            Use “Open in X to post” when the API reply is not allowed.
-          </p>
-        </>
-      )}
+              <input
+                id={`${tone}-${item.id}`}
+                type="radio"
+                name={`choice-${item.id}`}
+                checked={item.selected === tone}
+                onChange={() => {
+                  onSelectionChange(tone);
+                  onToneChange(tone);
+                }}
+                className="rounded-full border-border text-primary focus:ring-primary/30"
+              />
+              <span className="font-medium">{label}</span>
+            </label>
+          ))}
+        </div>
+
+        <Textarea
+          rows={3}
+          value={selectedText}
+          onChange={(e) => onReplyChange(e.target.value)}
+          placeholder={placeholderByTone[item.selected]}
+          name={`reply-${item.id}`}
+        />
+      </div>
+
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <Button
+          size="sm"
+          type="button"
+          variant="secondary"
+          onClick={onGenerate}
+          disabled={isLoadingReply}
+        >
+          {isLoadingReply ? "Generating…" : "Generate with AI"}
+        </Button>
+
+        <Button
+          size="sm"
+          type="button"
+          onClick={onPostReply}
+          disabled={isPosting || !canPost}
+        >
+          {isPosting ? "Posting…" : "Post reply"}
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          href={buildTwitterReplyIntent(item.id, selectedText)}
+          external
+          className={cn(!canPost && "opacity-50 pointer-events-none")}
+        >
+          Open in X to post
+        </Button>
+      </div>
+
+      <p className="mt-1.5 text-xs text-muted">
+        Use “Open in X to post” when the API reply is not allowed.
+      </p>
     </div>
   );
 };

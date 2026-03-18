@@ -3,8 +3,8 @@ import type {
   PostAnalysis,
   ReplyTone,
 } from "@/services/ai/replies/types";
-import { analyzePost } from "@/services/ai/replies/analyzePost";
-import { generateSingleReplyForPost } from "@/services/ai/replies/processPost";
+import { analyzePost } from "@/services/ai/replies/analyze-post.service";
+import { generateSingleReplyForPost } from "@/services/ai/replies/process-post.service";
 
 const PLATFORM_X: PlatformId = "x";
 

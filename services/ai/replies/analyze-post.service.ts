@@ -1,6 +1,5 @@
-import { getOpenAI } from "@/integrations/openai/client";
-
 import type { PlatformId, PostAnalysis } from "./types";
+import { getOpenAI } from "@/integrations/openai/client";
 import { getAnalyzePostPrompt } from "./prompts";
 
 export const analyzePost = async (

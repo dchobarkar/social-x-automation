@@ -36,6 +36,7 @@ const SearchPage = () => {
     handleDeleteTweet,
     handleReplyClick,
     handlePostFor,
+    setReplyTone,
     generateReplyForId,
   } = useTweetList(ROUTES.API_X_SEARCH_SAVED);
 
@@ -136,13 +137,7 @@ const SearchPage = () => {
         onCloseReply={() => setReplyingToId(null)}
         onDelete={handleDeleteTweet}
         onSelectionChange={handleChangeSelection}
-        onToneChange={(id, tone) =>
-          setItems((prev) =>
-            prev.map((item) =>
-              item.id === id ? { ...item, selected: tone } : item,
-            ),
-          )
-        }
+        onToneChange={(id, tone) => setReplyTone(id, tone)}
         onReplyChange={(id, value) =>
           setItems((prev) =>
             prev.map((item) =>

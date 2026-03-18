@@ -1,10 +1,10 @@
 import type { ReplyVariants } from "@/types/ai";
 
 import type { PlatformId, ReplyTone } from "./types";
-import { analyzePost } from "./analyzePost";
-import { generateReply } from "./generateReply";
-import { suggestTones } from "./suggestTones";
-import { validateReply } from "./validateReply";
+import { analyzePost } from "./analyze-post.service";
+import { generateReply } from "./generate-reply.service";
+import { suggestTones } from "./suggest-tone.service";
+import { validateReply } from "./validate-reply.service";
 
 const pickTone = (tones: ReplyTone[]): ReplyTone => tones[0] ?? "insightful";
 

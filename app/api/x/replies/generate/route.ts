@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { generateXReplyForPost } from "@/services/x/replies.service";
+import type { ReplyTone } from "@/services/ai/replies/types";
+
+const ALLOWED_TONES: ReplyTone[] = [
+  "helpful",
+  "insightful",
+  "witty",
+  "empathetic",
+  "professional",
+];
 
 export const POST = async (request: NextRequest) => {
   try {
@@ -17,7 +26,10 @@ export const POST = async (request: NextRequest) => {
 
     const reply = await generateXReplyForPost({
       post: post.trim(),
-      tone: typeof tone === "string" ? (tone as any) : undefined,
+      tone:
+        typeof tone === "string" && ALLOWED_TONES.includes(tone as ReplyTone)
+          ? (tone as ReplyTone)
+          : undefined,
     });
 
     return NextResponse.json({ reply });

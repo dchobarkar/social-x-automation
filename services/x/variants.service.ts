@@ -1,6 +1,6 @@
 import type { ReplyVariants } from "@/types/ai";
 
-import { generateReplyVariantsForPost } from "@/services/ai/replies/processPost";
+import { generateReplyVariantsForPost } from "@/services/ai/replies/process-post.service";
 
 export const generateXReplyVariants = async (
   tweetText: string,
