@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { Bot, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
 
 import type { FeedApiItem, StoredTweet } from "@/types/x/tweet";
 import SectionLayout from "@/components/ui/SectionLayout";
@@ -44,6 +45,22 @@ const XFeedDashboardClient = ({
   const [feedExcludeRetweets, setFeedExcludeRetweets] = useState(true);
   const [feedMaxReplyCount, setFeedMaxReplyCount] = useState("");
   const [feedMinAuthorFollowers, setFeedMinAuthorFollowers] = useState("");
+  const draftedCount = items.filter((item) =>
+    Boolean(item[item.selected]),
+  ).length;
+  const safeCount = items.filter((item) => {
+    const validation = replyUiByTweetId[item.id]?.validation;
+    return validation?.isSafe;
+  }).length;
+  const averageFollowers =
+    items.length > 0
+      ? Math.round(
+          items.reduce(
+            (sum, item) => sum + (item.author_followers_count ?? 0),
+            0,
+          ) / items.length,
+        )
+      : 0;
 
   const handleLoadFeed = useCallback(async () => {
     setLoadingFeed(true);
@@ -112,10 +129,62 @@ const XFeedDashboardClient = ({
 
   return (
     <SectionLayout padding="none" variant="transparent" as="div">
-      <PageHeader
-        title="Home Feed"
-        description="Load your X home timeline. Tweets are stored in data/x/feed.json. Generate AI reply drafts, then open X to post manually."
-      />
+      <div className="mb-8 overflow-hidden rounded-4xl border border-white/70 bg-white/80 p-6 shadow-(--shadow-soft) backdrop-blur-xl md:p-8">
+        <PageHeader
+          title="Home Feed"
+          description="Review your X timeline in one place, generate reply drafts in context, and move to X only for the final posting step."
+          className="mb-0"
+        />
+
+        <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {[
+            {
+              label: "Saved posts",
+              value: String(items.length),
+              hint: "Current feed workspace",
+              icon: TrendingUp,
+            },
+            {
+              label: "Drafted replies",
+              value: String(draftedCount),
+              hint: "Posts with an active draft",
+              icon: Sparkles,
+            },
+            {
+              label: "Validated safe",
+              value: String(safeCount),
+              hint: "Replies cleared by validation",
+              icon: ShieldCheck,
+            },
+            {
+              label: "Avg followers",
+              value: averageFollowers.toLocaleString(),
+              hint: "Average author reach loaded",
+              icon: Bot,
+            },
+          ].map(({ label, value, hint, icon: Icon }) => (
+            <div
+              key={label}
+              className="rounded-3xl border border-border/70 bg-surface p-4"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/75">
+                    {label}
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold text-foreground">
+                    {value}
+                  </p>
+                </div>
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <Icon className="h-5 w-5" />
+                </div>
+              </div>
+              <p className="mt-3 text-sm text-muted">{hint}</p>
+            </div>
+          ))}
+        </div>
+      </div>
 
       <FeedFilterBox
         className="mb-8"
@@ -135,7 +204,7 @@ const XFeedDashboardClient = ({
         onLoadFeed={handleLoadFeed}
       />
 
-      <FlashMessageBar message={message} />
+      <FlashMessageBar message={message} className="mb-8" />
 
       <TweetListSection
         items={items}

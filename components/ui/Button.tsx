@@ -28,18 +28,21 @@ export type ButtonProps = {
 } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className" | "children">;
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: "bg-primary text-white hover:opacity-90 border-transparent",
-  secondary: "bg-secondary text-white hover:opacity-90 border-transparent",
-  outline: "border border-border bg-background text-foreground hover:bg-border",
-  ghost: "text-foreground hover:bg-border border-transparent",
-  destructive: "text-error hover:bg-error/10 border-transparent",
+  primary:
+    "border-transparent bg-primary text-white shadow-[0_12px_24px_rgba(22,93,245,0.2)] hover:-translate-y-0.5 hover:brightness-105",
+  secondary:
+    "border-transparent bg-secondary text-white shadow-[0_12px_24px_rgba(14,165,164,0.18)] hover:-translate-y-0.5 hover:brightness-105",
+  outline:
+    "border border-border bg-surface text-foreground hover:border-primary/35 hover:bg-primary/5",
+  ghost: "border-transparent text-foreground hover:bg-primary/6",
+  destructive: "border-transparent text-error hover:bg-error/10",
   link: "text-primary underline-offset-4 hover:underline border-transparent p-0 h-auto",
 };
 const sizeClasses: Record<ButtonSize, string> = {
-  default: "h-10 px-4 py-2 text-sm",
-  sm: "h-8 px-3 text-xs",
+  default: "h-11 px-5 py-2.5 text-sm",
+  sm: "h-9 px-4 text-xs",
   lg: "h-12 px-6 text-base",
-  icon: "h-10 w-10 p-0",
+  icon: "h-11 w-11 p-0",
 };
 
 const isExternal = (href: string, external?: boolean): boolean => {
@@ -78,7 +81,7 @@ const Button = ({
   ...rest
 }: ButtonProps) => {
   const base =
-    "inline-flex items-center justify-center gap-2 rounded-button font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-60 disabled:pointer-events-none shrink-0";
+    "inline-flex items-center justify-center gap-2 rounded-button border font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-60 disabled:pointer-events-none shrink-0";
   const combined = cn(
     base,
     variantClasses[variant],

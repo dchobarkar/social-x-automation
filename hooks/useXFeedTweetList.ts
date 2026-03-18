@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { ReplyTone } from "@/types/ai/replies";
 import type { FlashMessage } from "@/types/ui";
@@ -22,6 +22,16 @@ export const useXFeedTweetList = (initialItems: StoredTweet[] = []) => {
   const [replyUiByTweetId, setReplyUiByTweetId] = useState<
     Record<string, XReplyDraftUiState>
   >({});
+  const hasMountedRef = useRef(false);
+
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+
+    void saveXFeedItemsAction(items);
+  }, [items]);
 
   const showMessage = useCallback((type: "success" | "error", text: string) => {
     setMessage({ type, text });
@@ -29,16 +39,11 @@ export const useXFeedTweetList = (initialItems: StoredTweet[] = []) => {
 
   const replaceItems = useCallback((next: StoredTweet[]) => {
     setItems(next);
-    void saveXFeedItemsAction(next);
   }, []);
 
   const updateItems = useCallback(
     (updater: (currentItems: StoredTweet[]) => StoredTweet[]) => {
-      setItems((prev) => {
-        const next = updater(prev);
-        void saveXFeedItemsAction(next);
-        return next;
-      });
+      setItems((prev) => updater(prev));
     },
     [],
   );

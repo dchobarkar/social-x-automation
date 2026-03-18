@@ -24,12 +24,21 @@ const XDashboardLayoutShell = async ({
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <XSidebar />
 
-      <main className="flex-1 flex flex-col md:pl-64 min-h-screen">
+      <main className="relative flex min-h-screen flex-1 flex-col md:pl-72">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -left-40 -top-48 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+          <div className="absolute -right-24 top-20 h-72 w-72 rounded-full bg-secondary/10 blur-3xl" />
+        </div>
+
         <XNavbar signOutAction={signOutAction} />
 
-        <XDashboardFlashClient />
+        <div className="relative z-10 px-4 pt-4 md:px-6 lg:px-8">
+          <XDashboardFlashClient />
+        </div>
 
-        <div className="flex-1 p-4 md:p-6 lg:p-8">{children}</div>
+        <div className="relative z-10 flex-1 px-4 pb-6 pt-4 md:px-6 lg:px-8">
+          {children}
+        </div>
 
         <Footer />
       </main>

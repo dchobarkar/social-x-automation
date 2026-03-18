@@ -59,18 +59,18 @@ const TweetCard = ({
   };
 
   return (
-    <article className="relative rounded-card border border-border/80 bg-background p-4 shadow-sm transition-shadow hover:shadow-md">
+    <article className="relative rounded-[28px] border border-white/70 bg-white/85 p-4 shadow-(--shadow-card) transition-all hover:-translate-y-0.5 hover:shadow-(--shadow-soft) sm:p-5">
       <button
         type="button"
         onClick={() => setDeleteConfirmOpen(true)}
-        className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-button border border-error/20 bg-error/10 text-error transition-colors hover:bg-error/20 focus:outline-none focus:ring-2 focus:ring-error/30"
+        className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-button border border-error/20 bg-white text-error transition-colors hover:bg-error/10 focus:outline-none focus:ring-2 focus:ring-error/30"
         aria-label="Delete tweet"
         title="Delete tweet"
       >
         <Trash2 className="h-4 w-4" />
       </button>
 
-      <div className="flex gap-3">
+      <div className="flex gap-4">
         <div className="shrink-0">
           {item.author_profile_image_url ? (
             <Image
@@ -78,11 +78,11 @@ const TweetCard = ({
               alt=""
               width={44}
               height={44}
-              className="h-11 w-11 rounded-full object-cover ring-1 ring-border/50"
+              className="h-12 w-12 rounded-full object-cover ring-2 ring-white"
             />
           ) : (
             <div
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-base font-semibold text-primary"
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-base font-semibold text-primary"
               aria-hidden
             >
               {initial}
@@ -91,10 +91,10 @@ const TweetCard = ({
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
+          <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
             <span className="font-semibold text-foreground">{displayName}</span>
             {item.author_username != null && (
-              <span className="text-sm text-muted">
+              <span className="rounded-full bg-primary/5 px-2 py-0.5 text-sm text-primary">
                 @{item.author_username}
               </span>
             )}
@@ -105,14 +105,17 @@ const TweetCard = ({
           </div>
 
           {(item.author_followers_count != null || item.id) && (
-            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted">
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
               {item.author_followers_count != null && (
-                <span>
+                <span className="rounded-full border border-border/70 bg-surface-strong px-2.5 py-1 text-muted">
                   {formatFollowerNumber(item.author_followers_count)} followers
                 </span>
               )}
 
-              <span className="font-mono" title="Tweet ID">
+              <span
+                className="rounded-full border border-border/70 bg-surface-strong px-2.5 py-1 font-mono text-muted"
+                title="Tweet ID"
+              >
                 {item.id}
               </span>
             </div>
@@ -121,7 +124,7 @@ const TweetCard = ({
           <div className="mt-2">
             <p
               className={cn(
-                "text-[15px] text-foreground leading-snug whitespace-pre-wrap wrap-break-word",
+                "text-[15px] leading-7 text-foreground whitespace-pre-wrap wrap-break-word",
                 showCollapsed && "line-clamp-4",
               )}
             >
@@ -132,7 +135,7 @@ const TweetCard = ({
               <button
                 type="button"
                 onClick={() => setExpanded((value) => !value)}
-                className="mt-0.5 text-sm text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-1 rounded"
+                className="mt-1 rounded text-sm text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-1"
               >
                 {expanded ? "Show less" : "Show more"}
               </button>
@@ -145,21 +148,21 @@ const TweetCard = ({
             (item.public_metrics.reply_count != null ||
               item.public_metrics.retweet_count != null ||
               item.public_metrics.like_count != null) && (
-              <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted">
+              <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted">
                 {item.public_metrics.reply_count != null && (
-                  <span className="inline-flex items-center gap-1">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-surface-strong px-2.5 py-1">
                     <MessageCircle className="h-3.5 w-3.5" />
                     {item.public_metrics.reply_count}
                   </span>
                 )}
                 {item.public_metrics.retweet_count != null && (
-                  <span className="inline-flex items-center gap-1">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-surface-strong px-2.5 py-1">
                     <Repeat2 className="h-3.5 w-3.5" />
                     {item.public_metrics.retweet_count}
                   </span>
                 )}
                 {item.public_metrics.like_count != null && (
-                  <span className="inline-flex items-center gap-1">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-surface-strong px-2.5 py-1">
                     <Heart className="h-3.5 w-3.5" />
                     {item.public_metrics.like_count}
                   </span>

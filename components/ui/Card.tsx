@@ -3,7 +3,7 @@ import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/utils/cn";
 
 const rootClasses =
-  "rounded-card border border-border bg-background text-foreground shadow-sm";
+  "rounded-card border border-border/70 bg-surface text-foreground shadow-[var(--shadow-card)]";
 
 export type CardProps = HTMLAttributes<HTMLDivElement> & {
   className?: string;

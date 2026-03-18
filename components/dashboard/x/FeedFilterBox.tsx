@@ -45,8 +45,8 @@ const FeedFilterBox = ({
 }: FeedFilterBoxProps) => {
   return (
     <Card className={className}>
-      <div className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="space-y-6">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Select
             label="Posted in last"
             value={feedLastHours === "" ? "" : String(feedLastHours)}
@@ -63,6 +63,7 @@ const FeedFilterBox = ({
                 label: `${h} hour${h !== 1 ? "s" : ""}`,
               })),
             ]}
+            description="Use a time window when you want fresher posts."
           />
 
           <Input
@@ -84,6 +85,7 @@ const FeedFilterBox = ({
               )
             }
             name="feedMaxResults"
+            description="A smaller batch is easier to scan and draft quickly."
           />
 
           <Input
@@ -92,6 +94,7 @@ const FeedFilterBox = ({
             value={feedMaxReplyCount}
             onChange={(e) => setFeedMaxReplyCount(e.target.value)}
             name="feedMaxReplyCount"
+            description="Good for finding posts that are still open for replies."
           />
 
           <Input
@@ -100,23 +103,28 @@ const FeedFilterBox = ({
             value={feedMinAuthorFollowers}
             onChange={(e) => setFeedMinAuthorFollowers(e.target.value)}
             name="feedMinAuthorFollowers"
+            description="Use this if you want to bias toward higher reach accounts."
           />
         </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-4">
-          <Checkbox
-            name="feedExcludeReplies"
-            label="Exclude replies"
-            checked={feedExcludeReplies}
-            onChange={(e) => setFeedExcludeReplies(e.target.checked)}
-          />
+        <div className="flex flex-col gap-4 rounded-3xl border border-border/70 bg-surface-strong p-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap gap-5">
+            <Checkbox
+              name="feedExcludeReplies"
+              label="Exclude replies"
+              checked={feedExcludeReplies}
+              onChange={(e) => setFeedExcludeReplies(e.target.checked)}
+              description="Keep the list focused on top-level posts."
+            />
 
-          <Checkbox
-            name="feedExcludeRetweets"
-            label="Exclude retweets"
-            checked={feedExcludeRetweets}
-            onChange={(e) => setFeedExcludeRetweets(e.target.checked)}
-          />
+            <Checkbox
+              name="feedExcludeRetweets"
+              label="Exclude reposts"
+              checked={feedExcludeRetweets}
+              onChange={(e) => setFeedExcludeRetweets(e.target.checked)}
+              description="Helpful when you only want original content."
+            />
+          </div>
 
           <Button onClick={onLoadFeed} disabled={loadingFeed}>
             {loadingFeed ? "Loading feed…" : "Load feed"}

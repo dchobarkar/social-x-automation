@@ -35,10 +35,10 @@ const PlatformCard = ({
         title={title}
         description={description}
         className={cn(
-          "h-full transition-colors",
+          "h-full border-white/70 bg-white/80 transition-all backdrop-blur-sm",
           muted
-            ? "hover:border-border"
-            : "hover:border-primary/50 hover:shadow-md",
+            ? "hover:border-border hover:bg-white"
+            : "hover:-translate-y-1 hover:border-primary/30 hover:shadow-(--shadow-soft)",
         )}
       >
         <span

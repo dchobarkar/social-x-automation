@@ -62,16 +62,23 @@ const TweetReplyDraftPanel = ({
   ).map(([tone, label]) => ({ tone, label }));
 
   return (
-    <div className="mt-4 pt-4 border-t border-border space-y-3">
+    <div className="mt-5 space-y-4 rounded-[28px] border border-primary/10 bg-primary/5 p-4 sm:p-5">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-medium">Reply options</span>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/75">
+            Draft workspace
+          </p>
+          <span className="text-sm font-medium">
+            Pick a tone and refine the reply
+          </span>
+        </div>
 
         <Button variant="ghost" size="sm" type="button" onClick={onCloseReply}>
           <X />
         </Button>
       </div>
 
-      <div className="text-xs text-muted">
+      <div className="rounded-3xl border border-white/70 bg-white/80 p-3 text-xs text-muted">
         {analysisLoading ? (
           <span>Analyzing post tone…</span>
         ) : analysisTone || analysisIntent ? (
@@ -96,27 +103,37 @@ const TweetReplyDraftPanel = ({
       </div>
 
       <div className="flex flex-col gap-3">
-        <div className="flex flex-wrap gap-3">
-          {tones.map(({ tone, label }) => (
-            <label
-              key={tone}
-              htmlFor={`${tone}-${item.id}`}
-              className="inline-flex items-center gap-2 text-sm"
-            >
-              <input
-                id={`${tone}-${item.id}`}
-                type="radio"
-                name={`choice-${item.id}`}
-                checked={item.selected === tone}
-                onChange={() => {
-                  onSelectionChange(tone);
-                  onToneChange(tone);
-                }}
-                className="rounded-full border-border text-primary focus:ring-primary/30"
-              />
-              <span className="font-medium">{label}</span>
-            </label>
-          ))}
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+            Reply tone
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {tones.map(({ tone, label }) => (
+              <label
+                key={tone}
+                htmlFor={`${tone}-${item.id}`}
+                className={cn(
+                  "inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-2 text-sm",
+                  item.selected === tone
+                    ? "border-primary bg-primary text-white shadow-[0_10px_24px_rgba(22,93,245,0.18)]"
+                    : "border-border bg-white text-foreground hover:border-primary/30 hover:bg-primary/5",
+                )}
+              >
+                <input
+                  id={`${tone}-${item.id}`}
+                  type="radio"
+                  name={`choice-${item.id}`}
+                  checked={item.selected === tone}
+                  onChange={() => {
+                    onSelectionChange(tone);
+                    onToneChange(tone);
+                  }}
+                  className="sr-only"
+                />
+                <span className="font-medium">{label}</span>
+              </label>
+            ))}
+          </div>
         </div>
 
         <Textarea
@@ -125,6 +142,8 @@ const TweetReplyDraftPanel = ({
           onChange={(e) => onReplyChange(e.target.value)}
           placeholder={X_REPLY_DRAFT_PLACEHOLDERS[item.selected]}
           name={`reply-${item.id}`}
+          className="rounded-[22px]"
+          description="Edit the draft before you open X. Nothing is posted automatically."
         />
       </div>
 
@@ -132,7 +151,7 @@ const TweetReplyDraftPanel = ({
         <Button
           size="sm"
           type="button"
-          variant="secondary"
+          variant="primary"
           onClick={onGenerate}
           disabled={isLoadingReply}
         >
@@ -151,7 +170,7 @@ const TweetReplyDraftPanel = ({
       </div>
 
       {validation ? (
-        <div className="mt-2 rounded-card border border-border/60 bg-muted/40 p-3 text-xs">
+        <div className="mt-2 rounded-3xl border border-border/60 bg-white/80 p-3 text-xs">
           <div>
             Validation: {validation.isSafe ? "Safe" : "Not safe"} • Score{" "}
             {validation.score}
