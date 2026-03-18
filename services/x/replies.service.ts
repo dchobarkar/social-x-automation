@@ -3,10 +3,9 @@ import type {
   PostAnalysis,
   ReplyTone,
   ReplyValidation,
-} from "@/services/ai/replies/types";
+} from "@/types/ai/replies";
 import { analyzePost } from "@/services/ai/replies/analyze-post.service";
 import {
-  generateSingleReplyForPost,
   generateSingleReplyForPostWithValidation,
 } from "@/services/ai/replies/process-post.service";
 
@@ -19,16 +18,6 @@ export type GenerateXReplyInput = {
 
 export type AnalyzeXPostInput = {
   post: string;
-};
-
-export const generateXReplyForPost = async ({
-  post,
-  tone,
-}: GenerateXReplyInput): Promise<string> => {
-  if (!process.env.OPENAI_API_KEY)
-    throw new Error("OPENAI_API_KEY is not set in .env.local");
-
-  return generateSingleReplyForPost(post, PLATFORM_X, tone);
 };
 
 export const generateXReplyForPostWithValidation = async ({

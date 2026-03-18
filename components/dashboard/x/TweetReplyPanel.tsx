@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 
 import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
-import type { ReplyTone, ReplyValidation } from "@/services/ai/replies/types";
+import type { ReplyTone, ReplyValidation } from "@/types/ai/replies";
 import Button from "@/components/ui/Button";
 import Textarea from "@/components/form/Textarea";
 import { buildTwitterReplyIntent } from "@/constants/x/dashboard";
@@ -190,9 +190,7 @@ const TweetReplyPanel = ({
             {validation.score}
           </div>
           {validation.issues && validation.issues.length > 0 && (
-            <div className="mt-1">
-              Issues: {validation.issues.join(" • ")}
-            </div>
+            <div className="mt-1">Issues: {validation.issues.join(" • ")}</div>
           )}
         </div>
       ) : validationLoading ? (

@@ -1,6 +1,6 @@
-import type { PlatformId, PostAnalysis } from "./types";
+import type { PlatformId, PostAnalysis } from "@/types/ai/replies";
 import { getOpenAI } from "@/integrations/openai/client";
-import { getAnalyzePostPrompt } from "./prompts";
+import { getAnalyzePostPrompt } from "@/constants/ai/replies/prompts";
 
 export const analyzePost = async (
   content: string,

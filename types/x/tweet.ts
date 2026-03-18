@@ -1,6 +1,5 @@
 // X app-level tweet types: stored shape, API response shapes, and reply variants.
-import type { ReplyTone } from "@/services/ai/replies/types";
-import type { XTweet } from "./api";
+import type { ReplyTone } from "@/types/ai/replies";
 
 export type TweetMetrics = {
   reply_count?: number;
@@ -47,11 +46,4 @@ export type FeedApiItem = {
   public_metrics?: TweetMetrics;
   author_metrics?: { followers_count?: number };
   media?: TweetMedia[];
-};
-
-/** Search-with-replies API response: tweet plus generated reply variants. */
-export type SearchWithRepliesItem = {
-  tweet: XTweet;
-  humorous: string;
-  insightful: string;
 };

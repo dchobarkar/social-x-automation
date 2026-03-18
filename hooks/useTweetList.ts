@@ -3,10 +3,7 @@
 import { useCallback, useState } from "react";
 
 import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
-import type {
-  ReplyTone,
-  ReplyValidation,
-} from "@/services/ai/replies/types";
+import type { ReplyTone, ReplyValidation } from "@/types/ai/replies";
 import type { FlashMessage } from "@/types/ui";
 import { ROUTES } from "@/constants/routes";
 import { postJson } from "@/utils/http";
@@ -229,9 +226,7 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
   const handlePostFor = useCallback(
     async (id: string) => {
       const tweet = items.find((t) => t.id === id);
-      const chosenText = tweet
-        ? (tweet[tweet.selected] ?? "").toString()
-        : "";
+      const chosenText = tweet ? (tweet[tweet.selected] ?? "").toString() : "";
       if (!chosenText?.trim()) {
         showMessage("error", "Reply is empty.");
         return;

@@ -1,4 +1,4 @@
-import type { PostIntent, ReplyTone } from "./types";
+import type { PostIntent, ReplyTone } from "@/types/ai/replies";
 
 export const suggestTones = (intent: PostIntent): ReplyTone[] => {
   const map: Record<PostIntent, ReplyTone[]> = {

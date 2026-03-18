@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { generateXReplyForPostWithValidation } from "@/services/x/replies.service";
-import type { ReplyTone } from "@/services/ai/replies/types";
+import type { ReplyTone } from "@/types/ai/replies";
 
 const ALLOWED_TONES: ReplyTone[] = [
   "helpful",

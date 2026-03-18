@@ -1,11 +1,9 @@
 import type {
   HomeTimelineOptions,
-  XReferencedTweet,
-  XTweetPublicMetrics,
   XTweetWithMetrics,
-  XUserPublicMetrics,
 } from "@/types/x/api";
 import type { XMedia } from "@/types/x/api";
+import type { XHomeTimelineResponse } from "@/types/x/timeline";
 import { getTokens } from "@/lib/storage/tokenStore";
 import {
   TIMELINE_TWEET_FIELDS,
@@ -61,43 +59,14 @@ export const getHomeTimeline = async (
     const err = await res.text();
     throw new Error(`X API timeline error: ${res.status} ${err}`);
   }
-  const json = (await res.json()) as {
-    data?: Array<{
-      id: string;
-      text: string;
-      author_id?: string;
-      created_at?: string;
-      conversation_id?: string;
-      lang?: string;
-      referenced_tweets?: XReferencedTweet[];
-      public_metrics?: XTweetPublicMetrics;
-      attachments?: { media_keys?: string[] };
-    }>;
-    includes?: {
-      users?: Array<{
-        id: string;
-        username?: string;
-        name?: string;
-        profile_image_url?: string;
-        public_metrics?: XUserPublicMetrics;
-      }>;
-      media?: Array<{
-        media_key: string;
-        type: string;
-        url?: string;
-        preview_image_url?: string;
-        width?: number;
-        height?: number;
-      }>;
-    };
-  };
+  const json = (await res.json()) as XHomeTimelineResponse;
   const tweets = json.data ?? [];
   const usersById = new Map((json.includes?.users ?? []).map((u) => [u.id, u]));
   const mediaByKey = new Map(
     (json.includes?.media ?? []).map((m) => [
       m.media_key,
       {
-        type: m.type as XMedia["type"],
+        type: m.type,
         url: m.url,
         preview_image_url: m.preview_image_url,
         width: m.width,

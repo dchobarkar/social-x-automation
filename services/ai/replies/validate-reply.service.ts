@@ -1,7 +1,6 @@
+import type { PlatformId, ReplyValidation } from "@/types/ai/replies";
 import { getOpenAI } from "@/integrations/openai/client";
-
-import type { PlatformId, ReplyValidation } from "./types";
-import { getValidateReplyPrompt } from "./prompts";
+import { getValidateReplyPrompt } from "@/constants/ai/replies/prompts";
 
 export const validateReply = async (
   reply: string,

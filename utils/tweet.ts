@@ -1,9 +1,4 @@
-import type {
-  StoredTweet,
-  FeedApiItem,
-  SearchWithRepliesItem,
-  VariantChoice,
-} from "@/types/x/tweet";
+import type { StoredTweet, FeedApiItem } from "@/types/x/tweet";
 
 /**
  * Merge newly fetched feed items with existing stored items.
@@ -36,15 +31,4 @@ export const mapFeedApiItemsToStored = (raw: FeedApiItem[]): StoredTweet[] =>
     public_metrics: item.public_metrics,
     author_followers_count: item.author_metrics?.followers_count,
     media: item.media,
-  }));
-
-export const mapSearchWithRepliesToStored = (
-  items: SearchWithRepliesItem[],
-): StoredTweet[] =>
-  items.map((item) => ({
-    id: item.tweet.id,
-    text: item.tweet.text,
-    helpful: item.humorous,
-    insightful: item.insightful,
-    selected: "insightful" as VariantChoice,
   }));
