@@ -3,7 +3,10 @@
 import { useCallback, useState } from "react";
 
 import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
-import type { ReplyTone } from "@/services/ai/replies/types";
+import type {
+  ReplyTone,
+  ReplyValidation,
+} from "@/services/ai/replies/types";
 import type { FlashMessage } from "@/types/ui";
 import { ROUTES } from "@/constants/routes";
 import { postJson } from "@/utils/http";
@@ -15,13 +18,15 @@ type SaveEndpoint =
 
 export type ReplyUIState = {
   tone?: ReplyTone;
-  reply?: string;
   loading?: boolean;
   analysisTone?: string;
   analysisIntent?: string;
   analysisTopics?: string[];
   analysisLoading?: boolean;
   analysisError?: string;
+  validation?: ReplyValidation;
+  validationLoading?: boolean;
+  validationError?: string;
 };
 
 export const useTweetList = (saveEndpoint: SaveEndpoint) => {
@@ -83,13 +88,15 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
         ...prev,
         [item.id]: {
           tone: prev[item.id]?.tone ?? item.selected ?? "insightful",
-          reply: prev[item.id]?.reply,
           loading: false,
           analysisTone: prev[item.id]?.analysisTone,
           analysisIntent: prev[item.id]?.analysisIntent,
           analysisTopics: prev[item.id]?.analysisTopics,
           analysisLoading: prev[item.id]?.analysisLoading ?? true,
           analysisError: undefined,
+          validation: undefined,
+          validationLoading: false,
+          validationError: undefined,
         },
       }));
 
@@ -141,13 +148,6 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
     }));
   }, []);
 
-  const setReplyText = useCallback((id: string, text: string) => {
-    setReplyUI((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], reply: text },
-    }));
-  }, []);
-
   const generateReplyForId = useCallback(
     async (id: string) => {
       const item = items.find((i) => i.id === id);
@@ -158,27 +158,59 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
 
       setReplyUI((prev) => ({
         ...prev,
-        [id]: { ...prev[id], loading: true },
+        [id]: { ...prev[id], loading: true, validationLoading: true },
       }));
       setMessage(null);
 
       try {
         const { res, data } = await postJson<{
           reply?: string;
+          validation?: ReplyValidation;
+          tone?: ReplyTone;
           error?: string;
         }>(ROUTES.API_X_REPLIES_GENERATE, { post: item.text, tone });
-        if (!res.ok || !data.reply) {
+
+        const toneUsed = (data.tone ?? tone) as ReplyTone;
+
+        if (data.reply) {
+          setItems((prev) =>
+            prev.map((tweet) =>
+              tweet.id === id ? { ...tweet, [toneUsed]: data.reply } : tweet,
+            ),
+          );
+        }
+
+        if (data.validation) {
+          setReplyUI((prev) => ({
+            ...prev,
+            [id]: {
+              ...prev[id],
+              tone: toneUsed,
+              validation: data.validation,
+              validationLoading: false,
+              loading: false,
+            },
+          }));
+        } else {
+          // Backend should always return validation, but keep a safe fallback.
+          setReplyUI((prev) => ({
+            ...prev,
+            [id]: {
+              ...prev[id],
+              tone: toneUsed,
+              validationLoading: false,
+              loading: false,
+            },
+          }));
+        }
+
+        if (!res.ok) {
+          if (data.validation) {
+            // Validation response is already stored; don't throw.
+            return;
+          }
           throw new Error(data.error ?? "Generate reply failed");
         }
-        setItems((prev) =>
-          prev.map((tweet) =>
-            tweet.id === id ? { ...tweet, [tone]: data.reply } : tweet,
-          ),
-        );
-        setReplyUI((prev) => ({
-          ...prev,
-          [id]: { ...prev[id], tone, reply: data.reply, loading: false },
-        }));
       } catch (e) {
         showMessage(
           "error",
@@ -186,7 +218,7 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
         );
         setReplyUI((prev) => ({
           ...prev,
-          [id]: { ...prev[id], loading: false },
+          [id]: { ...prev[id], loading: false, validationLoading: false },
         }));
       } finally {
         setLoadingReplyForId(null);
@@ -196,8 +228,10 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
   );
   const handlePostFor = useCallback(
     async (id: string) => {
-      const ui = replyUI[id];
-      const chosenText = ui?.reply;
+      const tweet = items.find((t) => t.id === id);
+      const chosenText = tweet
+        ? (tweet[tweet.selected] ?? "").toString()
+        : "";
       if (!chosenText?.trim()) {
         showMessage("error", "Reply is empty.");
         return;
@@ -229,7 +263,7 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
         setPostingForId(null);
       }
     },
-    [items, replyUI, saveEndpoint, showMessage],
+    [items, saveEndpoint, showMessage],
   );
 
   return {
@@ -249,7 +283,6 @@ export const useTweetList = (saveEndpoint: SaveEndpoint) => {
     handlePostFor,
     updateItem,
     setReplyTone,
-    setReplyText,
     generateReplyForId,
   };
 };

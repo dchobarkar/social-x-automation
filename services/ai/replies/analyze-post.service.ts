@@ -28,8 +28,8 @@ export const analyzePost = async (
 
   const data = parsed as Partial<PostAnalysis>;
   return {
-    tone: data.tone ?? "neutral",
-    intent: data.intent ?? "discussion",
+    tone: data.tone ?? "unknown",
+    intent: data.intent ?? "unknown",
     topics: Array.isArray(data.topics) ? data.topics : [],
   };
 };

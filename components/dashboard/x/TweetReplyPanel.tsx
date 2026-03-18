@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 
 import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
-import type { ReplyTone } from "@/services/ai/replies/types";
+import type { ReplyTone, ReplyValidation } from "@/services/ai/replies/types";
 import Button from "@/components/ui/Button";
 import Textarea from "@/components/form/Textarea";
 import { buildTwitterReplyIntent } from "@/constants/x/dashboard";
@@ -28,6 +28,9 @@ export type TweetReplyPanelProps = {
   analysisIntent?: string;
   analysisLoading?: boolean;
   analysisError?: string;
+  analysisTopics?: string[];
+  validation?: ReplyValidation;
+  validationLoading?: boolean;
   onCloseReply: () => void;
   onSelectionChange: (choice: VariantChoice) => void;
   onToneChange: (tone: ReplyTone) => void;
@@ -45,6 +48,9 @@ const TweetReplyPanel = ({
   analysisIntent,
   analysisLoading,
   analysisError,
+  analysisTopics,
+  validation,
+  validationLoading,
   onCloseReply,
   onSelectionChange,
   onToneChange,
@@ -58,7 +64,10 @@ const TweetReplyPanel = ({
     const value = item[item.selected];
     return (value ?? "").trim();
   })();
-  const canPost = Boolean(selectedText);
+  const hasReplyText = Boolean(selectedText);
+  const canPost = hasReplyText && (validation?.isSafe ?? true);
+
+  const topicPreview = (analysisTopics ?? []).slice(0, 5).join(", ");
 
   const tones: { tone: ReplyTone; label: string }[] = [
     { tone: "helpful", label: REPLY_VARIANT_HELPFUL },
@@ -101,6 +110,12 @@ const TweetReplyPanel = ({
 
         {analysisError && (
           <span className="ml-2 text-error">({analysisError})</span>
+        )}
+        {analysisTopics && analysisTopics.length > 0 && (
+          <span className="ml-2">
+            • Topics: {topicPreview}
+            {analysisTopics.length > 5 ? "…" : ""}
+          </span>
         )}
       </div>
 
@@ -162,11 +177,27 @@ const TweetReplyPanel = ({
           size="sm"
           href={buildTwitterReplyIntent(item.id, selectedText)}
           external
-          className={cn(!canPost && "opacity-50 pointer-events-none")}
+          className={cn(!hasReplyText && "opacity-50 pointer-events-none")}
         >
           Open in X to post
         </Button>
       </div>
+
+      {validation ? (
+        <div className="mt-2 rounded-card border border-border/60 bg-muted/40 p-3 text-xs">
+          <div>
+            Validation: {validation.isSafe ? "Safe" : "Not safe"} • Score{" "}
+            {validation.score}
+          </div>
+          {validation.issues && validation.issues.length > 0 && (
+            <div className="mt-1">
+              Issues: {validation.issues.join(" • ")}
+            </div>
+          )}
+        </div>
+      ) : validationLoading ? (
+        <div className="mt-2 text-xs text-muted">Validating…</div>
+      ) : null}
 
       <p className="mt-1.5 text-xs text-muted">
         Use “Open in X to post” when the API reply is not allowed.

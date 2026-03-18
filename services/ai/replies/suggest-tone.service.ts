@@ -7,6 +7,7 @@ export const suggestTones = (intent: PostIntent): ReplyTone[] => {
     discussion: ["insightful", "empathetic"],
     hiring: ["professional"],
     promotion: ["witty", "insightful"],
+    unknown: ["insightful"],
   };
 
   return map[intent] ?? ["insightful"];

@@ -5,15 +5,15 @@ You are analyzing a ${platform} post and must return JSON only.
 
 Return:
 {
-  "tone": "neutral | excited | angry | curious | informative",
-  "intent": "question | opinion | discussion | hiring | promotion",
+  "tone": "neutral | excited | angry | curious | informative | unknown",
+  "intent": "question | opinion | discussion | hiring | promotion | unknown",
   "topics": ["string"]
 }
 
 Rules:
 - Be concise.
 - Do not hallucinate topics.
-- If unsure, fall back to "neutral" tone and "discussion" intent.
+- If unsure, fall back to "unknown" tone and "unknown" intent.
 `;
 
 export const getGenerateReplyPrompt = (platform: PlatformId): string => `

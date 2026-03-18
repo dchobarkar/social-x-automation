@@ -15,9 +15,28 @@ export const POST = async (request: NextRequest) => {
     }
 
     const variants = await generateXReplyVariants(tweetText.trim());
+
+    // Backward-compatible mapping to the legacy response shape.
+    // "humorous" roughly maps to "witty".
+    const humorous =
+      variants.witty ??
+      variants.helpful ??
+      variants.insightful ??
+      variants.empathetic ??
+      variants.professional ??
+      "";
+
+    const insightful =
+      variants.insightful ??
+      variants.professional ??
+      variants.helpful ??
+      variants.empathetic ??
+      variants.witty ??
+      "";
+
     return NextResponse.json({
-      humorous: variants.humorous,
-      insightful: variants.insightful,
+      humorous,
+      insightful,
     });
   } catch (err) {
     const message =

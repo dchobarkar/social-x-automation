@@ -8,11 +8,15 @@ import { validateReply } from "./validate-reply.service";
 
 const pickTone = (tones: ReplyTone[]): ReplyTone => tones[0] ?? "insightful";
 
-export const generateSingleReplyForPost = async (
+export const generateSingleReplyForPostWithValidation = async (
   post: string,
   platform: PlatformId,
   forcedTone?: ReplyTone,
-): Promise<string> => {
+): Promise<{
+  reply: string;
+  tone: ReplyTone;
+  validation: Awaited<ReturnType<typeof validateReply>>;
+}> => {
   const analysis = await analyzePost(post, platform);
   const tones = suggestTones(analysis.intent);
   const tone = forcedTone ?? pickTone(tones);
@@ -25,6 +29,21 @@ export const generateSingleReplyForPost = async (
   });
 
   const validation = await validateReply(reply, post, platform);
+
+  return { reply, tone, validation };
+};
+
+export const generateSingleReplyForPost = async (
+  post: string,
+  platform: PlatformId,
+  forcedTone?: ReplyTone,
+): Promise<string> => {
+  const { reply, validation } = await generateSingleReplyForPostWithValidation(
+    post,
+    platform,
+    forcedTone,
+  );
+
   if (!validation.isSafe) throw new Error("Reply failed validation");
 
   return reply;

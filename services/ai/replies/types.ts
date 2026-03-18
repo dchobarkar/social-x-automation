@@ -3,14 +3,16 @@ export type PostTone =
   | "excited"
   | "angry"
   | "curious"
-  | "informative";
+  | "informative"
+  | "unknown";
 
 export type PostIntent =
   | "question"
   | "opinion"
   | "discussion"
   | "hiring"
-  | "promotion";
+  | "promotion"
+  | "unknown";
 
 export type ReplyTone =
   | "helpful"
