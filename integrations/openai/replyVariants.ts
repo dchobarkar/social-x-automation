@@ -48,10 +48,30 @@ export const generateReplyVariants = async (
   }
 
   const obj = parsed as Partial<ReplyVariants>;
-  const humorous = (obj.humorous ?? "").toString().trim();
-  const insightful = (obj.insightful ?? "").toString().trim();
 
-  if (!humorous || !insightful)
-    throw new Error("OpenAI variants missing humorous or insightful reply");
-  return { humorous, insightful };
+  const coerce = (value: unknown): string | undefined => {
+    if (typeof value !== "string") return undefined;
+    const trimmed = value.trim();
+    return trimmed || undefined;
+  };
+
+  const variants: ReplyVariants = {
+    helpful: coerce(obj.helpful),
+    insightful: coerce(obj.insightful),
+    witty: coerce(obj.witty),
+    empathetic: coerce(obj.empathetic),
+    professional: coerce(obj.professional),
+  };
+
+  if (
+    !variants.helpful &&
+    !variants.insightful &&
+    !variants.witty &&
+    !variants.empathetic &&
+    !variants.professional
+  ) {
+    throw new Error("OpenAI variants missing all reply tones");
+  }
+
+  return variants;
 };

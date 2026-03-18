@@ -28,7 +28,7 @@ export const mapFeedApiItemsToStored = (raw: FeedApiItem[]): StoredTweet[] =>
   raw.map((item) => ({
     id: item.id,
     text: item.text,
-    selected: "humorous",
+    selected: "insightful",
     author_username: item.author_username,
     author_name: item.author_name,
     author_profile_image_url: item.author_profile_image_url,
@@ -44,7 +44,7 @@ export const mapSearchWithRepliesToStored = (
   items.map((item) => ({
     id: item.tweet.id,
     text: item.tweet.text,
-    humorous: item.humorous,
+    helpful: item.humorous,
     insightful: item.insightful,
-    selected: "humorous" as VariantChoice,
+    selected: "insightful" as VariantChoice,
   }));

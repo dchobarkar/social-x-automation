@@ -13,8 +13,8 @@ export const searchTweetsWithReplyVariants = async (
     const variants = await generateReplyVariants(tweet.text);
     items.push({
       tweet,
-      humorous: variants.humorous,
-      insightful: variants.insightful,
+      humorous: variants.witty ?? variants.helpful ?? "",
+      insightful: variants.insightful ?? variants.professional ?? "",
     });
   }
 

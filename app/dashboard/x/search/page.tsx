@@ -31,11 +31,12 @@ const SearchPage = () => {
     replyingToId,
     setReplyingToId,
     postingForId,
+    replyUI,
     handleChangeSelection,
     handleDeleteTweet,
     handleReplyClick,
     handlePostFor,
-    updateItem,
+    generateReplyForId,
   } = useTweetList(ROUTES.API_X_SEARCH_SAVED);
 
   const [query, setQuery] = useState("");
@@ -127,18 +128,29 @@ const SearchPage = () => {
       <TweetListSection
         items={items}
         title="Results"
-        description="Click Reply to regenerate options. Delete removes from list."
         loadingReplyForId={loadingReplyForId}
         replyingToId={replyingToId}
         postingForId={postingForId}
+        replyUI={replyUI}
         onReplyClick={handleReplyClick}
         onCloseReply={() => setReplyingToId(null)}
         onDelete={handleDeleteTweet}
         onSelectionChange={handleChangeSelection}
-        onHumorousChange={(id, value) => updateItem(id, { humorous: value })}
-        onInsightfulChange={(id, value) =>
-          updateItem(id, { insightful: value })
+        onToneChange={(id, tone) =>
+          setItems((prev) =>
+            prev.map((item) =>
+              item.id === id ? { ...item, selected: tone } : item,
+            ),
+          )
         }
+        onReplyChange={(id, value) =>
+          setItems((prev) =>
+            prev.map((item) =>
+              item.id === id ? { ...item, [item.selected]: value } : item,
+            ),
+          )
+        }
+        onGenerate={generateReplyForId}
         onPostReply={handlePostFor}
         className="mb-8"
       />

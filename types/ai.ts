@@ -1,8 +1,11 @@
 /**
- * AI-generated reply variants (e.g. from OpenAI).
- * Shared shape for any platform that uses humorous/insightful reply generation.
+ * AI-generated reply variants keyed by reply tone.
+ * This is generic across platforms and tones.
  */
 export type ReplyVariants = {
-  humorous: string;
-  insightful: string;
+  helpful?: string;
+  insightful?: string;
+  witty?: string;
+  empathetic?: string;
+  professional?: string;
 };

@@ -1,4 +1,5 @@
 import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
+import type { ReplyUIState } from "@/hooks/useTweetList";
 import Card from "@/components/ui/Card";
 import TweetCard from "./TweetCard";
 
@@ -8,12 +9,14 @@ export type TweetListSectionProps = {
   loadingReplyForId: string | null;
   replyingToId: string | null;
   postingForId: string | null;
+  replyUI: Record<string, ReplyUIState>;
   onReplyClick: (item: StoredTweet) => void;
   onCloseReply: () => void;
   onDelete: (id: string) => void;
   onSelectionChange: (id: string, choice: VariantChoice) => void;
-  onHumorousChange: (id: string, value: string) => void;
-  onInsightfulChange: (id: string, value: string) => void;
+  onToneChange: (id: string, tone: VariantChoice) => void;
+  onReplyChange: (id: string, value: string) => void;
+  onGenerate: (id: string) => void;
   onPostReply: (id: string) => void;
   className?: string;
 };
@@ -24,12 +27,14 @@ const TweetListSection = ({
   loadingReplyForId,
   replyingToId,
   postingForId,
+  replyUI,
   onReplyClick,
   onCloseReply,
   onDelete,
   onSelectionChange,
-  onHumorousChange,
-  onInsightfulChange,
+  onToneChange,
+  onReplyChange,
+  onGenerate,
   onPostReply,
   className,
 }: TweetListSectionProps) => {
@@ -42,6 +47,7 @@ const TweetListSection = ({
           <TweetCard
             key={item.id}
             item={item}
+            replyState={replyUI[item.id]}
             isReplying={replyingToId === item.id}
             isLoadingReply={loadingReplyForId === item.id}
             isPosting={postingForId === item.id}
@@ -49,8 +55,9 @@ const TweetListSection = ({
             onCloseReply={onCloseReply}
             onDelete={() => onDelete(item.id)}
             onSelectionChange={(choice) => onSelectionChange(item.id, choice)}
-            onHumorousChange={(value) => onHumorousChange(item.id, value)}
-            onInsightfulChange={(value) => onInsightfulChange(item.id, value)}
+            onToneChange={(tone) => onToneChange(item.id, tone)}
+            onReplyChange={(value) => onReplyChange(item.id, value)}
+            onGenerate={() => onGenerate(item.id)}
             onPostReply={() => onPostReply(item.id)}
           />
         ))}

@@ -1,4 +1,5 @@
 // X app-level tweet types: stored shape, API response shapes, and reply variants.
+import type { ReplyTone } from "@/services/ai/replies/types";
 import type { XTweet } from "./api";
 
 export type TweetMetrics = {
@@ -16,13 +17,16 @@ export type TweetMedia = {
   height?: number;
 };
 
-export type VariantChoice = "humorous" | "insightful";
+export type VariantChoice = ReplyTone;
 
 export type StoredTweet = {
   id: string;
   text: string;
-  humorous?: string;
+  helpful?: string;
   insightful?: string;
+  witty?: string;
+  empathetic?: string;
+  professional?: string;
   selected: VariantChoice;
   author_username?: string;
   author_name?: string;

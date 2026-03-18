@@ -26,11 +26,12 @@ const Page = () => {
     replyingToId,
     setReplyingToId,
     postingForId,
+    replyUI,
     handleChangeSelection,
     handleDeleteTweet,
     handleReplyClick,
     handlePostFor,
-    updateItem,
+    generateReplyForId,
   } = useTweetList(ROUTES.API_X_FEED_SAVED);
 
   const [loadingFeed, setLoadingFeed] = useState(false);
@@ -133,9 +134,12 @@ const Page = () => {
         onLoadFeed={handleLoadFeed}
       />
 
+      <FlashMessageBar message={message} />
+
       <TweetListSection
         items={items}
         title="Tweets"
+        replyUI={replyUI}
         loadingReplyForId={loadingReplyForId}
         replyingToId={replyingToId}
         postingForId={postingForId}
@@ -143,15 +147,24 @@ const Page = () => {
         onCloseReply={() => setReplyingToId(null)}
         onDelete={handleDeleteTweet}
         onSelectionChange={handleChangeSelection}
-        onHumorousChange={(id, value) => updateItem(id, { humorous: value })}
-        onInsightfulChange={(id, value) =>
-          updateItem(id, { insightful: value })
+        onToneChange={(id, tone) =>
+          setItems((prev) =>
+            prev.map((item) =>
+              item.id === id ? { ...item, selected: tone } : item,
+            ),
+          )
         }
+        onReplyChange={(id, value) =>
+          setItems((prev) =>
+            prev.map((item) =>
+              item.id === id ? { ...item, [item.selected]: value } : item,
+            ),
+          )
+        }
+        onGenerate={generateReplyForId}
         onPostReply={handlePostFor}
         className="mb-8"
       />
-
-      <FlashMessageBar message={message} />
     </SectionLayout>
   );
 };

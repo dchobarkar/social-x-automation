@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Heart, MessageCircle, Repeat2, Trash2 } from "lucide-react";
 
 import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
+import type { ReplyUIState } from "@/hooks/useTweetList";
 import TweetActionBar from "@/components/dashboard/x/TweetActionBar";
 import TweetMediaGrid from "@/components/dashboard/x/TweetMediaGrid";
 import TweetReplyPanel from "@/components/dashboard/x/TweetReplyPanel";
@@ -21,12 +22,14 @@ export type TweetCardProps = {
   isReplying: boolean;
   isLoadingReply: boolean;
   isPosting: boolean;
+  replyState?: ReplyUIState;
   onReplyClick: () => void;
   onCloseReply: () => void;
   onDelete: () => void;
   onSelectionChange: (choice: VariantChoice) => void;
-  onHumorousChange: (value: string) => void;
-  onInsightfulChange: (value: string) => void;
+  onReplyChange: (value: string) => void;
+  onToneChange: (tone: VariantChoice) => void;
+  onGenerate: () => void;
   onPostReply: () => void;
 };
 
@@ -35,12 +38,14 @@ const TweetCard = ({
   isReplying,
   isLoadingReply,
   isPosting,
+  replyState,
   onReplyClick,
   onCloseReply,
   onDelete,
   onSelectionChange,
-  onHumorousChange,
-  onInsightfulChange,
+  onReplyChange,
+  onToneChange,
+  onGenerate,
   onPostReply,
 }: TweetCardProps) => {
   const [expanded, setExpanded] = useState(false);
@@ -177,10 +182,15 @@ const TweetCard = ({
             isReplying={isReplying}
             isLoadingReply={isLoadingReply}
             isPosting={isPosting}
+            analysisTone={replyState?.analysisTone}
+            analysisIntent={replyState?.analysisIntent}
+            analysisLoading={replyState?.analysisLoading}
+            analysisError={replyState?.analysisError}
             onCloseReply={onCloseReply}
             onSelectionChange={onSelectionChange}
-            onHumorousChange={onHumorousChange}
-            onInsightfulChange={onInsightfulChange}
+            onToneChange={onToneChange}
+            onReplyChange={onReplyChange}
+            onGenerate={onGenerate}
             onPostReply={onPostReply}
           />
         </div>
