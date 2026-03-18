@@ -1,21 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import type { StoredTweet, SearchWithRepliesItem } from "@/types/tweet";
+import type { SearchWithRepliesItem } from "@/types/x/tweet";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import SectionLayout from "@/components/ui/SectionLayout";
+import PageHeader from "@/components/ui/PageHeader";
 import Input from "@/components/form/Input";
-import TweetCard from "@/components/dashboard/TweetCard";
-import FlashMessageBar from "@/components/dashboard/FlashMessageBar";
+import FlashMessageBar from "@/components/ui/FlashMessageBar";
+import TweetListSection from "@/components/dashboard/x/TweetListSection";
 import {
   SEARCH_DEFAULT_MAX_RESULTS,
   SEARCH_MAX_RESULTS_MAX,
-} from "@/constants/defaults";
+} from "@/constants/x/defaults";
 import { ROUTES } from "@/constants/routes";
+import { useLoadSavedTweets } from "@/hooks/useLoadSavedTweets";
 import { useTweetList } from "@/hooks/useTweetList";
 import { mapSearchWithRepliesToStored } from "@/utils/tweet";
+import { postJson } from "@/utils/http";
+import { persistSavedItems } from "@/utils/savedItems";
 
 const SearchPage = () => {
   const {
@@ -38,19 +42,7 @@ const SearchPage = () => {
   const [maxResults, setMaxResults] = useState(SEARCH_DEFAULT_MAX_RESULTS);
   const [loadingSearch, setLoadingSearch] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    fetch(ROUTES.API_X_SEARCH_SAVED)
-      .then((res) => res.json())
-      .then((data: { items?: StoredTweet[] }) => {
-        if (cancelled || !Array.isArray(data.items)) return;
-        if (data.items.length > 0) setItems(data.items);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [setItems]);
+  useLoadSavedTweets({ endpoint: ROUTES.API_X_SEARCH_SAVED, onLoad: setItems });
 
   const handleSearch = async () => {
     if (!query.trim()) {
@@ -59,24 +51,18 @@ const SearchPage = () => {
     }
     setLoadingSearch(true);
     try {
-      const res = await fetch(ROUTES.API_X_SEARCH_WITH_REPLIES, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: query.trim(),
-          maxResults: Math.min(Math.max(maxResults, 1), SEARCH_MAX_RESULTS_MAX),
-        }),
+      const { res, data } = await postJson<{
+        items?: SearchWithRepliesItem[];
+        error?: string;
+      }>(ROUTES.API_X_SEARCH_WITH_REPLIES, {
+        query: query.trim(),
+        maxResults: Math.min(Math.max(maxResults, 1), SEARCH_MAX_RESULTS_MAX),
       });
-      const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Search failed");
       const raw = (data.items ?? []) as SearchWithRepliesItem[];
       const mapped = mapSearchWithRepliesToStored(raw);
       setItems(mapped);
-      await fetch(ROUTES.API_X_SEARCH_SAVED, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: mapped }),
-      }).catch(() => {});
+      await persistSavedItems(ROUTES.API_X_SEARCH_SAVED, mapped);
       if (mapped.length === 0) {
         showMessage("success", "No tweets found for that query.");
       } else {
@@ -97,13 +83,10 @@ const SearchPage = () => {
 
   return (
     <SectionLayout padding="none" variant="transparent" as="div">
-      <h1 className="text-h2 font-semibold tracking-tight mb-2">
-        Search by keyword
-      </h1>
-      <p className="text-muted mb-6">
-        Search tweets and generate Humorous &amp; Insightful reply options.
-        Results are stored in data/x/search.json.
-      </p>
+      <PageHeader
+        title="Search by keyword"
+        description="Search tweets and generate Humorous &amp; Insightful reply options. Results are stored in data/x/search.json."
+      />
 
       <Card title="Search" className="mb-8">
         <div className="flex flex-wrap gap-2 items-end">
@@ -141,37 +124,24 @@ const SearchPage = () => {
         </div>
       </Card>
 
-      {items.length > 0 && (
-        <Card title="Results" className="mb-8">
-          <p className="text-sm text-muted mb-4">
-            Click Reply to regenerate options. Delete removes from list.
-          </p>
-          <div className="divide-y divide-border">
-            {items.map((item) => (
-              <TweetCard
-                key={item.id}
-                item={item}
-                isReplying={replyingToId === item.id}
-                isLoadingReply={loadingReplyForId === item.id}
-                isPosting={postingForId === item.id}
-                onReplyClick={() => handleReplyClick(item)}
-                onCloseReply={() => setReplyingToId(null)}
-                onDelete={() => handleDeleteTweet(item.id)}
-                onSelectionChange={(choice) =>
-                  handleChangeSelection(item.id, choice)
-                }
-                onHumorousChange={(value) =>
-                  updateItem(item.id, { humorous: value })
-                }
-                onInsightfulChange={(value) =>
-                  updateItem(item.id, { insightful: value })
-                }
-                onPostReply={() => handlePostFor(item.id)}
-              />
-            ))}
-          </div>
-        </Card>
-      )}
+      <TweetListSection
+        items={items}
+        title="Results"
+        description="Click Reply to regenerate options. Delete removes from list."
+        loadingReplyForId={loadingReplyForId}
+        replyingToId={replyingToId}
+        postingForId={postingForId}
+        onReplyClick={handleReplyClick}
+        onCloseReply={() => setReplyingToId(null)}
+        onDelete={handleDeleteTweet}
+        onSelectionChange={handleChangeSelection}
+        onHumorousChange={(id, value) => updateItem(id, { humorous: value })}
+        onInsightfulChange={(id, value) =>
+          updateItem(id, { insightful: value })
+        }
+        onPostReply={handlePostFor}
+        className="mb-8"
+      />
 
       <FlashMessageBar message={message} />
     </SectionLayout>

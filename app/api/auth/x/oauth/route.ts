@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
 
-import { savePkceState } from "@/lib/pkceStateStore";
+import { savePkceState } from "@/lib/storage/pkceStateStore";
+import { buildXAuthorizeUrl } from "@/integrations/x/oauth";
 import {
   generateState,
   generateCodeVerifier,
   generateCodeChallenge,
 } from "@/lib/pkce";
-
-const SCOPES = "tweet.read tweet.write users.read offline.access";
-const AUTH_URL = "https://x.com/i/oauth2/authorize";
 
 export async function GET() {
   const clientId = process.env.X_CLIENT_ID;
@@ -28,16 +26,11 @@ export async function GET() {
 
   await savePkceState(state, code_verifier);
 
-  const params = new URLSearchParams({
-    response_type: "code",
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    scope: SCOPES,
+  const url = buildXAuthorizeUrl({
+    clientId,
+    redirectUri,
     state,
-    code_challenge,
-    code_challenge_method: "S256",
+    codeChallenge: code_challenge,
   });
-
-  const url = `${AUTH_URL}?${params.toString()}`;
   return NextResponse.redirect(url);
 }

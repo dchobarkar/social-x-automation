@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { consumePkceState } from "@/lib/pkceStateStore";
-import { saveTokens } from "@/lib/tokenStore";
-
-const TOKEN_URL = "https://api.x.com/2/oauth2/token";
+import { exchangeXAuthorizationCodeForTokens } from "@/integrations/x/oauth";
+import { consumePkceState } from "@/lib/storage/pkceStateStore";
+import { saveTokens } from "@/lib/storage/tokenStore";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -44,35 +43,26 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const body = new URLSearchParams({
-    grant_type: "authorization_code",
-    code,
-    redirect_uri: redirectUri,
-    client_id: clientId,
-    code_verifier,
-  });
-
-  const res = await fetch(TOKEN_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
-    },
-    body: body.toString(),
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    return NextResponse.redirect(
-      `${dashboardX}?error=${encodeURIComponent(`Token exchange failed: ${err}`)}`,
-    );
-  }
-
-  const data = (await res.json()) as {
+  let data: {
     access_token: string;
     refresh_token?: string;
     expires_in: number;
   };
+  try {
+    data = await exchangeXAuthorizationCodeForTokens({
+      code,
+      codeVerifier: code_verifier,
+      redirectUri,
+      clientId,
+      clientSecret,
+    });
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Token exchange failed";
+    return NextResponse.redirect(
+      `${dashboardX}?error=${encodeURIComponent(message)}`,
+    );
+  }
 
   await saveTokens(
     data.access_token,

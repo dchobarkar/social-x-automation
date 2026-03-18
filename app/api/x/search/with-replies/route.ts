@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { generateReplyVariants } from "@/lib/openai";
-import { searchTweetsByKeyword } from "@/lib/twitter";
+import { searchTweetsWithReplyVariants } from "@/services/x/search.service";
 
 export const POST = async (request: NextRequest) => {
   try {
@@ -21,17 +20,7 @@ export const POST = async (request: NextRequest) => {
         ? maxResults
         : 5;
 
-    const tweets = await searchTweetsByKeyword(query, limit);
-
-    const items = [];
-    for (const tweet of tweets) {
-      const variants = await generateReplyVariants(tweet.text);
-      items.push({
-        tweet,
-        humorous: variants.humorous,
-        insightful: variants.insightful,
-      });
-    }
+    const items = await searchTweetsWithReplyVariants(query, limit);
 
     return NextResponse.json({ items });
   } catch (err) {

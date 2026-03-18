@@ -3,7 +3,26 @@ import type {
   FeedApiItem,
   SearchWithRepliesItem,
   VariantChoice,
-} from "@/types/tweet";
+} from "@/types/x/tweet";
+
+/**
+ * Merge newly fetched feed items with existing stored items.
+ * New items are prepended; existing items not in the new set are kept (order: new first, then existing).
+ * When an id exists in both, the existing record is kept to preserve reply variants and selection.
+ */
+export const mergeFeedWithExisting = (
+  existing: StoredTweet[],
+  newItems: StoredTweet[],
+): StoredTweet[] => {
+  const newIds = new Set(newItems.map((t) => t.id));
+  const existingById = new Map(existing.map((t) => [t.id, t]));
+  for (const t of newItems)
+    if (!existingById.has(t.id)) existingById.set(t.id, t);
+
+  const onlyExisting = existing.filter((t) => !newIds.has(t.id));
+  const merged = [...newItems, ...onlyExisting];
+  return merged;
+};
 
 export const mapFeedApiItemsToStored = (raw: FeedApiItem[]): StoredTweet[] =>
   raw.map((item) => ({
@@ -16,6 +35,7 @@ export const mapFeedApiItemsToStored = (raw: FeedApiItem[]): StoredTweet[] =>
     created_at: item.created_at,
     public_metrics: item.public_metrics,
     author_followers_count: item.author_metrics?.followers_count,
+    media: item.media,
   }));
 
 export const mapSearchWithRepliesToStored = (

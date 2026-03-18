@@ -1,11 +1,10 @@
 import { createHash, randomBytes } from "node:crypto";
 
-const PKCE_LENGTH = 32;
-const STATE_LENGTH = 24;
+import { PKCE_CODE_VERIFIER_LENGTH, PKCE_STATE_LENGTH } from "@/constants/auth";
 
 // Generate a cryptographically random code_verifier (43–128 chars).
 export const generateCodeVerifier = (): string => {
-  const bytes = randomBytes(PKCE_LENGTH);
+  const bytes = randomBytes(PKCE_CODE_VERIFIER_LENGTH);
   return base64UrlEncode(bytes);
 };
 
@@ -17,7 +16,7 @@ export const generateCodeChallenge = (verifier: string): string => {
 
 // Generate a random state string for CSRF protection.
 export const generateState = (): string => {
-  const bytes = randomBytes(STATE_LENGTH);
+  const bytes = randomBytes(PKCE_STATE_LENGTH);
   return base64UrlEncode(bytes);
 };
 

@@ -1,19 +1,26 @@
+import type { ComponentType } from "react";
 import Link from "next/link";
-import { Home, Share2 } from "lucide-react";
+import { Home, Linkedin, MessageCircle, Twitter } from "lucide-react";
 
+import { FOOTER_PLATFORM_LINKS } from "@/constants/footer";
 import { ROUTES } from "@/constants/routes";
-import { PLATFORM_NAMES } from "@/constants/platforms";
 
-const FOOTER_PLATFORM_LINKS = [
-  { href: ROUTES.AUTH_X, label: PLATFORM_NAMES.X },
-  { href: ROUTES.AUTH_LINKEDIN, label: PLATFORM_NAMES.LINKEDIN },
-  { href: ROUTES.AUTH_REDDIT, label: PLATFORM_NAMES.REDDIT },
-] as const;
+const PLATFORM_ICON_BY_LABEL: Record<
+  (typeof FOOTER_PLATFORM_LINKS)[number]["label"],
+  ComponentType<{ className?: string }>
+> = {
+  X: Twitter,
+  LinkedIn: Linkedin,
+  Reddit: MessageCircle,
+};
 
 const Footer = () => {
   return (
     <footer className="border-t border-border bg-background mt-auto">
-      <div className="max-w-4xl mx-auto px-4 py-6 flex flex-wrap items-center justify-between gap-4 text-sm text-muted">
+      <div
+        className="mx-auto px-4 py-6 flex flex-wrap items-center justify-between gap-4 text-sm text-muted"
+        style={{ height: "var(--x-chrome-footer-h, 5.5rem)" }}
+      >
         <span>© 2026. All rights reserved.</span>
 
         <nav
@@ -35,7 +42,10 @@ const Footer = () => {
               className="p-2 rounded-button text-muted hover:bg-border hover:text-foreground transition-colors"
               aria-label={label}
             >
-              <Share2 className="h-4 w-4" />
+              {(() => {
+                const Icon = PLATFORM_ICON_BY_LABEL[label];
+                return <Icon className="h-4 w-4" />;
+              })()}
             </Link>
           ))}
         </nav>
