@@ -11,6 +11,7 @@ export const getHomeFeed = async (
     maxResults: filters.maxResults ?? 20,
     startTime: filters.startTime,
     endTime: filters.endTime,
+    sinceId: filters.sinceId,
     excludeReplies: filters.excludeReplies ?? true,
     excludeRetweets: filters.excludeRetweets ?? true,
     paginationToken: filters.paginationToken,

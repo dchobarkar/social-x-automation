@@ -4,6 +4,7 @@ import Checkbox from "@/components/form/Checkbox";
 import Input from "@/components/form/Input";
 import Select from "@/components/form/Select";
 import RequestPreviewBox from "@/components/dashboard/x/RequestPreviewBox";
+import SinceIdField from "@/components/dashboard/x/SinceIdField";
 import {
   X_FEED_DEFAULT_MAX_RESULTS,
   X_FEED_LAST_HOURS_OPTIONS,
@@ -24,6 +25,8 @@ export type FeedFilterBoxProps = {
   setFeedMaxReplyCount: (value: string) => void;
   feedMinAuthorFollowers: string;
   setFeedMinAuthorFollowers: (value: string) => void;
+  feedSinceId: string;
+  setFeedSinceId: (value: string) => void;
   requestPreview: string;
   loadingFeed: boolean;
   hasNextPage: boolean;
@@ -47,6 +50,8 @@ const FeedFilterBox = ({
   setFeedMaxReplyCount,
   feedMinAuthorFollowers,
   setFeedMinAuthorFollowers,
+  feedSinceId,
+  setFeedSinceId,
   requestPreview,
   loadingFeed,
   hasNextPage,
@@ -57,7 +62,7 @@ const FeedFilterBox = ({
   return (
     <Card className={className}>
       <div className="space-y-6">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <Select
             label="Posted in last"
             value={feedLastHours === "" ? "" : String(feedLastHours)}
@@ -115,6 +120,13 @@ const FeedFilterBox = ({
             onChange={(e) => setFeedMinAuthorFollowers(e.target.value)}
             name="feedMinAuthorFollowers"
             description="Use this if you want to bias toward higher reach accounts."
+          />
+
+          <SinceIdField
+            value={feedSinceId}
+            onChange={setFeedSinceId}
+            name="feedSinceId"
+            description="Only request feed posts newer than this id."
           />
         </div>
 

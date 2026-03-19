@@ -76,6 +76,7 @@ export const mapSearchPostsToStored = (
     author_name: post.author.name,
     author_profile_image_url: post.author.profileImage,
     author_followers_count: post.author.followers,
+    media: post.media,
     public_metrics: {
       like_count: post.metrics.likeCount,
       reply_count: post.metrics.replyCount,

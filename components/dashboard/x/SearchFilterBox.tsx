@@ -5,6 +5,7 @@ import Checkbox from "@/components/form/Checkbox";
 import Input from "@/components/form/Input";
 import Select from "@/components/form/Select";
 import RequestPreviewBox from "@/components/dashboard/x/RequestPreviewBox";
+import SinceIdField from "@/components/dashboard/x/SinceIdField";
 import { X_SEARCH_SORT_OPTIONS } from "@/constants/x/search";
 
 export type SearchFilterBoxProps = {
@@ -16,6 +17,8 @@ export type SearchFilterBoxProps = {
   setFromUsers: (value: string) => void;
   hashtags: string;
   setHashtags: (value: string) => void;
+  sinceId: string;
+  setSinceId: (value: string) => void;
   maxResults: number;
   setMaxResults: (value: number) => void;
   sortOrder: XSearchSortOrder;
@@ -43,6 +46,8 @@ const SearchFilterBox = ({
   setFromUsers,
   hashtags,
   setHashtags,
+  sinceId,
+  setSinceId,
   maxResults,
   setMaxResults,
   sortOrder,
@@ -98,6 +103,13 @@ const SearchFilterBox = ({
             name="searchHashtags"
             placeholder="nextjs, webdev"
             description="Comma or newline separated tags. You can omit the # prefix."
+          />
+
+          <SinceIdField
+            value={sinceId}
+            onChange={setSinceId}
+            name="searchSinceId"
+            description="Only request search results newer than this post id."
           />
         </div>
 

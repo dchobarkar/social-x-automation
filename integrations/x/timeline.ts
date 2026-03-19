@@ -39,6 +39,7 @@ export const getHomeTimeline = async (
 
   if (options.startTime) params.set("start_time", options.startTime);
   if (options.endTime) params.set("end_time", options.endTime);
+  if (options.sinceId) params.set("since_id", options.sinceId);
   if (options.paginationToken) {
     params.set("pagination_token", options.paginationToken);
   }

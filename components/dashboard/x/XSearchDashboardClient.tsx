@@ -46,6 +46,7 @@ const XSearchDashboardClient = ({
   const [exactPhrases, setExactPhrases] = useState("");
   const [fromUsers, setFromUsers] = useState("");
   const [hashtags, setHashtags] = useState("");
+  const [sinceId, setSinceId] = useState("");
   const [maxResults, setMaxResults] = useState(X_SEARCH_DEFAULT_MAX_RESULTS);
   const [sortOrder, setSortOrder] = useState<XSearchSortOrder>("recency");
   const [excludeRetweets, setExcludeRetweets] = useState(true);
@@ -55,27 +56,30 @@ const XSearchDashboardClient = ({
   const [nextToken, setNextToken] = useState<string | null>(null);
   const [activeQuery, setActiveQuery] = useState("");
 
-  const queryPreview = useMemo(
-    () =>
-      buildSearchQuery({
-        keywords: splitSearchTerms(keywords),
-        exactPhrases: splitSearchTerms(exactPhrases),
-        fromUsers: splitSearchTerms(fromUsers),
-        hashtags: splitSearchTerms(hashtags),
-        excludeRetweets,
-        englishOnly,
-        verifiedOnly,
-      }),
-    [
-      keywords,
-      exactPhrases,
-      fromUsers,
-      hashtags,
+  const queryPreview = useMemo(() => {
+    const query = buildSearchQuery({
+      keywords: splitSearchTerms(keywords),
+      exactPhrases: splitSearchTerms(exactPhrases),
+      fromUsers: splitSearchTerms(fromUsers),
+      hashtags: splitSearchTerms(hashtags),
       excludeRetweets,
       englishOnly,
       verifiedOnly,
-    ],
-  );
+    });
+
+    if (!sinceId.trim()) return query;
+
+    return [query, `since_id=${sinceId.trim()}`].filter(Boolean).join(" | ");
+  }, [
+    keywords,
+    exactPhrases,
+    fromUsers,
+    hashtags,
+    excludeRetweets,
+    englishOnly,
+    verifiedOnly,
+    sinceId,
+  ]);
 
   const { draftedCount, safeCount, uniqueAuthors } = useMemo(() => {
     let drafted = 0;
@@ -108,6 +112,7 @@ const XSearchDashboardClient = ({
           excludeRetweets,
           englishOnly,
           verifiedOnly,
+          sinceId: sinceId.trim() || undefined,
           maxResults,
           sortOrder,
           nextToken: loadMore ? (nextToken ?? undefined) : undefined,
@@ -152,6 +157,7 @@ const XSearchDashboardClient = ({
       excludeRetweets,
       englishOnly,
       verifiedOnly,
+      sinceId,
       maxResults,
       sortOrder,
       nextToken,
@@ -232,6 +238,8 @@ const XSearchDashboardClient = ({
         setFromUsers={setFromUsers}
         hashtags={hashtags}
         setHashtags={setHashtags}
+        sinceId={sinceId}
+        setSinceId={setSinceId}
         maxResults={maxResults}
         setMaxResults={setMaxResults}
         sortOrder={sortOrder}

@@ -31,6 +31,7 @@ export const searchXPosts = async (
   const result = await searchPosts({
     query,
     maxResults: filters.maxResults,
+    sinceId: filters.sinceId,
     nextToken: filters.nextToken,
     sortOrder: filters.sortOrder,
   });

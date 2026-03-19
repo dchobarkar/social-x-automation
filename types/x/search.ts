@@ -1,3 +1,5 @@
+import type { TweetMedia } from "@/types/x/tweet";
+
 export type XSearchSortOrder = "recency" | "relevancy";
 
 export type SearchQueryBuilderParams = {
@@ -13,6 +15,7 @@ export type SearchQueryBuilderParams = {
 export type SearchPostsParams = {
   query: string;
   maxResults?: number;
+  sinceId?: string;
   nextToken?: string;
   sortOrder?: XSearchSortOrder;
 };
@@ -24,6 +27,7 @@ export type SearchPostsResult = {
 
 export type XSearchFilters = SearchQueryBuilderParams & {
   maxResults?: number;
+  sinceId?: string;
   nextToken?: string;
   sortOrder?: XSearchSortOrder;
 };
@@ -47,6 +51,7 @@ export type NormalizedPost = {
   };
   conversationId?: string;
   lang?: string;
+  media?: TweetMedia[];
 };
 
 export type XRecentSearchTweet = {
@@ -56,6 +61,9 @@ export type XRecentSearchTweet = {
   created_at?: string;
   conversation_id?: string;
   lang?: string;
+  attachments?: {
+    media_keys?: string[];
+  };
   public_metrics?: {
     like_count?: number;
     reply_count?: number;
@@ -74,10 +82,15 @@ export type XRecentSearchUser = {
   };
 };
 
+export type XRecentSearchMedia = TweetMedia & {
+  media_key: string;
+};
+
 export type XRecentSearchResponse = {
   data?: XRecentSearchTweet[];
   includes?: {
     users?: XRecentSearchUser[];
+    media?: XRecentSearchMedia[];
   };
   meta?: {
     next_token?: string;

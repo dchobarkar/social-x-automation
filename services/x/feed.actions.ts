@@ -20,6 +20,7 @@ export const loadXFeedAction = async (
     minAuthorFollowers: filters.minAuthorFollowers,
     startTime: filters.startTime,
     endTime: filters.endTime,
+    sinceId: filters.sinceId,
     paginationToken: filters.paginationToken,
   };
 

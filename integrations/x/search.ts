@@ -7,6 +7,7 @@ import { X_API_BASE } from "@/constants/x/api";
 import { getValidAccessToken } from "@/integrations/x/auth";
 import {
   X_SEARCH_DEFAULT_MAX_RESULTS,
+  X_SEARCH_MEDIA_FIELDS,
   X_SEARCH_TWEET_FIELDS,
   X_SEARCH_USER_FIELDS,
 } from "@/constants/x/search";
@@ -80,6 +81,7 @@ const getErrorFromStatus = (
 export const searchRecentPosts = async ({
   query,
   maxResults = X_SEARCH_DEFAULT_MAX_RESULTS,
+  sinceId,
   nextToken,
   sortOrder = "recency",
 }: SearchPostsParams): Promise<SearchPostsResult> => {
@@ -88,11 +90,13 @@ export const searchRecentPosts = async ({
     query: query.trim(),
     max_results: String(Math.min(Math.max(maxResults, 10), 100)),
     "tweet.fields": X_SEARCH_TWEET_FIELDS,
-    expansions: "author_id",
+    expansions: "author_id,attachments.media_keys",
     "user.fields": X_SEARCH_USER_FIELDS,
+    "media.fields": X_SEARCH_MEDIA_FIELDS,
     sort_order: sortOrder,
   });
 
+  if (sinceId?.trim()) params.set("since_id", sinceId.trim());
   if (nextToken?.trim()) params.set("next_token", nextToken.trim());
 
   const url = `${X_API_BASE}/tweets/search/recent?${params.toString()}`;
@@ -123,12 +127,18 @@ export const searchRecentPosts = async ({
   const usersById = new Map(
     (json.includes?.users ?? []).map((user) => [user.id, user]),
   );
+  const mediaByKey = new Map(
+    (json.includes?.media ?? []).map((media) => [media.media_key, media]),
+  );
 
   return {
     posts: (json.data ?? []).map((tweet) => {
       const author = tweet.author_id
         ? usersById.get(tweet.author_id)
         : undefined;
+      const media = tweet.attachments?.media_keys
+        ?.map((key) => mediaByKey.get(key))
+        .filter((item): item is NonNullable<typeof item> => item !== undefined);
 
       return {
         id: tweet.id,
@@ -136,6 +146,7 @@ export const searchRecentPosts = async ({
         createdAt: tweet.created_at,
         conversationId: tweet.conversation_id,
         lang: tweet.lang,
+        media: media?.length ? media : undefined,
         metrics: {
           likeCount: tweet.public_metrics?.like_count ?? 0,
           replyCount: tweet.public_metrics?.reply_count ?? 0,

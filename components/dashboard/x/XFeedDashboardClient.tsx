@@ -49,6 +49,7 @@ const XFeedDashboardClient = ({
   const [feedEnglishOnly, setFeedEnglishOnly] = useState(true);
   const [feedMaxReplyCount, setFeedMaxReplyCount] = useState("");
   const [feedMinAuthorFollowers, setFeedMinAuthorFollowers] = useState("");
+  const [feedSinceId, setFeedSinceId] = useState("");
   const [nextToken, setNextToken] = useState<string | null>(null);
   const { draftedCount, safeCount, averageFollowers } = useMemo(() => {
     let drafted = 0;
@@ -76,6 +77,7 @@ const XFeedDashboardClient = ({
       feedExcludeReplies ? "exclude=replies" : "",
       feedExcludeRetweets ? "exclude=retweets" : "",
       feedEnglishOnly ? "lang=en" : "",
+      feedSinceId.trim() ? `since_id=${feedSinceId.trim()}` : "",
       feedMaxReplyCount.trim()
         ? `max_reply_count=${feedMaxReplyCount.trim()}`
         : "",
@@ -91,6 +93,7 @@ const XFeedDashboardClient = ({
     feedExcludeReplies,
     feedExcludeRetweets,
     feedEnglishOnly,
+    feedSinceId,
     feedMaxReplyCount,
     feedMinAuthorFollowers,
   ]);
@@ -105,6 +108,7 @@ const XFeedDashboardClient = ({
           excludeReplies: boolean;
           excludeRetweets: boolean;
           englishOnly: boolean;
+          sinceId?: string;
           lastHours?: number;
           maxReplyCount?: number;
           minAuthorFollowers?: number;
@@ -114,6 +118,7 @@ const XFeedDashboardClient = ({
           excludeReplies: feedExcludeReplies,
           excludeRetweets: feedExcludeRetweets,
           englishOnly: feedEnglishOnly,
+          sinceId: feedSinceId.trim() || undefined,
           paginationToken: loadMore ? (nextToken ?? undefined) : undefined,
         };
 
@@ -169,6 +174,7 @@ const XFeedDashboardClient = ({
       feedExcludeReplies,
       feedExcludeRetweets,
       feedEnglishOnly,
+      feedSinceId,
       feedMaxReplyCount,
       feedMinAuthorFollowers,
       nextToken,
@@ -252,6 +258,8 @@ const XFeedDashboardClient = ({
         setFeedMaxReplyCount={setFeedMaxReplyCount}
         feedMinAuthorFollowers={feedMinAuthorFollowers}
         setFeedMinAuthorFollowers={setFeedMinAuthorFollowers}
+        feedSinceId={feedSinceId}
+        setFeedSinceId={setFeedSinceId}
         requestPreview={requestPreview}
         loadingFeed={loadingFeed}
         hasNextPage={Boolean(nextToken)}

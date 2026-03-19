@@ -67,6 +67,7 @@ export type HomeTimelineOptions = {
   maxResults?: number;
   startTime?: string; // ISO 8601 e.g. 2025-03-05T18:00:00Z
   endTime?: string;
+  sinceId?: string;
   excludeReplies?: boolean;
   excludeRetweets?: boolean;
   paginationToken?: string;
