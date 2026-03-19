@@ -1,16 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 
-import type { ReplyTone } from "@/types/ai/replies";
 import type { StoredTweet } from "@/types/x/tweet";
 import { getDataXDir, getSearchFilePath } from "@/constants/storage";
-
-const VALID_REPLY_TONES: ReplyTone[] = [
-  "helpful",
-  "insightful",
-  "witty",
-  "empathetic",
-  "professional",
-];
 
 const ensureDataDir = async (): Promise<void> => {
   await mkdir(getDataXDir(), { recursive: true });
@@ -26,9 +17,7 @@ const sanitizeStoredTweet = (value: unknown): StoredTweet | null => {
   const text = typeof value.text === "string" ? value.text : "";
   if (!id || !text) return null;
 
-  const selected = VALID_REPLY_TONES.includes(value.selected as ReplyTone)
-    ? (value.selected as ReplyTone)
-    : "insightful";
+  const selected = typeof value.selected === "string" ? value.selected : "";
 
   const getOptionalString = (key: string) =>
     typeof value[key] === "string" ? (value[key] as string) : undefined;
@@ -38,12 +27,14 @@ const sanitizeStoredTweet = (value: unknown): StoredTweet | null => {
   return {
     id,
     text,
-    selected,
-    helpful: getOptionalString("helpful"),
-    insightful: getOptionalString("insightful"),
-    witty: getOptionalString("witty"),
-    empathetic: getOptionalString("empathetic"),
-    professional: getOptionalString("professional"),
+    selected:
+      selected === "helpful" ||
+      selected === "insightful" ||
+      selected === "witty" ||
+      selected === "empathetic" ||
+      selected === "professional"
+        ? selected
+        : "insightful",
     author_username: getOptionalString("author_username"),
     author_name: getOptionalString("author_name"),
     author_profile_image_url: getOptionalString("author_profile_image_url"),
