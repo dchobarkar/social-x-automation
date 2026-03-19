@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { ReplyTone } from "@/types/ai/replies";
+import type { PostIntent } from "@/types/ai/replies";
 import type { FlashMessage } from "@/types/ui";
 import type { StoredTweet, VariantChoice } from "@/types/x/tweet";
 import type { XReplyDraftUiState } from "@/types/x/reply-drafts";
@@ -15,6 +16,14 @@ export type UseXTweetWorkspaceOptions = {
   initialItems?: StoredTweet[];
   saveItemsAction: (items: StoredTweet[]) => Promise<void>;
 };
+
+const isPostIntent = (value: string | undefined): value is PostIntent =>
+  value === "question" ||
+  value === "opinion" ||
+  value === "discussion" ||
+  value === "hiring" ||
+  value === "promotion" ||
+  value === "unknown";
 
 export const useXTweetWorkspace = ({
   initialItems = [],
@@ -168,6 +177,9 @@ export const useXTweetWorkspace = ({
       if (!item) return;
 
       const tone = replyUiByTweetId[id]?.tone ?? item.selected ?? "insightful";
+      const intent = isPostIntent(replyUiByTweetId[id]?.analysisIntent)
+        ? replyUiByTweetId[id]?.analysisIntent
+        : undefined;
       setLoadingReplyForId(id);
       setReplyUiByTweetId((prev) => ({
         ...prev,
@@ -176,7 +188,11 @@ export const useXTweetWorkspace = ({
       setMessage(null);
 
       try {
-        const data = await generateXReplyDraftAction({ post: item.text, tone });
+        const data = await generateXReplyDraftAction({
+          post: item.text,
+          tone,
+          intent,
+        });
         const toneUsed = (data.tone ?? tone) as ReplyTone;
 
         setReplyUiByTweetId((prev) => ({
