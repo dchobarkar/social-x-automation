@@ -9,4 +9,4 @@ export const X_SEARCH_TWEET_FIELDS =
   "created_at,public_metrics,conversation_id,author_id,lang" as const;
 
 export const X_SEARCH_USER_FIELDS =
-  "id,name,username,public_metrics,profile_image_url" as const;
+  "id,name,username,public_metrics,profile_image_url,verified" as const;

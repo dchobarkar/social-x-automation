@@ -31,6 +31,8 @@ export const buildSearchQuery = ({
   keywords,
   exactPhrases = [],
   excludeRetweets = false,
+  englishOnly = false,
+  verifiedOnly = false,
   fromUsers = [],
   hashtags = [],
 }: SearchQueryBuilderParams): string => {
@@ -42,6 +44,8 @@ export const buildSearchQuery = ({
   ].filter(Boolean);
 
   if (excludeRetweets) parts.push("-is:retweet");
+  if (verifiedOnly) parts.push("is:verified");
+  if (englishOnly) parts.push("lang:en");
 
   return parts.join(" ").trim();
 };

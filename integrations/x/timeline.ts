@@ -114,6 +114,7 @@ export const getHomeTimeline = async (
       referenced_tweets: t.referenced_tweets,
       public_metrics: t.public_metrics,
       author_metrics: author?.public_metrics,
+      author_verified: author?.verified,
       author_username: author?.username,
       author_name: author?.name,
       author_profile_image_url: author?.profile_image_url,

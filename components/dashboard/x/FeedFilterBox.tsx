@@ -3,6 +3,7 @@ import Card from "@/components/ui/Card";
 import Checkbox from "@/components/form/Checkbox";
 import Input from "@/components/form/Input";
 import Select from "@/components/form/Select";
+import RequestPreviewBox from "@/components/dashboard/x/RequestPreviewBox";
 import {
   X_FEED_DEFAULT_MAX_RESULTS,
   X_FEED_LAST_HOURS_OPTIONS,
@@ -17,10 +18,13 @@ export type FeedFilterBoxProps = {
   setFeedExcludeReplies: (value: boolean) => void;
   feedExcludeRetweets: boolean;
   setFeedExcludeRetweets: (value: boolean) => void;
+  feedEnglishOnly: boolean;
+  setFeedEnglishOnly: (value: boolean) => void;
   feedMaxReplyCount: string;
   setFeedMaxReplyCount: (value: string) => void;
   feedMinAuthorFollowers: string;
   setFeedMinAuthorFollowers: (value: string) => void;
+  requestPreview: string;
   loadingFeed: boolean;
   hasNextPage: boolean;
   onLoadFeed: () => void;
@@ -37,10 +41,13 @@ const FeedFilterBox = ({
   setFeedExcludeReplies,
   feedExcludeRetweets,
   setFeedExcludeRetweets,
+  feedEnglishOnly,
+  setFeedEnglishOnly,
   feedMaxReplyCount,
   setFeedMaxReplyCount,
   feedMinAuthorFollowers,
   setFeedMinAuthorFollowers,
+  requestPreview,
   loadingFeed,
   hasNextPage,
   onLoadFeed,
@@ -128,6 +135,14 @@ const FeedFilterBox = ({
               onChange={(e) => setFeedExcludeRetweets(e.target.checked)}
               description="Helpful when you only want original content."
             />
+
+            <Checkbox
+              name="feedEnglishOnly"
+              label="English only"
+              checked={feedEnglishOnly}
+              onChange={(e) => setFeedEnglishOnly(e.target.checked)}
+              description="Keeps only tweets where X reports the post language as English."
+            />
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -143,6 +158,12 @@ const FeedFilterBox = ({
             </Button>
           </div>
         </div>
+
+        <RequestPreviewBox
+          title="Request preview"
+          value={requestPreview}
+          emptyText="Adjust the feed filters to preview the active request."
+        />
       </div>
     </Card>
   );

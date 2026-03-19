@@ -144,6 +144,7 @@ export const searchRecentPosts = async ({
           name: author?.name,
           profileImage: author?.profile_image_url,
           followers: author?.public_metrics?.followers_count,
+          verified: author?.verified,
         },
       };
     }),

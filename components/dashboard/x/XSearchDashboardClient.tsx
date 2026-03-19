@@ -49,6 +49,8 @@ const XSearchDashboardClient = ({
   const [maxResults, setMaxResults] = useState(X_SEARCH_DEFAULT_MAX_RESULTS);
   const [sortOrder, setSortOrder] = useState<XSearchSortOrder>("recency");
   const [excludeRetweets, setExcludeRetweets] = useState(true);
+  const [englishOnly, setEnglishOnly] = useState(true);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [nextToken, setNextToken] = useState<string | null>(null);
   const [activeQuery, setActiveQuery] = useState("");
@@ -61,8 +63,18 @@ const XSearchDashboardClient = ({
         fromUsers: splitSearchTerms(fromUsers),
         hashtags: splitSearchTerms(hashtags),
         excludeRetweets,
+        englishOnly,
+        verifiedOnly,
       }),
-    [keywords, exactPhrases, fromUsers, hashtags, excludeRetweets],
+    [
+      keywords,
+      exactPhrases,
+      fromUsers,
+      hashtags,
+      excludeRetweets,
+      englishOnly,
+      verifiedOnly,
+    ],
   );
 
   const { draftedCount, safeCount, uniqueAuthors } = useMemo(() => {
@@ -94,6 +106,8 @@ const XSearchDashboardClient = ({
           fromUsers: splitSearchTerms(fromUsers),
           hashtags: splitSearchTerms(hashtags),
           excludeRetweets,
+          englishOnly,
+          verifiedOnly,
           maxResults,
           sortOrder,
           nextToken: loadMore ? (nextToken ?? undefined) : undefined,
@@ -142,6 +156,8 @@ const XSearchDashboardClient = ({
       fromUsers,
       hashtags,
       excludeRetweets,
+      englishOnly,
+      verifiedOnly,
       maxResults,
       sortOrder,
       nextToken,
@@ -228,6 +244,10 @@ const XSearchDashboardClient = ({
         setSortOrder={setSortOrder}
         excludeRetweets={excludeRetweets}
         setExcludeRetweets={setExcludeRetweets}
+        englishOnly={englishOnly}
+        setEnglishOnly={setEnglishOnly}
+        verifiedOnly={verifiedOnly}
+        setVerifiedOnly={setVerifiedOnly}
         queryPreview={queryPreview}
         loading={loadingSearch}
         hasNextPage={Boolean(nextToken)}

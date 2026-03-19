@@ -4,6 +4,8 @@ export type SearchQueryBuilderParams = {
   keywords: string[];
   exactPhrases?: string[];
   excludeRetweets?: boolean;
+  englishOnly?: boolean;
+  verifiedOnly?: boolean;
   fromUsers?: string[];
   hashtags?: string[];
 };
@@ -41,6 +43,7 @@ export type NormalizedPost = {
     name?: string;
     profileImage?: string;
     followers?: number;
+    verified?: boolean;
   };
   conversationId?: string;
   lang?: string;
@@ -65,6 +68,7 @@ export type XRecentSearchUser = {
   username?: string;
   name?: string;
   profile_image_url?: string;
+  verified?: boolean;
   public_metrics?: {
     followers_count?: number;
   };

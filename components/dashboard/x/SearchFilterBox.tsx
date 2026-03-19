@@ -4,6 +4,7 @@ import Card from "@/components/ui/Card";
 import Checkbox from "@/components/form/Checkbox";
 import Input from "@/components/form/Input";
 import Select from "@/components/form/Select";
+import RequestPreviewBox from "@/components/dashboard/x/RequestPreviewBox";
 import { X_SEARCH_SORT_OPTIONS } from "@/constants/x/search";
 
 export type SearchFilterBoxProps = {
@@ -21,6 +22,10 @@ export type SearchFilterBoxProps = {
   setSortOrder: (value: XSearchSortOrder) => void;
   excludeRetweets: boolean;
   setExcludeRetweets: (value: boolean) => void;
+  englishOnly: boolean;
+  setEnglishOnly: (value: boolean) => void;
+  verifiedOnly: boolean;
+  setVerifiedOnly: (value: boolean) => void;
   queryPreview: string;
   loading: boolean;
   hasNextPage: boolean;
@@ -44,6 +49,10 @@ const SearchFilterBox = ({
   setSortOrder,
   excludeRetweets,
   setExcludeRetweets,
+  englishOnly,
+  setEnglishOnly,
+  verifiedOnly,
+  setVerifiedOnly,
   queryPreview,
   loading,
   hasNextPage,
@@ -124,25 +133,37 @@ const SearchFilterBox = ({
           />
 
           <div className="flex items-end">
-            <Checkbox
-              name="searchExcludeRetweets"
-              label="Exclude reposts"
-              checked={excludeRetweets}
-              onChange={(e) => setExcludeRetweets(e.target.checked)}
-              description="Adds -is:retweet to keep the workspace closer to original posts."
-            />
+            <div className="space-y-3">
+              <Checkbox
+                name="searchExcludeRetweets"
+                label="Exclude reposts"
+                checked={excludeRetweets}
+                onChange={(e) => setExcludeRetweets(e.target.checked)}
+                description="Adds -is:retweet to keep the workspace closer to original posts."
+              />
+              <Checkbox
+                name="searchVerifiedOnly"
+                label="Verified accounts only"
+                checked={verifiedOnly}
+                onChange={(e) => setVerifiedOnly(e.target.checked)}
+                description="Adds is:verified to focus on posts from verified accounts."
+              />
+              <Checkbox
+                name="searchEnglishOnly"
+                label="English only"
+                checked={englishOnly}
+                onChange={(e) => setEnglishOnly(e.target.checked)}
+                description="Adds lang:en to keep results in English."
+              />
+            </div>
           </div>
         </div>
 
-        <div className="rounded-3xl border border-border/70 bg-surface-strong p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/75">
-            Query preview
-          </p>
-          <p className="mt-2 wrap-break-word font-mono text-sm text-foreground">
-            {queryPreview ||
-              "Add keywords, phrases, users, or hashtags to build the query."}
-          </p>
-        </div>
+        <RequestPreviewBox
+          title="Query preview"
+          value={queryPreview}
+          emptyText="Add keywords, phrases, users, or hashtags to build the query."
+        />
 
         <div className="flex flex-col gap-3 rounded-3xl border border-border/70 bg-surface-strong p-4 lg:flex-row lg:items-center lg:justify-between">
           <p className="text-sm text-muted">

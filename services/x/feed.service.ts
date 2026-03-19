@@ -17,6 +17,9 @@ export const getHomeFeed = async (
   });
 
   let result = posts;
+  if (filters.englishOnly) {
+    result = result.filter((t) => (t.lang ?? "").toLowerCase() === "en");
+  }
   if (typeof filters.maxReplyCount === "number") {
     result = result.filter(
       (t) => (t.public_metrics?.reply_count ?? 0) <= filters.maxReplyCount!,

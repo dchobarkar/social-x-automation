@@ -27,6 +27,7 @@ export type XHomeTimelineUser = {
   username?: string;
   name?: string;
   profile_image_url?: string;
+  verified?: boolean;
   public_metrics?: XUserPublicMetrics;
 };
 

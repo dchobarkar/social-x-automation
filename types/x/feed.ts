@@ -8,6 +8,7 @@ export type FeedFilters = {
   endTime?: string;
   excludeReplies?: boolean;
   excludeRetweets?: boolean;
+  englishOnly?: boolean;
   maxReplyCount?: number;
   minAuthorFollowers?: number;
   paginationToken?: string;

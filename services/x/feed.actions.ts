@@ -15,6 +15,7 @@ export const loadXFeedAction = async (
         : 20,
     excludeReplies: filters.excludeReplies,
     excludeRetweets: filters.excludeRetweets,
+    englishOnly: filters.englishOnly,
     maxReplyCount: filters.maxReplyCount,
     minAuthorFollowers: filters.minAuthorFollowers,
     startTime: filters.startTime,

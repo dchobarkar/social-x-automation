@@ -46,6 +46,7 @@ const XFeedDashboardClient = ({
   );
   const [feedExcludeReplies, setFeedExcludeReplies] = useState(true);
   const [feedExcludeRetweets, setFeedExcludeRetweets] = useState(true);
+  const [feedEnglishOnly, setFeedEnglishOnly] = useState(true);
   const [feedMaxReplyCount, setFeedMaxReplyCount] = useState("");
   const [feedMinAuthorFollowers, setFeedMinAuthorFollowers] = useState("");
   const [nextToken, setNextToken] = useState<string | null>(null);
@@ -68,6 +69,32 @@ const XFeedDashboardClient = ({
     };
   }, [items, replyUiByTweetId]);
 
+  const requestPreview = useMemo(() => {
+    const parts = [
+      `max_results=${Math.min(Math.max(feedMaxResults, 1), 100)}`,
+      feedLastHours === "" ? "time=all" : `last_hours=${String(feedLastHours)}`,
+      feedExcludeReplies ? "exclude=replies" : "",
+      feedExcludeRetweets ? "exclude=retweets" : "",
+      feedEnglishOnly ? "lang=en" : "",
+      feedMaxReplyCount.trim()
+        ? `max_reply_count=${feedMaxReplyCount.trim()}`
+        : "",
+      feedMinAuthorFollowers.trim()
+        ? `min_author_followers=${feedMinAuthorFollowers.trim()}`
+        : "",
+    ].filter(Boolean);
+
+    return parts.join(" | ");
+  }, [
+    feedMaxResults,
+    feedLastHours,
+    feedExcludeReplies,
+    feedExcludeRetweets,
+    feedEnglishOnly,
+    feedMaxReplyCount,
+    feedMinAuthorFollowers,
+  ]);
+
   const handleLoadFeed = useCallback(
     async (loadMore = false) => {
       setLoadingFeed(true);
@@ -77,6 +104,7 @@ const XFeedDashboardClient = ({
           maxResults: number;
           excludeReplies: boolean;
           excludeRetweets: boolean;
+          englishOnly: boolean;
           lastHours?: number;
           maxReplyCount?: number;
           minAuthorFollowers?: number;
@@ -85,6 +113,7 @@ const XFeedDashboardClient = ({
           maxResults: Math.min(Math.max(feedMaxResults, 1), 100),
           excludeReplies: feedExcludeReplies,
           excludeRetweets: feedExcludeRetweets,
+          englishOnly: feedEnglishOnly,
           paginationToken: loadMore ? (nextToken ?? undefined) : undefined,
         };
 
@@ -146,6 +175,7 @@ const XFeedDashboardClient = ({
       feedMaxResults,
       feedExcludeReplies,
       feedExcludeRetweets,
+      feedEnglishOnly,
       feedMaxReplyCount,
       feedMinAuthorFollowers,
       nextToken,
@@ -223,10 +253,13 @@ const XFeedDashboardClient = ({
         setFeedExcludeReplies={setFeedExcludeReplies}
         feedExcludeRetweets={feedExcludeRetweets}
         setFeedExcludeRetweets={setFeedExcludeRetweets}
+        feedEnglishOnly={feedEnglishOnly}
+        setFeedEnglishOnly={setFeedEnglishOnly}
         feedMaxReplyCount={feedMaxReplyCount}
         setFeedMaxReplyCount={setFeedMaxReplyCount}
         feedMinAuthorFollowers={feedMinAuthorFollowers}
         setFeedMinAuthorFollowers={setFeedMinAuthorFollowers}
+        requestPreview={requestPreview}
         loadingFeed={loadingFeed}
         hasNextPage={Boolean(nextToken)}
         onLoadFeed={() => void handleLoadFeed(false)}
