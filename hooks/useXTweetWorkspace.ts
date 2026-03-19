@@ -30,6 +30,7 @@ export const useXTweetWorkspace = ({
     Record<string, XReplyDraftUiState>
   >({});
   const hasMountedRef = useRef(false);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!hasMountedRef.current) {
@@ -37,7 +38,18 @@ export const useXTweetWorkspace = ({
       return;
     }
 
-    void saveItemsAction(items);
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+
+    saveTimeoutRef.current = setTimeout(() => {
+      void saveItemsAction(items);
+    }, 300);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = null;
+      }
+    };
   }, [items, saveItemsAction]);
 
   const showMessage = useCallback((type: "success" | "error", text: string) => {
@@ -87,6 +99,13 @@ export const useXTweetWorkspace = ({
         return;
       }
 
+      const existingReplyUi = replyUiByTweetId[item.id];
+      const hasCachedAnalysis =
+        existingReplyUi?.analysisError == null &&
+        (existingReplyUi?.analysisTone != null ||
+          existingReplyUi?.analysisIntent != null ||
+          (existingReplyUi?.analysisTopics?.length ?? 0) > 0);
+
       setReplyingToId(item.id);
       setReplyUiByTweetId((prev) => ({
         ...prev,
@@ -96,13 +115,17 @@ export const useXTweetWorkspace = ({
           analysisTone: prev[item.id]?.analysisTone,
           analysisIntent: prev[item.id]?.analysisIntent,
           analysisTopics: prev[item.id]?.analysisTopics,
-          analysisLoading: prev[item.id]?.analysisLoading ?? true,
+          analysisLoading: hasCachedAnalysis
+            ? false
+            : (prev[item.id]?.analysisLoading ?? true),
           analysisError: undefined,
           validation: undefined,
           validationLoading: false,
           validationError: undefined,
         },
       }));
+
+      if (hasCachedAnalysis) return;
 
       try {
         const analysis = await analyzeXPostAction(item.text);
@@ -129,7 +152,7 @@ export const useXTweetWorkspace = ({
         }));
       }
     },
-    [replyingToId],
+    [replyUiByTweetId, replyingToId],
   );
 
   const setReplyTone = useCallback((id: string, tone: ReplyTone) => {

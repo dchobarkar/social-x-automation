@@ -65,16 +65,23 @@ const XSearchDashboardClient = ({
     [keywords, exactPhrases, fromUsers, hashtags, excludeRetweets],
   );
 
-  const draftedCount = items.filter((item) =>
-    Boolean(item[item.selected]),
-  ).length;
-  const safeCount = items.filter((item) => {
-    const validation = replyUiByTweetId[item.id]?.validation;
-    return validation?.isSafe;
-  }).length;
-  const uniqueAuthors = new Set(
-    items.map((item) => item.author_username ?? item.author_name ?? item.id),
-  ).size;
+  const { draftedCount, safeCount, uniqueAuthors } = useMemo(() => {
+    let drafted = 0;
+    let safe = 0;
+    const authors = new Set<string>();
+
+    for (const item of items) {
+      if (item[item.selected]) drafted += 1;
+      if (replyUiByTweetId[item.id]?.validation?.isSafe) safe += 1;
+      authors.add(item.author_username ?? item.author_name ?? item.id);
+    }
+
+    return {
+      draftedCount: drafted,
+      safeCount: safe,
+      uniqueAuthors: authors.size,
+    };
+  }, [items, replyUiByTweetId]);
 
   const handleSearch = useCallback(
     async (loadMore = false) => {
@@ -93,12 +100,11 @@ const XSearchDashboardClient = ({
         });
 
         const mapped = mapSearchPostsToStored(result.posts);
+        const mappedIds = new Set(mapped.map((post) => post.id));
         const nextItems = loadMore
           ? mergeStoredTweetsWithExisting(items, mapped)
           : mergeStoredTweetsWithExisting(
-              items.filter((item) =>
-                mapped.some((post) => post.id === item.id),
-              ),
+              items.filter((item) => mappedIds.has(item.id)),
               mapped,
             );
 

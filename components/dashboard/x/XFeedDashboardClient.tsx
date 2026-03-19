@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Bot, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
 
 import type { FeedApiItem, StoredTweet } from "@/types/x/tweet";
@@ -48,22 +48,24 @@ const XFeedDashboardClient = ({
   const [feedExcludeRetweets, setFeedExcludeRetweets] = useState(true);
   const [feedMaxReplyCount, setFeedMaxReplyCount] = useState("");
   const [feedMinAuthorFollowers, setFeedMinAuthorFollowers] = useState("");
-  const draftedCount = items.filter((item) =>
-    Boolean(item[item.selected]),
-  ).length;
-  const safeCount = items.filter((item) => {
-    const validation = replyUiByTweetId[item.id]?.validation;
-    return validation?.isSafe;
-  }).length;
-  const averageFollowers =
-    items.length > 0
-      ? Math.round(
-          items.reduce(
-            (sum, item) => sum + (item.author_followers_count ?? 0),
-            0,
-          ) / items.length,
-        )
-      : 0;
+  const { draftedCount, safeCount, averageFollowers } = useMemo(() => {
+    let drafted = 0;
+    let safe = 0;
+    let totalFollowers = 0;
+
+    for (const item of items) {
+      if (item[item.selected]) drafted += 1;
+      if (replyUiByTweetId[item.id]?.validation?.isSafe) safe += 1;
+      totalFollowers += item.author_followers_count ?? 0;
+    }
+
+    return {
+      draftedCount: drafted,
+      safeCount: safe,
+      averageFollowers:
+        items.length > 0 ? Math.round(totalFollowers / items.length) : 0,
+    };
+  }, [items, replyUiByTweetId]);
 
   const handleLoadFeed = useCallback(async () => {
     setLoadingFeed(true);
