@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, MouseEventHandler, ReactNode } from "react";
 import Link from "next/link";
 
 import { cn } from "@/utils/cn";
@@ -78,6 +78,7 @@ const Button = ({
   children,
   disabled,
   type = "button",
+  onClick,
   ...rest
 }: ButtonProps) => {
   const base =
@@ -89,6 +90,9 @@ const Button = ({
     className,
   );
   const label = content(iconBefore, iconAfter, children);
+  const linkOnClick = onClick as
+    | MouseEventHandler<HTMLAnchorElement>
+    | undefined;
 
   if (href != null && href !== "") {
     const externalLink = isExternal(href, external);
@@ -100,6 +104,7 @@ const Button = ({
           target="_blank"
           rel="noopener noreferrer"
           className={combined}
+          onClick={linkOnClick}
         >
           {label}
         </a>
@@ -107,14 +112,20 @@ const Button = ({
     }
 
     return (
-      <Link href={href} className={combined}>
+      <Link href={href} className={combined} onClick={linkOnClick}>
         {label}
       </Link>
     );
   }
 
   return (
-    <button type={type} disabled={disabled} className={combined} {...rest}>
+    <button
+      type={type}
+      disabled={disabled}
+      className={combined}
+      onClick={onClick}
+      {...rest}
+    >
       {label}
     </button>
   );
