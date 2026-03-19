@@ -42,6 +42,7 @@ const TweetAuthorAvatar = ({
         alt=""
         width={44}
         height={44}
+        unoptimized
         className="h-12 w-12 rounded-full object-cover ring-2 ring-white"
       />
     );

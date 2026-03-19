@@ -27,6 +27,20 @@ export const splitSearchTerms = (value: string): string[] =>
     .map((term) => term.trim())
     .filter(Boolean);
 
+export const hasStandaloneSearchClause = ({
+  keywords,
+  exactPhrases = [],
+  fromUsers = [],
+  hashtags = [],
+}: Pick<
+  SearchQueryBuilderParams,
+  "keywords" | "exactPhrases" | "fromUsers" | "hashtags"
+>): boolean =>
+  keywords.length > 0 ||
+  exactPhrases.length > 0 ||
+  fromUsers.length > 0 ||
+  hashtags.length > 0;
+
 export const buildSearchQuery = ({
   keywords,
   exactPhrases = [],

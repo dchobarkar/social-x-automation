@@ -134,14 +134,7 @@ const XFeedDashboardClient = ({
 
         const result = await loadXFeedAction(filters);
         const mapped = mapFeedApiItemsToStored(result.posts as FeedApiItem[]);
-        const merged = loadMore
-          ? mergeStoredTweetsWithExisting(items, mapped)
-          : mergeStoredTweetsWithExisting(
-              items.filter((item) =>
-                mapped.some((post) => post.id === item.id),
-              ),
-              mapped,
-            );
+        const merged = mergeStoredTweetsWithExisting(items, mapped);
         replaceItems(merged);
         setNextToken(result.nextToken ?? null);
 

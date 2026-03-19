@@ -114,13 +114,7 @@ const XSearchDashboardClient = ({
         });
 
         const mapped = mapSearchPostsToStored(result.posts);
-        const mappedIds = new Set(mapped.map((post) => post.id));
-        const nextItems = loadMore
-          ? mergeStoredTweetsWithExisting(items, mapped)
-          : mergeStoredTweetsWithExisting(
-              items.filter((item) => mappedIds.has(item.id)),
-              mapped,
-            );
+        const nextItems = mergeStoredTweetsWithExisting(items, mapped);
 
         replaceItems(nextItems);
         setNextToken(result.nextToken ?? null);

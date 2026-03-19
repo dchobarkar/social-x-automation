@@ -4,6 +4,7 @@ import type {
   XRecentSearchResponse,
 } from "@/types/x/search";
 import { X_API_BASE } from "@/constants/x/api";
+import { getValidAccessToken } from "@/integrations/x/auth";
 import {
   X_SEARCH_DEFAULT_MAX_RESULTS,
   X_SEARCH_TWEET_FIELDS,
@@ -26,17 +27,19 @@ export class XSearchServiceError extends Error {
   }
 }
 
-const getBearerToken = (): string => {
+const getSearchAccessToken = async (): Promise<string> => {
   const token = process.env.X_BEARER_TOKEN;
-  if (!token?.trim()) {
+  if (token?.trim()) return token.trim();
+
+  try {
+    return await getValidAccessToken();
+  } catch {
     throw new XSearchServiceError(
-      "X_BEARER_TOKEN must be configured before search can run.",
+      "Search needs either X_BEARER_TOKEN or a connected X account.",
       "auth",
       401,
     );
   }
-
-  return token.trim();
 };
 
 const getErrorFromStatus = (
@@ -80,7 +83,7 @@ export const searchRecentPosts = async ({
   nextToken,
   sortOrder = "recency",
 }: SearchPostsParams): Promise<SearchPostsResult> => {
-  const bearerToken = getBearerToken();
+  const accessToken = await getSearchAccessToken();
   const params = new URLSearchParams({
     query: query.trim(),
     max_results: String(Math.min(Math.max(maxResults, 10), 100)),
@@ -98,7 +101,7 @@ export const searchRecentPosts = async ({
   try {
     response = await fetch(url, {
       headers: {
-        Authorization: `Bearer ${bearerToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       cache: "no-store",
     });
