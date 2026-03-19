@@ -55,16 +55,17 @@ const Page = () => {
 
           <Card
             title="Search"
-            description="Keyword search is being redesigned and will return later."
+            description="Run recent search with query building, review candidates, and generate reply drafts in the same workspace."
             footer={
               <Button size="sm" href={ROUTES.DASHBOARD_X_SEARCH}>
-                View Placeholder
+                Open Search
               </Button>
             }
           >
             <p className="text-sm leading-6 text-muted">
-              The upcoming search flow will follow the same draft-first pattern
-              so the writing experience stays consistent across discovery modes.
+              Build queries from keywords, phrases, usernames, and hashtags,
+              then page through recent results while keeping the same
+              draft-first writing flow as feed.
             </p>
           </Card>
         </div>
