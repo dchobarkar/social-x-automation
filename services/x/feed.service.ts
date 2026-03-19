@@ -5,17 +5,18 @@ import { getHomeTimeline } from "@/integrations/x/timeline";
 
 export const getHomeFeed = async (
   filters: FeedFilters,
-): Promise<XTweetWithMetrics[]> => {
+): Promise<{ posts: XTweetWithMetrics[]; nextToken?: string }> => {
   const me = await getMe();
-  const tweets = await getHomeTimeline(me.id, {
+  const { posts, nextToken } = await getHomeTimeline(me.id, {
     maxResults: filters.maxResults ?? 20,
     startTime: filters.startTime,
     endTime: filters.endTime,
     excludeReplies: filters.excludeReplies ?? true,
     excludeRetweets: filters.excludeRetweets ?? true,
+    paginationToken: filters.paginationToken,
   });
 
-  let result = tweets;
+  let result = posts;
   if (typeof filters.maxReplyCount === "number") {
     result = result.filter(
       (t) => (t.public_metrics?.reply_count ?? 0) <= filters.maxReplyCount!,
@@ -28,5 +29,8 @@ export const getHomeFeed = async (
     );
   }
 
-  return result;
+  return {
+    posts: result,
+    nextToken,
+  };
 };

@@ -6,7 +6,7 @@ import { saveFeed } from "@/lib/storage/feedStore";
 import { getHomeFeed } from "@/services/x/feed.service";
 
 export const loadXFeedAction = async (
-  filters: FeedFilters & { lastHours?: number },
+  filters: FeedFilters & { lastHours?: number; paginationToken?: string },
 ) => {
   const nextFilters: FeedFilters = {
     maxResults:
@@ -19,6 +19,7 @@ export const loadXFeedAction = async (
     minAuthorFollowers: filters.minAuthorFollowers,
     startTime: filters.startTime,
     endTime: filters.endTime,
+    paginationToken: filters.paginationToken,
   };
 
   if (

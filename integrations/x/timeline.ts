@@ -25,7 +25,7 @@ const getTweetText = (tweet: {
 export const getHomeTimeline = async (
   userId: string,
   options: HomeTimelineOptions = {},
-): Promise<XTweetWithMetrics[]> => {
+): Promise<{ posts: XTweetWithMetrics[]; nextToken?: string }> => {
   const accessToken = await getValidAccessToken();
   const maxResults = Math.min(Math.max(options.maxResults ?? 20, 1), 100);
   const params = new URLSearchParams({
@@ -39,6 +39,9 @@ export const getHomeTimeline = async (
 
   if (options.startTime) params.set("start_time", options.startTime);
   if (options.endTime) params.set("end_time", options.endTime);
+  if (options.paginationToken) {
+    params.set("pagination_token", options.paginationToken);
+  }
   const exclude: string[] = [];
   if (options.excludeReplies) exclude.push("replies");
   if (options.excludeRetweets) exclude.push("retweets");
@@ -82,7 +85,7 @@ export const getHomeTimeline = async (
       } satisfies XMedia,
     ]),
   );
-  const result: XTweetWithMetrics[] = tweets.map((t) => {
+  const posts: XTweetWithMetrics[] = tweets.map((t) => {
     const author = t.author_id ? usersById.get(t.author_id) : undefined;
     const retweetedTweetId = t.referenced_tweets?.find(
       (ref) => ref.type === "retweeted",
@@ -117,5 +120,8 @@ export const getHomeTimeline = async (
       media: media?.length ? media : undefined,
     };
   });
-  return result;
+  return {
+    posts,
+    nextToken: json.meta?.next_token,
+  };
 };

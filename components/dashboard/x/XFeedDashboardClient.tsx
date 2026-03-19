@@ -48,6 +48,7 @@ const XFeedDashboardClient = ({
   const [feedExcludeRetweets, setFeedExcludeRetweets] = useState(true);
   const [feedMaxReplyCount, setFeedMaxReplyCount] = useState("");
   const [feedMinAuthorFollowers, setFeedMinAuthorFollowers] = useState("");
+  const [nextToken, setNextToken] = useState<string | null>(null);
   const { draftedCount, safeCount, averageFollowers } = useMemo(() => {
     let drafted = 0;
     let safe = 0;
@@ -67,70 +68,91 @@ const XFeedDashboardClient = ({
     };
   }, [items, replyUiByTweetId]);
 
-  const handleLoadFeed = useCallback(async () => {
-    setLoadingFeed(true);
+  const handleLoadFeed = useCallback(
+    async (loadMore = false) => {
+      setLoadingFeed(true);
 
-    try {
-      const filters: {
-        maxResults: number;
-        excludeReplies: boolean;
-        excludeRetweets: boolean;
-        lastHours?: number;
-        maxReplyCount?: number;
-        minAuthorFollowers?: number;
-      } = {
-        maxResults: Math.min(Math.max(feedMaxResults, 1), 100),
-        excludeReplies: feedExcludeReplies,
-        excludeRetweets: feedExcludeRetweets,
-      };
+      try {
+        const filters: {
+          maxResults: number;
+          excludeReplies: boolean;
+          excludeRetweets: boolean;
+          lastHours?: number;
+          maxReplyCount?: number;
+          minAuthorFollowers?: number;
+          paginationToken?: string;
+        } = {
+          maxResults: Math.min(Math.max(feedMaxResults, 1), 100),
+          excludeReplies: feedExcludeReplies,
+          excludeRetweets: feedExcludeRetweets,
+          paginationToken: loadMore ? (nextToken ?? undefined) : undefined,
+        };
 
-      if (feedLastHours !== "") {
-        const h = Number(feedLastHours);
-        if (Number.isFinite(h) && h > 0) filters.lastHours = h;
-      }
+        if (feedLastHours !== "") {
+          const h = Number(feedLastHours);
+          if (Number.isFinite(h) && h > 0) filters.lastHours = h;
+        }
 
-      if (feedMaxReplyCount.trim() !== "") {
-        const n = Number.parseInt(feedMaxReplyCount, 10);
-        if (Number.isFinite(n) && n >= 0) filters.maxReplyCount = n;
-      }
+        if (feedMaxReplyCount.trim() !== "") {
+          const n = Number.parseInt(feedMaxReplyCount, 10);
+          if (Number.isFinite(n) && n >= 0) filters.maxReplyCount = n;
+        }
 
-      if (feedMinAuthorFollowers.trim() !== "") {
-        const n = Number.parseInt(feedMinAuthorFollowers, 10);
-        if (Number.isFinite(n) && n >= 0) filters.minAuthorFollowers = n;
-      }
+        if (feedMinAuthorFollowers.trim() !== "") {
+          const n = Number.parseInt(feedMinAuthorFollowers, 10);
+          if (Number.isFinite(n) && n >= 0) filters.minAuthorFollowers = n;
+        }
 
-      const raw = (await loadXFeedAction(filters)) as FeedApiItem[];
-      const mapped = mapFeedApiItemsToStored(raw);
-      const merged = mergeStoredTweetsWithExisting(items, mapped);
-      replaceItems(merged);
+        const result = await loadXFeedAction(filters);
+        const mapped = mapFeedApiItemsToStored(result.posts as FeedApiItem[]);
+        const merged = loadMore
+          ? mergeStoredTweetsWithExisting(items, mapped)
+          : mergeStoredTweetsWithExisting(
+              items.filter((item) =>
+                mapped.some((post) => post.id === item.id),
+              ),
+              mapped,
+            );
+        replaceItems(merged);
+        setNextToken(result.nextToken ?? null);
 
-      if (mapped.length === 0) {
-        showMessage("success", "No new tweets in your feed for these filters.");
-      } else {
+        if (mapped.length === 0) {
+          showMessage(
+            "success",
+            loadMore
+              ? "No additional tweets were returned for these filters."
+              : "No new tweets in your feed for these filters.",
+          );
+        } else {
+          showMessage(
+            "success",
+            loadMore
+              ? `Added ${mapped.length} more tweet(s). Feed now has ${merged.length} total.`
+              : `Loaded ${mapped.length} tweet(s). Feed now has ${merged.length} total.`,
+          );
+        }
+      } catch (e) {
         showMessage(
-          "success",
-          `Added ${mapped.length} tweet(s). Feed now has ${merged.length} total.`,
+          "error",
+          e instanceof Error ? e.message : "Failed to load feed",
         );
+      } finally {
+        setLoadingFeed(false);
       }
-    } catch (e) {
-      showMessage(
-        "error",
-        e instanceof Error ? e.message : "Failed to load feed",
-      );
-    } finally {
-      setLoadingFeed(false);
-    }
-  }, [
-    items,
-    feedLastHours,
-    feedMaxResults,
-    feedExcludeReplies,
-    feedExcludeRetweets,
-    feedMaxReplyCount,
-    feedMinAuthorFollowers,
-    showMessage,
-    replaceItems,
-  ]);
+    },
+    [
+      items,
+      feedLastHours,
+      feedMaxResults,
+      feedExcludeReplies,
+      feedExcludeRetweets,
+      feedMaxReplyCount,
+      feedMinAuthorFollowers,
+      nextToken,
+      showMessage,
+      replaceItems,
+    ],
+  );
 
   return (
     <SectionLayout padding="none" variant="transparent" as="div">
@@ -206,7 +228,9 @@ const XFeedDashboardClient = ({
         feedMinAuthorFollowers={feedMinAuthorFollowers}
         setFeedMinAuthorFollowers={setFeedMinAuthorFollowers}
         loadingFeed={loadingFeed}
-        onLoadFeed={handleLoadFeed}
+        hasNextPage={Boolean(nextToken)}
+        onLoadFeed={() => void handleLoadFeed(false)}
+        onLoadMore={() => void handleLoadFeed(true)}
       />
 
       <FlashMessageBar message={message} className="mb-8" />

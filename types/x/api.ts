@@ -68,4 +68,5 @@ export type HomeTimelineOptions = {
   endTime?: string;
   excludeReplies?: boolean;
   excludeRetweets?: boolean;
+  paginationToken?: string;
 };

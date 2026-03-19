@@ -10,4 +10,5 @@ export type FeedFilters = {
   excludeRetweets?: boolean;
   maxReplyCount?: number;
   minAuthorFollowers?: number;
+  paginationToken?: string;
 };

@@ -22,7 +22,9 @@ export type FeedFilterBoxProps = {
   feedMinAuthorFollowers: string;
   setFeedMinAuthorFollowers: (value: string) => void;
   loadingFeed: boolean;
+  hasNextPage: boolean;
   onLoadFeed: () => void;
+  onLoadMore: () => void;
   className?: string;
 };
 
@@ -40,7 +42,9 @@ const FeedFilterBox = ({
   feedMinAuthorFollowers,
   setFeedMinAuthorFollowers,
   loadingFeed,
+  hasNextPage,
   onLoadFeed,
+  onLoadMore,
   className,
 }: FeedFilterBoxProps) => {
   return (
@@ -126,9 +130,18 @@ const FeedFilterBox = ({
             />
           </div>
 
-          <Button onClick={onLoadFeed} disabled={loadingFeed}>
-            {loadingFeed ? "Loading feed…" : "Load feed"}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={onLoadFeed} disabled={loadingFeed}>
+              {loadingFeed ? "Loading feed…" : "Load feed"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={onLoadMore}
+              disabled={loadingFeed || !hasNextPage}
+            >
+              Load more
+            </Button>
+          </div>
         </div>
       </div>
     </Card>

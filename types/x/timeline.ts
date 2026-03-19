@@ -47,4 +47,9 @@ export type XHomeTimelineResponse = {
     users?: XHomeTimelineUser[];
     media?: XHomeTimelineMedia[];
   };
+  meta?: {
+    next_token?: string;
+    previous_token?: string;
+    result_count?: number;
+  };
 };
