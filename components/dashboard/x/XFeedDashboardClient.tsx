@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Bot, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
 
 import type { FeedApiItem, StoredTweet } from "@/types/x/tweet";
@@ -10,7 +10,10 @@ import FlashMessageBar from "@/components/ui/FlashMessageBar";
 import FeedFilterBox from "@/components/dashboard/x/FeedFilterBox";
 import TweetListSection from "@/components/dashboard/x/TweetListSection";
 import { X_FEED_DEFAULT_MAX_RESULTS } from "@/constants/x/feed";
-import { mapFeedApiItemsToStored, mergeFeedWithExisting } from "@/utils/tweet";
+import {
+  mapFeedApiItemsToStored,
+  mergeStoredTweetsWithExisting,
+} from "@/utils/tweet";
 import { useXFeedTweetList } from "@/hooks/useXFeedTweetList";
 import { loadXFeedAction } from "@/services/x/feed.actions";
 
@@ -43,89 +46,142 @@ const XFeedDashboardClient = ({
   );
   const [feedExcludeReplies, setFeedExcludeReplies] = useState(true);
   const [feedExcludeRetweets, setFeedExcludeRetweets] = useState(true);
+  const [feedEnglishOnly, setFeedEnglishOnly] = useState(true);
   const [feedMaxReplyCount, setFeedMaxReplyCount] = useState("");
   const [feedMinAuthorFollowers, setFeedMinAuthorFollowers] = useState("");
-  const draftedCount = items.filter((item) =>
-    Boolean(item[item.selected]),
-  ).length;
-  const safeCount = items.filter((item) => {
-    const validation = replyUiByTweetId[item.id]?.validation;
-    return validation?.isSafe;
-  }).length;
-  const averageFollowers =
-    items.length > 0
-      ? Math.round(
-          items.reduce(
-            (sum, item) => sum + (item.author_followers_count ?? 0),
-            0,
-          ) / items.length,
-        )
-      : 0;
+  const [feedSinceId, setFeedSinceId] = useState("");
+  const [nextToken, setNextToken] = useState<string | null>(null);
+  const { draftedCount, safeCount, averageFollowers } = useMemo(() => {
+    let drafted = 0;
+    let safe = 0;
+    let totalFollowers = 0;
 
-  const handleLoadFeed = useCallback(async () => {
-    setLoadingFeed(true);
-
-    try {
-      const filters: {
-        maxResults: number;
-        excludeReplies: boolean;
-        excludeRetweets: boolean;
-        lastHours?: number;
-        maxReplyCount?: number;
-        minAuthorFollowers?: number;
-      } = {
-        maxResults: Math.min(Math.max(feedMaxResults, 1), 100),
-        excludeReplies: feedExcludeReplies,
-        excludeRetweets: feedExcludeRetweets,
-      };
-
-      if (feedLastHours !== "") {
-        const h = Number(feedLastHours);
-        if (Number.isFinite(h) && h > 0) filters.lastHours = h;
-      }
-
-      if (feedMaxReplyCount.trim() !== "") {
-        const n = Number.parseInt(feedMaxReplyCount, 10);
-        if (Number.isFinite(n) && n >= 0) filters.maxReplyCount = n;
-      }
-
-      if (feedMinAuthorFollowers.trim() !== "") {
-        const n = Number.parseInt(feedMinAuthorFollowers, 10);
-        if (Number.isFinite(n) && n >= 0) filters.minAuthorFollowers = n;
-      }
-
-      const raw = (await loadXFeedAction(filters)) as FeedApiItem[];
-      const mapped = mapFeedApiItemsToStored(raw);
-      const merged = mergeFeedWithExisting(items, mapped);
-      replaceItems(merged);
-
-      if (mapped.length === 0) {
-        showMessage("success", "No new tweets in your feed for these filters.");
-      } else {
-        showMessage(
-          "success",
-          `Added ${mapped.length} tweet(s). Feed now has ${merged.length} total.`,
-        );
-      }
-    } catch (e) {
-      showMessage(
-        "error",
-        e instanceof Error ? e.message : "Failed to load feed",
-      );
-    } finally {
-      setLoadingFeed(false);
+    for (const item of items) {
+      if (item[item.selected]) drafted += 1;
+      if (replyUiByTweetId[item.id]?.validation?.isSafe) safe += 1;
+      totalFollowers += item.author_followers_count ?? 0;
     }
+
+    return {
+      draftedCount: drafted,
+      safeCount: safe,
+      averageFollowers:
+        items.length > 0 ? Math.round(totalFollowers / items.length) : 0,
+    };
+  }, [items, replyUiByTweetId]);
+
+  const requestPreview = useMemo(() => {
+    const parts = [
+      `max_results=${Math.min(Math.max(feedMaxResults, 1), 100)}`,
+      feedLastHours === "" ? "time=all" : `last_hours=${String(feedLastHours)}`,
+      feedExcludeReplies ? "exclude=replies" : "",
+      feedExcludeRetweets ? "exclude=retweets" : "",
+      feedEnglishOnly ? "lang=en" : "",
+      feedSinceId.trim() ? `since_id=${feedSinceId.trim()}` : "",
+      feedMaxReplyCount.trim()
+        ? `max_reply_count=${feedMaxReplyCount.trim()}`
+        : "",
+      feedMinAuthorFollowers.trim()
+        ? `min_author_followers=${feedMinAuthorFollowers.trim()}`
+        : "",
+    ].filter(Boolean);
+
+    return parts.join(" | ");
   }, [
-    items,
-    feedLastHours,
     feedMaxResults,
+    feedLastHours,
     feedExcludeReplies,
     feedExcludeRetweets,
+    feedEnglishOnly,
+    feedSinceId,
     feedMaxReplyCount,
     feedMinAuthorFollowers,
-    showMessage,
-    replaceItems,
   ]);
+
+  const handleLoadFeed = useCallback(
+    async (loadMore = false) => {
+      setLoadingFeed(true);
+
+      try {
+        const filters: {
+          maxResults: number;
+          excludeReplies: boolean;
+          excludeRetweets: boolean;
+          englishOnly: boolean;
+          sinceId?: string;
+          lastHours?: number;
+          maxReplyCount?: number;
+          minAuthorFollowers?: number;
+          paginationToken?: string;
+        } = {
+          maxResults: Math.min(Math.max(feedMaxResults, 1), 100),
+          excludeReplies: feedExcludeReplies,
+          excludeRetweets: feedExcludeRetweets,
+          englishOnly: feedEnglishOnly,
+          sinceId: feedSinceId.trim() || undefined,
+          paginationToken: loadMore ? (nextToken ?? undefined) : undefined,
+        };
+
+        if (feedLastHours !== "") {
+          const h = Number(feedLastHours);
+          if (Number.isFinite(h) && h > 0) filters.lastHours = h;
+        }
+
+        if (feedMaxReplyCount.trim() !== "") {
+          const n = Number.parseInt(feedMaxReplyCount, 10);
+          if (Number.isFinite(n) && n >= 0) filters.maxReplyCount = n;
+        }
+
+        if (feedMinAuthorFollowers.trim() !== "") {
+          const n = Number.parseInt(feedMinAuthorFollowers, 10);
+          if (Number.isFinite(n) && n >= 0) filters.minAuthorFollowers = n;
+        }
+
+        const result = await loadXFeedAction(filters);
+        const mapped = mapFeedApiItemsToStored(result.posts as FeedApiItem[]);
+        const merged = mergeStoredTweetsWithExisting(items, mapped);
+        replaceItems(merged);
+        setNextToken(result.nextToken ?? null);
+
+        if (mapped.length === 0) {
+          showMessage(
+            "success",
+            loadMore
+              ? "No additional tweets were returned for these filters."
+              : "No new tweets in your feed for these filters.",
+          );
+        } else {
+          showMessage(
+            "success",
+            loadMore
+              ? `Added ${mapped.length} more tweet(s). Feed now has ${merged.length} total.`
+              : `Loaded ${mapped.length} tweet(s). Feed now has ${merged.length} total.`,
+          );
+        }
+      } catch (e) {
+        showMessage(
+          "error",
+          e instanceof Error ? e.message : "Failed to load feed",
+        );
+      } finally {
+        setLoadingFeed(false);
+      }
+    },
+    [
+      items,
+      feedLastHours,
+      feedMaxResults,
+      feedExcludeReplies,
+      feedExcludeRetweets,
+      feedEnglishOnly,
+      feedSinceId,
+      feedMaxReplyCount,
+      feedMinAuthorFollowers,
+      nextToken,
+      showMessage,
+      replaceItems,
+    ],
+  );
 
   return (
     <SectionLayout padding="none" variant="transparent" as="div">
@@ -196,12 +252,19 @@ const XFeedDashboardClient = ({
         setFeedExcludeReplies={setFeedExcludeReplies}
         feedExcludeRetweets={feedExcludeRetweets}
         setFeedExcludeRetweets={setFeedExcludeRetweets}
+        feedEnglishOnly={feedEnglishOnly}
+        setFeedEnglishOnly={setFeedEnglishOnly}
         feedMaxReplyCount={feedMaxReplyCount}
         setFeedMaxReplyCount={setFeedMaxReplyCount}
         feedMinAuthorFollowers={feedMinAuthorFollowers}
         setFeedMinAuthorFollowers={setFeedMinAuthorFollowers}
+        feedSinceId={feedSinceId}
+        setFeedSinceId={setFeedSinceId}
+        requestPreview={requestPreview}
         loadingFeed={loadingFeed}
-        onLoadFeed={handleLoadFeed}
+        hasNextPage={Boolean(nextToken)}
+        onLoadFeed={() => void handleLoadFeed(false)}
+        onLoadMore={() => void handleLoadFeed(true)}
       />
 
       <FlashMessageBar message={message} className="mb-8" />

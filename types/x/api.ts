@@ -55,6 +55,7 @@ export type XMedia = {
 export type XTweetWithMetrics = XTweet & {
   public_metrics?: XTweetPublicMetrics;
   author_metrics?: XUserPublicMetrics;
+  author_verified?: boolean;
   author_username?: string;
   author_name?: string;
   author_profile_image_url?: string;
@@ -66,6 +67,8 @@ export type HomeTimelineOptions = {
   maxResults?: number;
   startTime?: string; // ISO 8601 e.g. 2025-03-05T18:00:00Z
   endTime?: string;
+  sinceId?: string;
   excludeReplies?: boolean;
   excludeRetweets?: boolean;
+  paginationToken?: string;
 };

@@ -27,6 +27,7 @@ export type XHomeTimelineUser = {
   username?: string;
   name?: string;
   profile_image_url?: string;
+  verified?: boolean;
   public_metrics?: XUserPublicMetrics;
 };
 
@@ -46,5 +47,10 @@ export type XHomeTimelineResponse = {
     tweets?: XHomeTimelineTweet[];
     users?: XHomeTimelineUser[];
     media?: XHomeTimelineMedia[];
+  };
+  meta?: {
+    next_token?: string;
+    previous_token?: string;
+    result_count?: number;
   };
 };

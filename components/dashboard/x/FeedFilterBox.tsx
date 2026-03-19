@@ -3,6 +3,8 @@ import Card from "@/components/ui/Card";
 import Checkbox from "@/components/form/Checkbox";
 import Input from "@/components/form/Input";
 import Select from "@/components/form/Select";
+import RequestPreviewBox from "@/components/dashboard/x/RequestPreviewBox";
+import SinceIdField from "@/components/dashboard/x/SinceIdField";
 import {
   X_FEED_DEFAULT_MAX_RESULTS,
   X_FEED_LAST_HOURS_OPTIONS,
@@ -17,12 +19,19 @@ export type FeedFilterBoxProps = {
   setFeedExcludeReplies: (value: boolean) => void;
   feedExcludeRetweets: boolean;
   setFeedExcludeRetweets: (value: boolean) => void;
+  feedEnglishOnly: boolean;
+  setFeedEnglishOnly: (value: boolean) => void;
   feedMaxReplyCount: string;
   setFeedMaxReplyCount: (value: string) => void;
   feedMinAuthorFollowers: string;
   setFeedMinAuthorFollowers: (value: string) => void;
+  feedSinceId: string;
+  setFeedSinceId: (value: string) => void;
+  requestPreview: string;
   loadingFeed: boolean;
+  hasNextPage: boolean;
   onLoadFeed: () => void;
+  onLoadMore: () => void;
   className?: string;
 };
 
@@ -35,18 +44,25 @@ const FeedFilterBox = ({
   setFeedExcludeReplies,
   feedExcludeRetweets,
   setFeedExcludeRetweets,
+  feedEnglishOnly,
+  setFeedEnglishOnly,
   feedMaxReplyCount,
   setFeedMaxReplyCount,
   feedMinAuthorFollowers,
   setFeedMinAuthorFollowers,
+  feedSinceId,
+  setFeedSinceId,
+  requestPreview,
   loadingFeed,
+  hasNextPage,
   onLoadFeed,
+  onLoadMore,
   className,
 }: FeedFilterBoxProps) => {
   return (
     <Card className={className}>
       <div className="space-y-6">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <Select
             label="Posted in last"
             value={feedLastHours === "" ? "" : String(feedLastHours)}
@@ -105,6 +121,13 @@ const FeedFilterBox = ({
             name="feedMinAuthorFollowers"
             description="Use this if you want to bias toward higher reach accounts."
           />
+
+          <SinceIdField
+            value={feedSinceId}
+            onChange={setFeedSinceId}
+            name="feedSinceId"
+            description="Only request feed posts newer than this id."
+          />
         </div>
 
         <div className="flex flex-col gap-4 rounded-3xl border border-border/70 bg-surface-strong p-4 lg:flex-row lg:items-center lg:justify-between">
@@ -124,12 +147,35 @@ const FeedFilterBox = ({
               onChange={(e) => setFeedExcludeRetweets(e.target.checked)}
               description="Helpful when you only want original content."
             />
+
+            <Checkbox
+              name="feedEnglishOnly"
+              label="English only"
+              checked={feedEnglishOnly}
+              onChange={(e) => setFeedEnglishOnly(e.target.checked)}
+              description="Keeps only tweets where X reports the post language as English."
+            />
           </div>
 
-          <Button onClick={onLoadFeed} disabled={loadingFeed}>
-            {loadingFeed ? "Loading feed…" : "Load feed"}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={onLoadFeed} disabled={loadingFeed}>
+              {loadingFeed ? "Loading feed…" : "Load feed"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={onLoadMore}
+              disabled={loadingFeed || !hasNextPage}
+            >
+              Load more
+            </Button>
+          </div>
         </div>
+
+        <RequestPreviewBox
+          title="Request preview"
+          value={requestPreview}
+          emptyText="Adjust the feed filters to preview the active request."
+        />
       </div>
     </Card>
   );

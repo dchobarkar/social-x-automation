@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 import { cn } from "@/utils/cn";
@@ -61,7 +62,7 @@ const Modal = ({
     };
   }, [open, handleEscape]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
   const contentClasses = cn(
     "bg-background text-foreground border border-border shadow-sm",
@@ -69,7 +70,7 @@ const Modal = ({
     className,
   );
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
       role="dialog"
@@ -100,7 +101,8 @@ const Modal = ({
 
         <div className="pt-8">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 

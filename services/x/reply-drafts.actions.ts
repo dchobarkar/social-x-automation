@@ -1,6 +1,6 @@
 "use server";
 
-import type { ReplyTone } from "@/types/ai/replies";
+import type { PostIntent, ReplyTone } from "@/types/ai/replies";
 import {
   analyzeXPostForReplyDraft,
   generateXReplyDraft,
@@ -13,9 +13,11 @@ export const analyzeXPostAction = async (post: string) => {
 export const generateXReplyDraftAction = async (args: {
   post: string;
   tone?: ReplyTone;
+  intent?: PostIntent;
 }) => {
   return generateXReplyDraft({
     post: args.post.trim(),
     tone: args.tone,
+    intent: args.intent,
   });
 };

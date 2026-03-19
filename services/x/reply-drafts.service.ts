@@ -1,6 +1,7 @@
 import type {
   PlatformId,
   PostAnalysis,
+  PostIntent,
   ReplyTone,
   ReplyValidation,
 } from "@/types/ai/replies";
@@ -12,6 +13,7 @@ const PLATFORM_X: PlatformId = "x";
 export type GenerateXReplyDraftInput = {
   post: string;
   tone?: ReplyTone;
+  intent?: PostIntent;
 };
 
 export type AnalyzeXPostForReplyDraftInput = {
@@ -21,6 +23,7 @@ export type AnalyzeXPostForReplyDraftInput = {
 export const generateXReplyDraft = async ({
   post,
   tone,
+  intent,
 }: GenerateXReplyDraftInput): Promise<{
   reply: string;
   tone: ReplyTone;
@@ -29,7 +32,12 @@ export const generateXReplyDraft = async ({
   if (!process.env.OPENAI_API_KEY)
     throw new Error("OPENAI_API_KEY is not set in .env.local");
 
-  return generateSingleReplyForPostWithValidation(post, PLATFORM_X, tone);
+  return generateSingleReplyForPostWithValidation(
+    post,
+    PLATFORM_X,
+    tone,
+    intent,
+  );
 };
 
 export const analyzeXPostForReplyDraft = async ({
