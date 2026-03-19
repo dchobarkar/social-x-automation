@@ -10,7 +10,10 @@ import FlashMessageBar from "@/components/ui/FlashMessageBar";
 import FeedFilterBox from "@/components/dashboard/x/FeedFilterBox";
 import TweetListSection from "@/components/dashboard/x/TweetListSection";
 import { X_FEED_DEFAULT_MAX_RESULTS } from "@/constants/x/feed";
-import { mapFeedApiItemsToStored, mergeFeedWithExisting } from "@/utils/tweet";
+import {
+  mapFeedApiItemsToStored,
+  mergeStoredTweetsWithExisting,
+} from "@/utils/tweet";
 import { useXFeedTweetList } from "@/hooks/useXFeedTweetList";
 import { loadXFeedAction } from "@/services/x/feed.actions";
 
@@ -96,7 +99,7 @@ const XFeedDashboardClient = ({
 
       const raw = (await loadXFeedAction(filters)) as FeedApiItem[];
       const mapped = mapFeedApiItemsToStored(raw);
-      const merged = mergeFeedWithExisting(items, mapped);
+      const merged = mergeStoredTweetsWithExisting(items, mapped);
       replaceItems(merged);
 
       if (mapped.length === 0) {

@@ -11,7 +11,7 @@ import FlashMessageBar from "@/components/ui/FlashMessageBar";
 import SearchFilterBox from "@/components/dashboard/x/SearchFilterBox";
 import TweetListSection from "@/components/dashboard/x/TweetListSection";
 import { X_SEARCH_DEFAULT_MAX_RESULTS } from "@/constants/x/search";
-import { mergeFeedWithExisting } from "@/utils/tweet";
+import { mergeStoredTweetsWithExisting } from "@/utils/tweet";
 import {
   buildSearchQuery,
   mapSearchPostsToStored,
@@ -94,8 +94,8 @@ const XSearchDashboardClient = ({
 
         const mapped = mapSearchPostsToStored(result.posts);
         const nextItems = loadMore
-          ? mergeFeedWithExisting(items, mapped)
-          : mergeFeedWithExisting(
+          ? mergeStoredTweetsWithExisting(items, mapped)
+          : mergeStoredTweetsWithExisting(
               items.filter((item) =>
                 mapped.some((post) => post.id === item.id),
               ),

@@ -1,11 +1,11 @@
 import type { StoredTweet, FeedApiItem } from "@/types/x/tweet";
 
 /**
- * Merge newly fetched feed items with existing stored items.
+ * Merge newly fetched stored items with existing workspace items.
  * New items are prepended; existing items not in the new set are kept (order: new first, then existing).
  * When an id exists in both, the existing record is kept to preserve reply variants and selection.
  */
-export const mergeFeedWithExisting = (
+export const mergeStoredTweetsWithExisting = (
   existing: StoredTweet[],
   newItems: StoredTweet[],
 ): StoredTweet[] => {
